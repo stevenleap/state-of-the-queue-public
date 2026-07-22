@@ -1,5 +1,5 @@
 {
-  "captured_at": "2026-07-22T04:24:13.696107+00:00",
+  "captured_at": "2026-07-22T13:29:47.418906+00:00",
   "events": [
     {
       "event": "step",
@@ -11,6 +11,14 @@
     },
     {
       "event": "step",
+      "data": "{\"type\": \"step\", \"label\": \"Fetching ERCOT's Large Load Interconnection Status report live\", \"detail\": \"https://www.ercot.com/files/docs/2026/04/01/ERCOT_LargeLoad_Update_April2026_B-C_-Hearing.pdf\"}"
+    },
+    {
+      "event": "result",
+      "data": "{\"type\": \"result\", \"label\": \"Live parse: ~410 GW total queue, ~87.0% data centers\", \"detail\": \"parsed directly from the PDF fetched just now, not cached\"}"
+    },
+    {
+      "event": "step",
       "data": "{\"type\": \"step\", \"label\": \"Cross-referencing 'Amazon Data Services, Inc.'\"}"
     },
     {
@@ -19,15 +27,15 @@
     },
     {
       "event": "checker",
-      "data": "{\"type\": \"checker\", \"source\": \"ferc_elibrary\", \"hit\": true, \"entity\": \"PEOPLE'S COUNSEL OF MARYLAND\", \"note\": \"\"}"
+      "data": "{\"type\": \"checker\", \"source\": \"ferc_elibrary\", \"hit\": true, \"entity\": \"Maryland Office of People's Counsel\", \"note\": \"\"}"
     },
     {
       "event": "checker",
-      "data": "{\"type\": \"checker\", \"source\": \"web_news\", \"hit\": true, \"entity\": \"Amazon Data Services, Inc. - BOARDMAN, OR | datacenter.fyi\", \"note\": \"\"}"
+      "data": "{\"type\": \"checker\", \"source\": \"web_news\", \"hit\": true, \"entity\": \"AWS Data Centers - Amazon Web Services ...\", \"note\": \"\"}"
     },
     {
       "event": "checker",
-      "data": "{\"type\": \"checker\", \"source\": \"incentive_announcements\", \"hit\": true, \"entity\": \"Incentives approved for $11 billion Amazon data center ...\", \"note\": \"\"}"
+      "data": "{\"type\": \"checker\", \"source\": \"incentive_announcements\", \"hit\": true, \"entity\": \"States offer big incentives for data centers' growth\", \"note\": \"\"}"
     },
     {
       "event": "checker",
@@ -35,7 +43,7 @@
     },
     {
       "event": "checker",
-      "data": "{\"type\": \"checker\", \"source\": \"contractor_announcements\", \"hit\": true, \"entity\": \"Amazon.com. Spend less. Smile more.\", \"note\": \"\"}"
+      "data": "{\"type\": \"checker\", \"source\": \"contractor_announcements\", \"hit\": true, \"entity\": \"Construction Manager, Data Center Construction - Job ID\", \"note\": \"\"}"
     },
     {
       "event": "checker",
@@ -46,16 +54,8 @@
       "data": "{\"type\": \"checker\", \"source\": \"county_permits\", \"hit\": false, \"entity\": null, \"note\": \"NOT YET BUILT for , . No shared API across counties -- add one entry per county, prioritized by your real top_chokepoints once you have live\"}"
     },
     {
-      "event": "checker",
-      "data": "{\"type\": \"checker\", \"source\": \"puc_dockets\", \"hit\": false, \"entity\": null, \"note\": \"NOT YET BUILT for state=. Registry empty -- same pattern as county_permits, add entries as researched.\"}"
-    },
-    {
-      "event": "checker",
-      "data": "{\"type\": \"checker\", \"source\": \"property_records\", \"hit\": false, \"entity\": null, \"note\": \"NOT YET BUILT for , . Registry empty -- same pattern as county_permits.\"}"
-    },
-    {
       "event": "verdict",
-      "data": "{\"type\": \"verdict\", \"project_name\": \"Amazon Data Services, Inc.\", \"county\": \"\", \"state\": \"\", \"confidence\": \"conflicting\", \"company_name\": \"AMAZON COM INC  (AMZN)  (CIK 0001018724)\", \"reason\": \"ferc_elibrary found \\u201cPEOPLE'S COUNSEL OF MARYLAND\\u201d; sec_edgar agree on \\u201cAMAZON COM INC  (AMZN)  (CIK 0001018724)\\u201d instead.\"}"
+      "data": "{\"type\": \"verdict\", \"project_name\": \"Amazon Data Services, Inc.\", \"county\": \"\", \"state\": \"\", \"confidence\": \"conflicting\", \"company_name\": \"AMAZON COM INC  (AMZN)  (CIK 0001018724)\", \"reason\": \"4 of 6 sources agree: AMAZON COM INC  (AMZN)  (CIK 0001018724). 1 (ferc_elibrary) found something different \\u2014 \\u201cMaryland Office of People's Counsel\\u201d \\u2014 flagged for review. (1 more remain unresolved.)\", \"has_disagreement\": true}"
     },
     {
       "event": "step",
@@ -67,15 +67,15 @@
     },
     {
       "event": "checker",
-      "data": "{\"type\": \"checker\", \"source\": \"ferc_elibrary\", \"hit\": true, \"entity\": \"Union Electric Company d/b/a Ameren Missouri\", \"note\": \"\"}"
+      "data": "{\"type\": \"checker\", \"source\": \"ferc_elibrary\", \"hit\": false, \"entity\": null, \"note\": \"520 Server Error: <none> for url: https://elibrary.ferc.gov/eLibraryWebAPI/api/Search/AdvancedSearch\"}"
     },
     {
       "event": "checker",
-      "data": "{\"type\": \"checker\", \"source\": \"web_news\", \"hit\": true, \"entity\": \"Area 71 - Wikipedia\", \"note\": \"\"}"
+      "data": "{\"type\": \"checker\", \"source\": \"web_news\", \"hit\": true, \"entity\": \"Area 71\", \"note\": \"\"}"
     },
     {
       "event": "checker",
-      "data": "{\"type\": \"checker\", \"source\": \"incentive_announcements\", \"hit\": true, \"entity\": \"Policy Snapshot: Data Center Incentives\", \"note\": \"\"}"
+      "data": "{\"type\": \"checker\", \"source\": \"incentive_announcements\", \"hit\": true, \"entity\": \"Site Selection: Overview of the Types of Incentives\", \"note\": \"\"}"
     },
     {
       "event": "checker",
@@ -94,16 +94,8 @@
       "data": "{\"type\": \"checker\", \"source\": \"county_permits\", \"hit\": false, \"entity\": null, \"note\": \"NOT YET BUILT for , . No shared API across counties -- add one entry per county, prioritized by your real top_chokepoints once you have live\"}"
     },
     {
-      "event": "checker",
-      "data": "{\"type\": \"checker\", \"source\": \"puc_dockets\", \"hit\": false, \"entity\": null, \"note\": \"NOT YET BUILT for state=. Registry empty -- same pattern as county_permits, add entries as researched.\"}"
-    },
-    {
-      "event": "checker",
-      "data": "{\"type\": \"checker\", \"source\": \"property_records\", \"hit\": false, \"entity\": null, \"note\": \"NOT YET BUILT for , . Registry empty -- same pattern as county_permits.\"}"
-    },
-    {
       "event": "verdict",
-      "data": "{\"type\": \"verdict\", \"project_name\": \"Walmart Inc.\", \"county\": \"\", \"state\": \"\", \"confidence\": \"conflicting\", \"company_name\": \"Walmart Inc.  (WMT)  (CIK 0000104169)\", \"reason\": \"ferc_elibrary found \\u201cUnion Electric Company d/b/a Ameren Missouri\\u201d; sec_edgar agree on \\u201cWalmart Inc.  (WMT)  (CIK 0000104169)\\u201d instead.\"}"
+      "data": "{\"type\": \"verdict\", \"project_name\": \"Walmart Inc.\", \"county\": \"\", \"state\": \"\", \"confidence\": \"verified\", \"company_name\": \"Walmart Inc.  (WMT)  (CIK 0000104169)\", \"reason\": \"2 of 5 sources agree: Walmart Inc.  (WMT)  (CIK 0000104169). 1 (web_news) found something different \\u2014 \\u201cArea 71\\u201d \\u2014 flagged for review. (2 more remain unresolved.)\", \"has_disagreement\": true}"
     },
     {
       "event": "step",
@@ -115,7 +107,7 @@
     },
     {
       "event": "checker",
-      "data": "{\"type\": \"checker\", \"source\": \"ferc_elibrary\", \"hit\": true, \"entity\": \"SECRETARY OF THE COMMISSION - FERC\", \"note\": \"\"}"
+      "data": "{\"type\": \"checker\", \"source\": \"ferc_elibrary\", \"hit\": false, \"entity\": null, \"note\": \"520 Server Error: <none> for url: https://elibrary.ferc.gov/eLibraryWebAPI/api/Search/AdvancedSearch\"}"
     },
     {
       "event": "checker",
@@ -123,15 +115,15 @@
     },
     {
       "event": "checker",
-      "data": "{\"type\": \"checker\", \"source\": \"incentive_announcements\", \"hit\": true, \"entity\": \"Verrus Data\", \"note\": \"\"}"
+      "data": "{\"type\": \"checker\", \"source\": \"incentive_announcements\", \"hit\": true, \"entity\": \"Policy Snapshot: Data Center Incentives\", \"note\": \"\"}"
     },
     {
       "event": "checker",
-      "data": "{\"type\": \"checker\", \"source\": \"utility_irp\", \"hit\": true, \"entity\": \"Integrated Resource Plans: An Introduction to Future ...\", \"note\": \"\"}"
+      "data": "{\"type\": \"checker\", \"source\": \"utility_irp\", \"hit\": true, \"entity\": \"Integrated Resource Plans: An Introduction to Future Capacity and Decommissions | Enverus\", \"note\": \"\"}"
     },
     {
       "event": "checker",
-      "data": "{\"type\": \"checker\", \"source\": \"contractor_announcements\", \"hit\": true, \"entity\": \"While controversy stirs... - Crain's Grand Rapids Business\", \"note\": \"\"}"
+      "data": "{\"type\": \"checker\", \"source\": \"contractor_announcements\", \"hit\": true, \"entity\": \"Construction \\u2013 Verrus\", \"note\": \"\"}"
     },
     {
       "event": "checker",
@@ -142,28 +134,12 @@
       "data": "{\"type\": \"checker\", \"source\": \"county_permits\", \"hit\": false, \"entity\": null, \"note\": \"NOT YET BUILT for , . No shared API across counties -- add one entry per county, prioritized by your real top_chokepoints once you have live\"}"
     },
     {
-      "event": "checker",
-      "data": "{\"type\": \"checker\", \"source\": \"puc_dockets\", \"hit\": false, \"entity\": null, \"note\": \"NOT YET BUILT for state=. Registry empty -- same pattern as county_permits, add entries as researched.\"}"
-    },
-    {
-      "event": "checker",
-      "data": "{\"type\": \"checker\", \"source\": \"property_records\", \"hit\": false, \"entity\": null, \"note\": \"NOT YET BUILT for , . Registry empty -- same pattern as county_permits.\"}"
-    },
-    {
       "event": "verdict",
-      "data": "{\"type\": \"verdict\", \"project_name\": \"Verrus, LLC\", \"county\": \"\", \"state\": \"\", \"confidence\": \"candidate\", \"company_name\": \"Verrus, LLC: Lyon Township Data Center\", \"reason\": null}"
-    },
-    {
-      "event": "step",
-      "data": "{\"type\": \"step\", \"label\": \"Fetching ERCOT's Large Load Interconnection Status report live\", \"detail\": \"https://www.ercot.com/files/docs/2026/04/01/ERCOT_LargeLoad_Update_April2026_B-C_-Hearing.pdf\"}"
-    },
-    {
-      "event": "result",
-      "data": "{\"type\": \"result\", \"label\": \"Live parse: ~410 GW total queue, ~87.0% data centers\", \"detail\": \"parsed directly from the PDF fetched just now, not cached\"}"
+      "data": "{\"type\": \"verdict\", \"project_name\": \"Verrus, LLC\", \"county\": \"\", \"state\": \"\", \"confidence\": \"conflicting\", \"company_name\": \"KKR Infrastructure Conglomerate LLC  (CIK 0001948056)\", \"reason\": \"1 of 5 sources agree: KKR Infrastructure Conglomerate LLC  (CIK 0001948056). 1 (web_news) found something different \\u2014 \\u201cVerrus, LLC: Lyon Township Data Center\\u201d \\u2014 flagged for review. (3 more remain unresolved.)\", \"has_disagreement\": true}"
     },
     {
       "event": "report",
-      "data": "{\"type\": \"report\", \"data\": {\"cross_ref\": [{\"project_name\": \"Amazon Data Services, Inc.\", \"county\": \"\", \"state\": \"\", \"confidence\": \"conflicting\", \"company_name\": \"AMAZON COM INC  (AMZN)  (CIK 0001018724)\", \"reason\": \"ferc_elibrary found \\u201cPEOPLE'S COUNSEL OF MARYLAND\\u201d; sec_edgar agree on \\u201cAMAZON COM INC  (AMZN)  (CIK 0001018724)\\u201d instead.\"}, {\"project_name\": \"Walmart Inc.\", \"county\": \"\", \"state\": \"\", \"confidence\": \"conflicting\", \"company_name\": \"Walmart Inc.  (WMT)  (CIK 0000104169)\", \"reason\": \"ferc_elibrary found \\u201cUnion Electric Company d/b/a Ameren Missouri\\u201d; sec_edgar agree on \\u201cWalmart Inc.  (WMT)  (CIK 0000104169)\\u201d instead.\"}, {\"project_name\": \"Verrus, LLC\", \"county\": \"\", \"state\": \"\", \"confidence\": \"candidate\", \"company_name\": \"Verrus, LLC: Lyon Township Data Center\", \"reason\": null}], \"va\": {\"case_name\": \"VIRGINIA ELECTRIC AND POWER CO\", \"n_documents\": 125, \"most_recent\": \"Amazon Data Services, Inc. - Notice of Withdrawal of Clarice M. Gardner as Counsel.\", \"most_recent_date\": \"2026-07-07\"}, \"tx\": {\"source_url\": \"https://www.ercot.com/files/docs/2026/04/01/ERCOT_LargeLoad_Update_April2026_B-C_-Hearing.pdf\", \"fetched_at\": \"2026-07-22T00:24:13\", \"extraction\": \"automated\", \"total_queue_gw_approx\": 410.0, \"data_center_pct\": 87.0, \"parse_status\": \"ok\"}, \"generated_at\": \"2026-07-22\"}}"
+      "data": "{\"type\": \"report\", \"data\": {\"cross_ref\": [{\"project_name\": \"Amazon Data Services, Inc.\", \"county\": \"\", \"state\": \"\", \"confidence\": \"conflicting\", \"company_name\": \"AMAZON COM INC  (AMZN)  (CIK 0001018724)\", \"reason\": \"4 of 6 sources agree: AMAZON COM INC  (AMZN)  (CIK 0001018724). 1 (ferc_elibrary) found something different \\u2014 \\u201cMaryland Office of People's Counsel\\u201d \\u2014 flagged for review. (1 more remain unresolved.)\", \"has_disagreement\": true}, {\"project_name\": \"Walmart Inc.\", \"county\": \"\", \"state\": \"\", \"confidence\": \"verified\", \"company_name\": \"Walmart Inc.  (WMT)  (CIK 0000104169)\", \"reason\": \"2 of 5 sources agree: Walmart Inc.  (WMT)  (CIK 0000104169). 1 (web_news) found something different \\u2014 \\u201cArea 71\\u201d \\u2014 flagged for review. (2 more remain unresolved.)\", \"has_disagreement\": true}, {\"project_name\": \"Verrus, LLC\", \"county\": \"\", \"state\": \"\", \"confidence\": \"conflicting\", \"company_name\": \"KKR Infrastructure Conglomerate LLC  (CIK 0001948056)\", \"reason\": \"1 of 5 sources agree: KKR Infrastructure Conglomerate LLC  (CIK 0001948056). 1 (web_news) found something different \\u2014 \\u201cVerrus, LLC: Lyon Township Data Center\\u201d \\u2014 flagged for review. (3 more remain unresolved.)\", \"has_disagreement\": true}], \"va\": {\"case_name\": \"VIRGINIA ELECTRIC AND POWER CO\", \"n_documents\": 125, \"most_recent\": \"Amazon Data Services, Inc. - Notice of Withdrawal of Clarice M. Gardner as Counsel.\", \"most_recent_date\": \"2026-07-07\"}, \"tx\": {\"source_url\": \"https://www.ercot.com/files/docs/2026/04/01/ERCOT_LargeLoad_Update_April2026_B-C_-Hearing.pdf\", \"fetched_at\": \"2026-07-22T09:29:12\", \"extraction\": \"automated\", \"total_queue_gw_approx\": 410.0, \"data_center_pct\": 87.0, \"parse_status\": \"ok\"}, \"generated_at\": \"2026-07-22\", \"candidates_shown\": 3, \"candidates_total\": 14}}"
     },
     {
       "event": "done",

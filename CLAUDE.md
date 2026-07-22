@@ -5,6 +5,283 @@ this folder. It's the full handoff from a planning conversation in
 claude.ai — that conversation isn't visible here, so treat this document
 as the complete record of what's been decided and built so far.
 
+## SESSION UPDATE 2026-07-22 (continued) — four confirmed real issues fixed: VA candidate filtering, LLM-based brand/parent-subsidiary matching (grounded in live search, not just model knowledge), and every outcome now shows an informative plurality read
+
+Four-part request, tested against real data after each fix rather than
+just describing the code change.
+
+1. **Virginia docket candidate filter.** Pulled the real, current, full
+   22-name candidate list before writing anything (not guessing at the
+   shape of the problem): alongside the 3 named examples (a lawyer's
+   name, a consumer-advocate office, a trade coalition), real live data
+   also contained a county government board, two environmental advocacy
+   NGOs, an electric-cooperative trade association, and a malformed
+   multi-party caption smashed into one string. Added `_looks_like_
+   person_name()` (a narrow "First M. Last" regex, checked only after
+   confirming no corporate suffix is present, so real short company names
+   never get misread as people), an expanded `_NON_CORPORATE_MARKERS`
+   list, and `_looks_malformed()` (catches "et al" / 3+ commas / >70 chars
+   joint-filing captions). **Before/after, re-fetched live**: 22 candidates
+   → 14. All 8 known-bad entries (including all 3 named ones) correctly
+   excluded; all 8 known-real companies correctly kept. One smaller,
+   related issue noticed but NOT fixed (out of the requested scope): a
+   mangled-encoding near-duplicate of "Verrus, LLC" ("Verrus, LLC's")
+   still passes through as a separate candidate -- would need Unicode
+   normalization + near-dup detection, flagged for a future pass.
+
+2. **LLM-based entity matching for brand variants -- grounded in live
+   search, not bare model knowledge, after direct testing showed bare
+   knowledge is unreliable for this.** First attempt asked
+   deepseek-v4-flash the yes/no/uncertain question directly. Testing this
+   BEFORE trusting it surfaced two real problems: (a) `max_tokens=5`
+   silently returned empty strings, because deepseek-v4-flash is a
+   reasoning model that consumes the token budget on hidden reasoning
+   tokens before any visible answer -- confirmed via `resp.usage`, not
+   guessed; needed ~300-800 tokens depending on the pair; (b) even with
+   room to answer, a direct knowledge question ("who owns Verrus LLC?")
+   burned 600 reasoning tokens and produced NOTHING, and with more room
+   landed on UNCERTAIN -- the model doesn't have reliable knowledge here.
+   **Fixed by grounding the judgment in a real live Tavily search** before
+   asking the LLM, with an explicit instruction to answer from the
+   evidence, not background knowledge. This also caught a real mistake in
+   this project's own earlier assumption (see item 3).
+
+3. **Parent/subsidiary recognition -- STACK/Blue Owl confirmed and fixed;
+   Verrus/KKR confirmed NOT a real relationship, correction made rather
+   than forcing a false match.** Grounding search for "STACK Infrastructure"
+   + "Blue Owl Capital" returned real, independent confirmation (Apollo
+   Global Management's own press release, DCD, Reuters, Bloomberg) --
+   genuinely the same corporate family, now correctly resolves VERIFIED.
+   Grounding search for "Verrus, LLC" + "KKR" returned the OPPOSITE: real,
+   independent sources (TechCrunch, Data Center Dynamics, Sidewalk
+   Infrastructure Partners' own company page) confirm Verrus is actually
+   backed by Sidewalk Infrastructure Partners, an Alphabet spin-out --
+   a DIFFERENT company than KKR entirely. **The earlier-session
+   assumption that Verrus/KKR was "the same pattern as STACK/Blue Owl,
+   never fixed" was itself mistaken** -- the original CONFLICTING result
+   for that pair was correct, not a bug. Did not force it to VERIFIED;
+   forcing it would have manufactured exactly the kind of false positive
+   this project's whole cross-referencing methodology exists to prevent.
+   sec_edgar's "KKR Infrastructure Conglomerate LLC" hit for a "Verrus"
+   search is most likely a weak SEC full-text match (a large diversified
+   KKR fund's filing happening to mention "Verrus" somewhere), not a real
+   ownership signal.
+
+   **Real performance problem found and fixed along the way**: the
+   straightforward "escalate every non-matching pair, one at a time"
+   version was tested live, not assumed fine, and took **215.8 seconds**
+   for a single 3-candidate run (versus ~20-45s before this feature).
+   Root cause: the cheap token check almost never succeeds between a
+   clean SEC EDGAR legal name and a scraped Tavily title, so nearly every
+   comparison was escalating to a real search + reasoning-heavy LLM call.
+   Redesigned `_cluster_named_hits` into two passes: cheap-only clustering
+   first (fast, free, unchanged), then a SEPARATELY bounded
+   (`MAX_LLM_ESCALATIONS_PER_CLUSTER_CALL = 4`) and PARALLEL (
+   `concurrent.futures.ThreadPoolExecutor`) escalation pass that only
+   checks the single biggest/most-authoritative cluster against its top
+   rivals, not every pair. Re-timed live after the fix: **60.6s**, then
+   with the rest of this session's changes together, **44.1s** -- both
+   comfortably within the established 60-90s ceiling. This same bounded/
+   parallel logic also benefits `cross_reference.py`'s own offline batch
+   CLI path (`cross_reference_one`), not just the live demo.
+
+4. **Every outcome now shows an informative plurality read, not just
+   conflicting ones.** This was the actual original request from a
+   session ago, and it got misread as "hide disagreement" -- corrected
+   framing, implemented this pass: every verdict (VERIFIED, CANDIDATE, or
+   CONFLICTING alike) now computes "N of M sources agree: [name]," and
+   whenever a real minority exists, names it explicitly with its own
+   source(s) and entity name, e.g. "4 of 6 sources agree: AMAZON COM INC...
+   1 (ferc_elibrary) found something different — "Maryland Office of
+   People's Counsel" — flagged for review." A precision fix made after
+   noticing it during testing: the remainder count originally said
+   "X more didn't match the majority either" -- corrected to "X more
+   remain unresolved," since some of that remainder may never have been
+   checked against the majority at all (capped by
+   `MAX_LLM_ESCALATIONS_PER_CLUSTER_CALL`), not just found to disagree --
+   the original wording would have overclaimed a negative result for
+   pairs never actually tested. Frontend shows this for every tier now
+   (neutral-colored for a clean agreement, warning-colored when a real
+   minority exists) in both the live trace and the final report's
+   cross-reference list.
+
+All four fixes verified together in one final live run (44.1s, zero
+console errors) and confirmed again on the replay path after re-capturing
+`cached_runs/latest_run.json` against the final code. Real, honest
+caveat carried forward: the exact "N of M" counts can vary somewhat run
+to run (confirmed across multiple live runs), since they depend on live
+Tavily search result quality and LLM grounding -- same natural non-
+determinism already documented elsewhere in this project, not a bug.
+
+## SESSION UPDATE 2026-07-22 (continued) — entity-matching gap fixed (found a second bug while fixing the first), "load more real filers" added
+
+Two follow-up requests: fix the Verrus/KKR entity-matching gap found
+earlier this session (question 1b), and let the demo cross-reference more
+than the first 3 real filers instead of stopping there.
+
+1. **Entity-matching fix, and a second real bug found by testing the
+   first fix, not assumed correct.** First pass: made "conflicting" fire
+   whenever ANY cluster other than `top` contains a high-confidence hit,
+   regardless of `top`'s size (the actual gap from question 1b). Re-ran
+   live to verify -- and the re-test itself surfaced a second bug:
+   `top` is chosen by cluster SIZE only, so once "conflicting" could fire
+   with a low-confidence cluster still sitting in `top`, the displayed
+   `company_name` kept falling back to that low-confidence cluster's
+   first member. Observed live: Amazon's case returned "Amazon.com. Spend
+   less. Smile more." (a scraped marketing tagline) instead of SEC
+   EDGAR's real legal name, because Tavily's naturally non-deterministic
+   results happened to cluster two low-confidence titles together that
+   run. **Fixed properly**: the displayed name now always prefers a
+   high-confidence hit -- checking the disagreeing cluster too if `top`
+   itself doesn't have one -- so a structured legal-record source
+   (SEC EDGAR, FERC eLibrary) always outranks a same-or-larger pile of
+   scraped page titles for what gets shown. Re-ran the live pipeline
+   twice after this second fix specifically to check stability against
+   Tavily's non-determinism, not just once: both runs correctly returned
+   Amazon → conflicting (real SEC EDGAR name, not the tagline), Verrus →
+   conflicting (real SEC EDGAR "KKR Infrastructure Conglomerate LLC" name,
+   correctly surfaced instead of silently buried), Walmart → verified
+   (regression check -- unaffected, confirming the fix didn't break the
+   case that was already correct).
+
+2. **"Load more real filers" -- the demo is no longer hard-capped at 3.**
+   `_extract_va_candidates()` now returns the FULL distinct filer list
+   from the VA docket (cheap -- just string processing over already-
+   fetched data, no extra network calls); `run_pipeline()` slices the
+   first `MAX_CROSS_REF_CANDIDATES` for the automatic run and reports
+   `candidates_shown`/`candidates_total` so the frontend knows how many
+   more exist. New `extend_pipeline()` + `GET /api/extend?skip=N`
+   re-fetches Virginia's docket fresh (a real live call, not reused state
+   -- consistent with this project's "every number is live" rule) and
+   cross-references the next batch. Frontend: a "Load more real filers (N
+   more in this docket)" link appears under the cross-reference list
+   after any run completes; clicking it appends new step cards without
+   clearing the existing trace, merges the new results into the same
+   report object, and re-renders the confidence chart/conclusion over the
+   combined total. Shared event-handling logic (step/result/checker/
+   verdict/step_error rendering) was factored out of `startRun()` into
+   named functions so the initial run and the extend flow don't duplicate
+   that code.
+
+   **Live-tested end to end, not just code-reviewed**: initial run showed
+   3 cross-ref items with "19 more in this docket"; clicking extend grew
+   it to 6 items ("16 more"), step cards went from 5 to 9, confidence
+   chart correctly recomputed across all 6 (1 verified, 5 conflicting --
+   consistent with the entity-matching fix above now correctly flagging
+   real disagreements). Also tested the two edge cases directly rather
+   than assuming: requesting past the end (`skip=200` against a 22-total
+   docket) returns a clean "No more distinct real filer names" result
+   with `has_more: false`, no crash; and forcing the VA re-fetch itself
+   to fail inside `/api/extend` produces a clean `step_error` event and a
+   safe empty `extend_result`, server survives, same hardening discipline
+   applied to the new endpoint as to the original one.
+
+Final clean run re-timed at 21.6s; `cached_runs/latest_run.json`
+re-captured against the final code (now includes `candidates_shown`/
+`candidates_total`, so the replay path's "Load more" button also works
+correctly, confirmed live). Real config confirmed restored, no leftover
+`TEMP:` markers.
+
+## SESSION UPDATE 2026-07-22 (continued) — two live questions investigated directly, dead checkers removed, demo reordered, hardening re-verified
+
+Four-part request, done in strict sequence with a live test gate between
+each part (per explicit instruction: test and confirm each before moving
+on, not all at once).
+
+1. **Two direct questions, answered by investigation, not guessing:**
+   - **Why only 3 of Virginia's 125 filings get cross-referenced:**
+     `_extract_va_candidates()` in `server.py` walks the docket's most
+     recent filings (already sorted newest-first) and collects up to
+     `MAX_CROSS_REF_CANDIDATES` (= 3) distinct non-procedural filer
+     names, stopping as soon as it has 3. It's a fixed demo-cost/speed
+     cap, not a percentage or a "most active filers" ranking — real,
+     deliberate, and worth saying plainly if asked live: 3 is chosen
+     because each candidate fires the full live checker set (8 real
+     external API calls after item 2 below), so scaling this up
+     multiplies both runtime and live API cost directly.
+   - **Verrus, LLC: sec_edgar found "KKR Infrastructure Conglomerate LLC"
+     while three other checkers found "Verrus" — confirmed CANDIDATE
+     instead of CONFLICTING is a real gap, not intentional KKR-parent-
+     company recognition.** Tested directly (not reasoned about): built
+     a standalone script that runs the real checkers against "Verrus,
+     LLC" and applies the exact clustering + confidence logic from
+     `server.py`. Confirmed: `_KNOWN_ALIASES` has zero entry mapping KKR
+     to Verrus (only hyperscaler aliases exist -- AWS/Amazon, GCP/Google,
+     Azure/Microsoft, Meta/Facebook), so sec_edgar's hit lands in its own
+     singleton cluster while the two Verrus-named hits cluster together
+     (size 2, both low-confidence). Because `len(top) >= 2` is checked
+     BEFORE ever checking whether other clusters disagree, the code takes
+     the "candidate" branch and never surfaces that the single highest-
+     confidence source (SEC EDGAR) found something completely different.
+     **Real, confirmed gap**: today, 2+ low-confidence sources agreeing
+     with each other can silently outvote a lone high-confidence
+     dissenter instead of being flagged "conflicting." A smaller,
+     separate finding surfaced by the same test: "Construction — Verrus"
+     (contractor_announcements) also fails to cluster with the other two
+     Verrus hits, because `_cluster_named_hits`'s greedy algorithm only
+     compares a new hit against each cluster's FIRST member, and the
+     extra "construction" token breaks the strict-subset match against
+     that specific representative. **Not fixed in this pass** — flagged
+     to the user as a real, fixable issue rather than fixed unprompted,
+     since it wasn't one of the four requested changes and fixing entity-
+     matching logic deserves its own dedicated pass.
+
+2. **Two dead checkers removed from the live demo specifically** (not
+   from `cross_reference.py`, which is untouched — `ALL_CHECKERS` there
+   still lists all 10). New `LIVE_DEMO_CHECKERS` constant in `server.py`
+   drops `check_puc_dockets` and `check_property_records` (both
+   unconditionally return `hit=False` for every input, empty registries)
+   and keeps `check_air_permits` + `check_county_permits` alongside the
+   other 6, for 8 total. **Real nuance found and flagged, not hidden**:
+   in practice, since this demo's VA-derived candidates are called with
+   `county="" state=""`, air_permits and county_permits are ALSO
+   guaranteed misses today (air_permits' only real logic requires
+   `state="VA"`; county_permits' checker function hard-codes
+   `hit=False` even for its one documented real entry, Loudoun VA — see
+   its own code comment, never wired to a live source). The difference
+   from the two removed checkers is real, working code that COULD hit
+   given real county/state input, not a structurally-empty registry.
+   Passing `state="VA"` for VA-derived candidates would give air_permits
+   a genuine shot — not done here since it wasn't asked for. Live-tested:
+   exactly 8 checker events per cross-reference step (confirmed via raw
+   SSE parsing, not just eyeballing), on-screen hit/miss now correctly
+   reads 6/8 (75%/25%) instead of the old 6/10 (60%/40%), and the same
+   real verdict distribution (conflicting/conflicting/candidate) came
+   back as before — confirming the 2+-source-agreement confidence logic
+   is genuinely unaffected by checker count (it only ever operated on
+   `named_hits`, which the two removed checkers never contributed to).
+
+3. **Demo reordered: Virginia's headline filing count, then Texas's
+   headline queue total/%, then the detailed cross-referencing sequence**
+   — previously cross-referencing was interleaved between the two
+   headline numbers. `run_pipeline()` in `server.py` now fetches and
+   yields both headline results before the candidate-extraction and
+   cross-reference loop runs. Live-tested: exact new order confirmed via
+   raw SSE step sequence AND via the rendered frontend step list, both
+   matching (VA → TX → 3× cross-reference → report → done).
+
+4. **Failure-state hardening re-verified under the new order and checker
+   count, not assumed still valid**: forced a VA-only failure, a TX-only
+   failure, and a simultaneous VA+TX failure again, this time against the
+   reordered/8-checker pipeline. All three behaved identically to the
+   original hardening pass — server survives every case, real readable
+   error text (not a traceback), cross-referencing still runs correctly
+   even when TX fails (candidates only ever depended on VA data), and the
+   "no sources came back" fallback still renders correctly when both
+   fail. The stall watchdog and `step_error`-vs-native-`error` fix were
+   confirmed untouched by inspection (both are fully event-driven and
+   generic, with zero dependency on step order or checker count) rather
+   than re-run through the full network-kill investigation again, since
+   the underlying mechanism genuinely didn't change.
+
+Final clean live run re-timed at 21.2s (down from ~28-46s pre-change,
+consistent with 2 fewer checkers × 3 candidates = 6 fewer live calls per
+run). `cached_runs/latest_run.json` re-captured fresh against the final
+reordered/8-checker code; replay path re-verified to render the same
+correct step order. Real config (`VA_CASE_NUMBER`, `TX_REPORT_URL`)
+confirmed restored after all failure testing, no leftover `TEMP:` test
+markers anywhere in `server.py`.
+
 ## SESSION UPDATE 2026-07-22 — PJM removed from the live demo entirely, charts + live visualization added, conclusion section added
 
 Direct user feedback, addressed immediately rather than deferred:

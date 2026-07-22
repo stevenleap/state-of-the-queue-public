@@ -33,7 +33,9 @@ specifically "For Approval of its Large-Load Connection Queue Process
 Standards," so every non-procedural party in it is a real large-load/
 data-center entity by construction -- see _extract_va_candidates).
 Cross-referencing is bounded to MAX_CROSS_REF_CANDIDATES names so one run
-doesn't fire 9 real checkers x many candidates live.
+doesn't fire LIVE_DEMO_CHECKERS (8 real checkers -- see its own comment
+for which 2 of cross_reference.py's 10 are excluded here and why) x many
+candidates live.
 
 Virginia and Texas steps hit a specific real, known case number /
 report URL rather than self-discovering one -- this project's own
@@ -54,6 +56,7 @@ Run locally:
 import io
 import json
 import asyncio
+import re
 from datetime import date, datetime, timezone
 from pathlib import Path
 
@@ -67,7 +70,38 @@ import ercot_large_load_tracker as elt
 
 app = FastAPI()
 
-MAX_CROSS_REF_CANDIDATES = 3  # each fires ~9 real checkers live -- keep demo-paced
+# Scoped to the live demo only -- cross_reference.py's own ALL_CHECKERS
+# still lists all 10 (puc_dockets and property_records included) and is
+# left untouched, since those two are real, working capabilities once
+# their registries get real entries. For THIS demo, they're excluded:
+# both have empty registries as currently built (see cross_reference.py's
+# own module docstring), so check_puc_dockets/check_property_records
+# return hit=False unconditionally, for every possible input -- a
+# guaranteed miss, not a real result, which was quietly padding the
+# on-screen hit/miss count with two checkers that can never contribute a
+# hit. air_permits and county_permits stay: both have real, working code
+# behind them (air_permits genuinely scrapes real Virginia DEQ pages when
+# state="VA"; county_permits has one real documented portal, Loudoun VA,
+# though its checker function itself still always returns hit=False even
+# for that one entry -- see its own code comment, it's a known "next
+# step," not wired to a live source yet).
+#
+# Caveat worth knowing, not something this pass fixes: this demo's VA-
+# derived candidates are cross-referenced with county="" state="" (that's
+# all Virginia's docket filer names carry), so today air_permits and
+# county_permits are ALSO guaranteed misses in practice, same as the two
+# checkers being removed here -- the difference is real code that COULD
+# hit given real county/state input, not registries that structurally
+# never can. Passing state="VA" for these candidates (we know it) would
+# give air_permits a genuine chance to hit; not done here since it wasn't
+# asked for and changes checker behavior, not just which checkers run.
+LIVE_DEMO_CHECKERS = [
+    cr.check_sec_edgar, cr.check_ferc_elibrary, cr.check_web_news,
+    cr.check_incentive_announcements, cr.check_utility_irp, cr.check_contractor_announcements,
+    cr.check_air_permits, cr.check_county_permits,
+]
+
+MAX_CROSS_REF_CANDIDATES = 3  # each fires 8 real checkers live -- keep demo-paced
 CACHE_PATH = Path("cached_runs/latest_run.json")  # see capture_demo_run.py / GET /api/replay
 REPLAY_EVENT_DELAY = 0.35     # seconds between replayed events -- paced for readability,
                                # not a claim about real latency (real latency is preserved
@@ -95,7 +129,7 @@ async def cross_ref_one_live(project_name, county="", state="", tow="", out=None
     from`/`async for` caller otherwise."""
     yield sse("step", label=f"Cross-referencing '{project_name}'" + (f" ({county}, {state})" if county or state else ""))
     hits = []
-    for checker in cr.ALL_CHECKERS:
+    for checker in LIVE_DEMO_CHECKERS:
         try:
             result = await asyncio.to_thread(checker, project_name=project_name, county=county,
                                                state=state, transmission_owner=tow)
@@ -108,66 +142,195 @@ async def cross_ref_one_live(project_name, county="", state="", tow="", out=None
     named_hits = [h for h in hits if h.get("entity_name")]
     reason = None
     if named_hits:
-        clusters = cr._cluster_named_hits(named_hits)
+        # Clustering can now make real live LLM calls (brand-variant /
+        # parent-subsidiary judgments the cheap token check can't
+        # resolve, see cross_reference.py's _llm_entities_match) -- run
+        # off the event loop like every other live call in this file.
+        clusters = await asyncio.to_thread(cr._cluster_named_hits, named_hits)
         clusters.sort(key=len, reverse=True)
         top = clusters[0]
         top_has_high = any(h.get("entity_confidence") == "high" for h in top)
-        if len(top) >= 2 and top_has_high:
+
+        # FIXED 2026-07-22 (real gap found by direct testing, not just
+        # reasoning about the code -- see CLAUDE.md). Two bugs, found and
+        # fixed together since the first fix immediately exposed the
+        # second when re-tested live:
+        #
+        # Bug 1: the old logic only ever checked "does another cluster
+        # disagree" in the branch where the top (largest) cluster was a
+        # singleton. That meant 2+ low-confidence sources agreeing with
+        # EACH OTHER could silently outvote a lone high-confidence
+        # dissenter -- confirmed live on "Verrus, LLC": sec_edgar found
+        # "KKR Infrastructure Conglomerate LLC" (high confidence) while
+        # two low-confidence Tavily sources agreed on "Verrus", and the
+        # old code returned "candidate" instead of surfacing that SEC
+        # EDGAR disagreed at all. Fixed: any high-confidence cluster other
+        # than top now forces "conflicting", regardless of top's size.
+        #
+        # Bug 2 (found by testing bug 1's fix, not assumed correct): once
+        # "conflicting" could fire with a low-confidence cluster still
+        # sitting in `top` (top is picked by SIZE, not confidence), the
+        # displayed company_name kept falling back to that low-confidence
+        # cluster's first member -- observed live returning a scraped
+        # marketing tagline ("Amazon.com. Spend less. Smile more.")
+        # instead of SEC EDGAR's real legal name, whenever Tavily's
+        # non-deterministic results happened to cluster two low-confidence
+        # titles together. Fixed: the displayed name always prefers a
+        # high-confidence hit, checking the disagreeing cluster too if
+        # `top` itself doesn't have one -- a structured legal-record
+        # source outranks a same-or-larger pile of scraped page titles.
+        rival_high_clusters = [c for c in clusters[1:]
+                                if any(h.get("entity_confidence") == "high" for h in c)]
+
+        if rival_high_clusters:
+            confidence = "conflicting"
+            disagreement_cluster = rival_high_clusters[0]
+        elif len(top) >= 2 and top_has_high:
             confidence = "verified"
+            disagreement_cluster = None
         elif len(top) >= 2:
             confidence = "candidate"
+            disagreement_cluster = None
         elif len(clusters) >= 2:
             confidence = "conflicting"
+            disagreement_cluster = clusters[1]
         else:
             confidence = "candidate"
-        best = next((h for h in top if h.get("entity_confidence") == "high"), top[0])
+            disagreement_cluster = None
+
+        primary_cluster = top
+        high_hits = [h for h in top if h.get("entity_confidence") == "high"]
+        if not high_hits and disagreement_cluster:
+            alt_high = [h for h in disagreement_cluster if h.get("entity_confidence") == "high"]
+            if alt_high:
+                high_hits, primary_cluster = alt_high, disagreement_cluster
+        best = high_hits[0] if high_hits else top[0]
         company_name = best["entity_name"]
 
-        # Name the actual disagreement on screen, not just the "conflicting"
-        # label, so a viewer doesn't need it explained out loud.
-        if confidence == "conflicting" and len(clusters) >= 2:
-            minority = clusters[1]
-            minority_sources = ", ".join(h["source"] for h in minority)
-            majority_sources = ", ".join(h["source"] for h in top)
-            reason = (f"{minority_sources} found “{minority[0]['entity_name']}”; "
-                      f"{majority_sources} agree on “{company_name}” instead.")
+        # Every outcome gets a plain-language plurality read, not just
+        # conflicting ones -- per explicit direction: the original ask was
+        # never "hide disagreement," it was "make every result legible on
+        # its own," including a clean VERIFIED/CANDIDATE result. "N of M
+        # sources agree" is computed the same way regardless of tier; a
+        # named minority (with its own source names) is appended whenever
+        # one exists, so genuine uncertainty stays visible rather than
+        # being flattened into a single word.
+        total_named = len(named_hits)
+        primary_count = len(primary_cluster)
+        noun = "source" if total_named == 1 else "sources"
+        reason = f"{primary_count} of {total_named} {noun} agree: {company_name}."
+        has_disagreement = False
+
+        other_clusters = [c for c in clusters if c is not primary_cluster]
+        if other_clusters:
+            has_disagreement = True
+            named_other = disagreement_cluster if disagreement_cluster in other_clusters else other_clusters[0]
+            other_sources = ", ".join(h["source"] for h in named_other)
+            remainder = sum(len(c) for c in other_clusters) - len(named_other)
+            reason += (f" {len(named_other)} ({other_sources}) found something different — "
+                       f"“{named_other[0]['entity_name']}” — flagged for review.")
+            if remainder:
+                # Deliberately NOT "didn't match" -- some of these were
+                # actively compared and found unrelated, but others may
+                # simply be past MAX_LLM_ESCALATIONS_PER_CLUSTER_CALL and
+                # were never checked against the majority at all. "Remain
+                # unresolved" is honest either way; "didn't match" would
+                # overclaim a negative result for ones never tested.
+                reason += f" ({remainder} more remain unresolved.)"
     else:
         confidence = "unresolved"
         company_name = None
+        reason = None
+        has_disagreement = False
 
     verdict = {"project_name": project_name, "county": county, "state": state,
-               "confidence": confidence, "company_name": company_name, "reason": reason}
+               "confidence": confidence, "company_name": company_name, "reason": reason,
+               "has_disagreement": has_disagreement}
     if out is not None:
         out.append(verdict)
     yield sse("verdict", **verdict)
 
 
-def _extract_va_candidates(docs_sorted, case_name, limit=MAX_CROSS_REF_CANDIDATES):
-    """Pulls up to `limit` distinct real filer/party names out of Virginia's
-    most recent SCC filings -- these are the real cross-reference targets
-    for the live demo. Document_Name is real, live text shaped like
-    "Amazon Data Services, Inc. - Notice of ..."; the party name is
-    everything before the first " - ". Filters out Dominion itself and
-    procedural parties (Staff, the Commission, the AG's office) since
-    those aren't data-center entities worth cross-referencing -- everyone
-    else in this specific docket (Case No. PUR-2026-00011, "Large-Load
-    Connection Queue Process Standards") is there because they're a real
-    large-load/data-center party, by construction of what the case is
-    about."""
-    exclude_markers = ("virginia electric", "state corporation commission", "commission staff",
-                        "office of the attorney general", "division of public utility",
-                        "old dominion electric", "division of consumer counsel")
+_CORPORATE_SUFFIX_RE = re.compile(
+    r"\b(inc|incorporated|llc|l\.l\.c|corp|corporation|co|company|ltd|limited|"
+    r"lp|llp|plc|devco|holding|holdings)\b", re.I)
+
+_PERSON_NAME_RE = re.compile(r"^[A-Z][a-zA-Z'\-]+(?:\s+[A-Z]\.?)?\s+[A-Z][a-zA-Z'\-]+$")
+# Matches "First Last" or "First M. Last" (e.g. "Theresa Ghiorzi", "Clarice
+# M. Gardner") -- a real, distinctive shape for an individual's name.
+# Deliberately checked only AFTER confirming no corporate suffix is
+# present (see _looks_like_person_name), so a genuinely short real
+# company name never gets misread as a person just because it's two
+# capitalized words.
+
+_NON_CORPORATE_MARKERS = (
+    # Regulatory bodies / consumer-advocate offices -- real parties in
+    # this docket, but a state agency, county board, or consumer-advocate
+    # office is never itself a data-center applicant.
+    "virginia electric", "state corporation commission", "commission staff",
+    "office of the attorney general", "division of public utility",
+    "old dominion electric", "division of consumer counsel",
+    "people's counsel", "public counsel", "consumer counsel",
+    "board of supervisors",
+    # Trade associations / advocacy coalitions -- represent an industry
+    # or a cause, not a single applicant company. Confirmed against this
+    # docket's own real filer list (see CLAUDE.md): "Data Center
+    # Coalition", "Virginia's Electric Cooperatives", "Piedmont
+    # Environmental Council", "Sierra Club" all appear as real parties
+    # here and are all this category, not corporate applicants.
+    "coalition", "association", "cooperative", "chamber of commerce",
+    "sierra club", "natural resources defense council", "environmental council",
+    "alliance",
+)
+
+
+def _looks_like_person_name(name: str) -> bool:
+    if _CORPORATE_SUFFIX_RE.search(name):
+        return False
+    return bool(_PERSON_NAME_RE.match(name.strip()))
+
+
+def _looks_malformed(name: str) -> bool:
+    """Catches joint-filing captions that collapse into one long string
+    when split on " - " (e.g. "Amazon..., Walmart..., Google, LLC, ...,
+    et al") -- confirmed real, live example from this exact docket. This
+    isn't a wrong KIND of entity, it's several real company names smashed
+    into one unusable candidate string -- excluded rather than parsed
+    apart, since the individual names inside it already appear as their
+    own separate real filings elsewhere in the docket."""
+    low = name.lower()
+    return "et al" in low or name.count(",") >= 3 or len(name) > 70
+
+
+def _extract_va_candidates(docs_sorted, case_name):
+    """Pulls every distinct real filer/party name out of Virginia's SCC
+    filings, most-recent-first, THEN filters out names that could never
+    verify as a specific data-center corporate applicant regardless of
+    how good the entity matching is -- individual people (filing
+    attorneys, e.g. "Clarice M. Gardner"), regulatory/consumer-advocate
+    offices (e.g. "PEOPLE'S COUNSEL OF MARYLAND"), trade associations /
+    advocacy coalitions (e.g. "Data Center Coalition"), and malformed
+    multi-party captions. These are real, confirmed categories found by
+    pulling this docket's actual filer list, not guessed. Document_Name
+    is real, live text shaped like "Amazon Data Services, Inc. - Notice
+    of ..."; the party name is everything before the first " - ".
+
+    Returns the FULL filtered, distinct list (not capped) -- callers
+    slice the page they want (e.g. the first MAX_CROSS_REF_CANDIDATES for
+    the initial run, the next batch for GET /api/extend). Cheap either
+    way: this is just string processing over data already fetched live,
+    no extra network calls."""
     seen = []
     for d in docs_sorted:
         name = d["Document_Name"].split(" - ", 1)[0].strip()
         if len(name) < 3 or name.lower() == (case_name or "").lower():
             continue
-        if any(m in name.lower() for m in exclude_markers):
+        if any(m in name.lower() for m in _NON_CORPORATE_MARKERS):
+            continue
+        if _looks_like_person_name(name) or _looks_malformed(name):
             continue
         if name not in seen:
             seen.append(name)
-        if len(seen) >= limit:
-            break
     return seen
 
 
@@ -194,24 +357,13 @@ async def run_pipeline():
     except Exception as e:
         yield sse("step_error", label=f"Virginia SCC check failed: {e}")
 
-    # ---------------------------------------------- cross-reference, live
-    # Targets are real large-load filers pulled live from the VA docket
-    # just checked above -- guaranteed data-center-relevant by what that
-    # docket is (Case No. PUR-2026-00011 is specifically about large-load
-    # connection queue standards).
-    candidates = _extract_va_candidates(docs_sorted, case_name)
-    for name in candidates:
-        verdict_out = []
-        async for event in cross_ref_one_live(name, out=verdict_out):
-            yield event
-        if verdict_out:
-            report["cross_ref"].append(verdict_out[0])
-
-    if not candidates:
-        yield sse("result", label="No real filer names available to cross-reference this run",
-                   detail="Virginia SCC check above didn't return usable filings live -- see the error, if any, just above.")
-
     # --------------------------------------------------------------- Texas
+    # Headline numbers first, detail after: both VA's filing count above
+    # and TX's queue total/data-center % below land on screen before the
+    # slower, more granular cross-referencing sequence starts -- a viewer
+    # sees the two real top-line stats immediately, then watches the
+    # verification engine work through the detail. Moved here (was
+    # previously after cross-referencing) per explicit direction.
     yield sse("step", label="Fetching ERCOT's Large Load Interconnection Status report live", detail=TX_REPORT_URL)
     try:
         pdf_bytes, text = await asyncio.to_thread(elt.fetch_pdf, TX_REPORT_URL)
@@ -226,15 +378,88 @@ async def run_pipeline():
     except Exception as e:
         yield sse("step_error", label=f"ERCOT fetch failed: {e}")
 
+    # ---------------------------------------------- cross-reference, live
+    # Targets are real large-load filers pulled live from the VA docket
+    # checked above -- guaranteed data-center-relevant by what that
+    # docket is (Case No. PUR-2026-00011 is specifically about large-load
+    # connection queue standards). Only the first page runs automatically;
+    # GET /api/extend below cross-references further real names from the
+    # same docket on demand, so the demo isn't hard-capped at 3.
+    all_candidates = _extract_va_candidates(docs_sorted, case_name)
+    candidates = all_candidates[:MAX_CROSS_REF_CANDIDATES]
+    for name in candidates:
+        verdict_out = []
+        async for event in cross_ref_one_live(name, out=verdict_out):
+            yield event
+        if verdict_out:
+            report["cross_ref"].append(verdict_out[0])
+
+    if not candidates:
+        yield sse("result", label="No real filer names available to cross-reference this run",
+                   detail="Virginia SCC check above didn't return usable filings live -- see the error, if any, just above.")
+
     report["generated_at"] = date.today().isoformat()
+    report["candidates_shown"] = len(candidates)
+    report["candidates_total"] = len(all_candidates)
     yield sse("report", data=report)
     yield sse("done")
+
+
+async def extend_pipeline(skip: int):
+    """Cross-references the NEXT real batch of Virginia filer names beyond
+    what a prior run (or a prior extend) already covered, live -- powers
+    the "Load more real filers" button so the demo isn't hard-capped at
+    MAX_CROSS_REF_CANDIDATES. Re-fetches the VA docket fresh rather than
+    reusing anything from the original run: this is a separate request
+    (possibly minutes later, possibly a different browser tab), and
+    re-fetching is cheap (a couple real API calls, not a full pipeline
+    run) -- consistent with this project's rule that every number comes
+    from a live call, not a cached one carried between requests."""
+    yield sse("step", label="Checking Virginia SCC docket live", detail=f"Case No. {VA_CASE_NUMBER} (for more real filers)")
+    docs_sorted, case_name = [], None
+    try:
+        case = await asyncio.to_thread(dst.get_case, VA_CASE_NUMBER)
+        case_name = case["Case_Name"]
+        docs = await asyncio.to_thread(dst.get_documents, case["MATTER_NO"])
+        docs_sorted = sorted(docs, key=lambda d: d["Date_Filed"], reverse=True)
+        yield sse("result", label=f"{len(docs)} real filings on record for {case_name}", detail="")
+    except Exception as e:
+        yield sse("step_error", label=f"Virginia SCC check failed: {e}")
+        yield sse("extend_result", new_cross_ref=[], candidates_total=0, has_more=False)
+        return
+
+    all_candidates = _extract_va_candidates(docs_sorted, case_name)
+    batch = all_candidates[skip:skip + MAX_CROSS_REF_CANDIDATES]
+
+    new_cross_ref = []
+    for name in batch:
+        verdict_out = []
+        async for event in cross_ref_one_live(name, out=verdict_out):
+            yield event
+        if verdict_out:
+            new_cross_ref.append(verdict_out[0])
+
+    if not batch:
+        yield sse("result", label="No more distinct real filer names in this docket",
+                   detail=f"{len(all_candidates)} distinct real filers found total; all of them have already been shown.")
+
+    yield sse("extend_result", new_cross_ref=new_cross_ref,
+              candidates_total=len(all_candidates), has_more=(skip + len(batch)) < len(all_candidates))
 
 
 @app.get("/api/run")
 async def api_run():
     async def gen():
         async for event in run_pipeline():
+            yield f"event: {event['event']}\ndata: {event['data']}\n\n"
+    return StreamingResponse(gen(), media_type="text/event-stream",
+                              headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"})
+
+
+@app.get("/api/extend")
+async def api_extend(skip: int = 0):
+    async def gen():
+        async for event in extend_pipeline(skip):
             yield f"event: {event['event']}\ndata: {event['data']}\n\n"
     return StreamingResponse(gen(), media_type="text/event-stream",
                               headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"})

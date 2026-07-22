@@ -17,7 +17,33 @@
   *{box-sizing:border-box;}
   body{ margin:0; background:var(--page); color:var(--ink); font-family:'IBM Plex Sans',sans-serif; line-height:1.5; -webkit-font-smoothing:antialiased; }
   .num{ font-family:'IBM Plex Mono',monospace; font-variant-numeric:tabular-nums; }
-  .wrap{ max-width:760px; margin:0 auto; padding:64px 28px 100px; }
+  .wrap{ max-width:760px; margin:0 auto; padding:64px 28px 100px; position:relative; z-index:1; }
+
+  /* ---- background: two real 3D coils, one per side, built from CSS 3D
+     transforms (no canvas, no WebGL, no dependency) ----
+     .spiral-3d establishes the perspective; each .coil-track is its own
+     shared 3D space, positioned in the left/right margin outside the
+     760px content column so it never competes with the report cards.
+     Rungs form the fixed slide structure -- the whole coil twists slowly
+     as you scroll, like looking down a rotating drill flute. Articles are
+     small cards that travel DOWN the coil as you scroll (their Y position
+     is driven by scrollY, wrapping so they loop endlessly), following the
+     exact same helix path as the rungs so they visibly ride the slide.
+     Depth (near side bigger/brighter, far side smaller/dimmer) is faked
+     with opacity+scale keyed to each element's rotation angle -- a
+     standard CSS 3D carousel technique. Hidden below 1100px viewport
+     width, where there's no side margin left for them to live in. */
+  #spiral3d{ position:fixed; inset:0; z-index:0; pointer-events:none; overflow:hidden; perspective:1300px; }
+  .coil-track{ position:absolute; top:50%; transform-style:preserve-3d; }
+  .coil-track.left{ left:150px; }
+  .coil-track.right{ right:150px; }
+  @media (max-width:1100px){ #spiral3d{ display:none; } }
+  .rung{ position:absolute; top:0; left:0; width:110px; height:7px; margin:-3.5px 0 0 -55px; border-radius:4px;
+    background:linear-gradient(90deg, transparent, rgba(184,110,225,.55), transparent);
+    transform-style:preserve-3d; will-change:transform,opacity; }
+  .article3d{ position:absolute; top:0; left:0; width:15px; height:15px; margin:-7.5px 0 0 -7.5px; border-radius:4px;
+    background:rgb(184,110,225); box-shadow:0 0 10px rgba(222,151,255,.7);
+    transform-style:preserve-3d; will-change:transform,opacity; }
 
   /* ---- hook ---- */
   #hook{ text-align:center; padding:80px 0 60px; }
@@ -71,6 +97,7 @@
   .err-dot{ width:13px; height:13px; border-radius:50%; background:var(--warn); flex:0 0 auto; position:relative; }
   .err-dot::after{ content:"!"; position:absolute; inset:0; color:#fff; font-size:9px; font-weight:700; display:flex; align-items:center; justify-content:center; }
   .step-note{ font-size:12px; color:var(--warn); margin-top:6px; }
+  .step-note-neutral{ color:var(--ink-muted); }
   .step.degraded{ border-left:3px solid var(--warn); }
 
   .checker-row{ display:flex; justify-content:space-between; align-items:center; font-size:12.5px; padding:6px 0 6px 23px; border-top:1px solid var(--hairline); }
@@ -97,7 +124,10 @@
   .rpt-val{ font-size:26px; font-weight:600; }
   .rpt-lbl{ font-size:12px; color:var(--ink-muted); margin-top:4px; }
   .rpt-list{ list-style:none; margin:0; padding:0; font-size:12.5px; }
-  .rpt-list li{ padding:8px 0; border-top:1px solid var(--hairline); display:flex; justify-content:space-between; gap:10px;}
+  .rpt-list li{ padding:8px 0; border-top:1px solid var(--hairline); }
+  .rpt-list li .rpt-list-row{ display:flex; justify-content:space-between; gap:10px; }
+  .rpt-list li .rpt-list-reason{ font-size:11.5px; color:var(--ink-muted); margin-top:4px; }
+  .rpt-list li .rpt-list-reason.has-disagreement{ color:var(--warn); }
   .rpt-list li:first-child{ border-top:none; padding-top:0; }
   .timestamp{ text-align:center; font-size:12px; color:var(--ink-muted); margin-top:32px; }
 
@@ -117,6 +147,10 @@
 </style>
 </head>
 <body>
+<div id="spiral3d">
+  <div class="coil-track left" id="coilTrackLeft"></div>
+  <div class="coil-track right" id="coilTrackRight"></div>
+</div>
 <div class="wrap">
 
   <section id="hook">
@@ -147,6 +181,7 @@
       <h3>Real Virginia filers — cross-referenced live</h3>
       <div id="rptConfidenceChart"></div>
       <ul class="rpt-list" id="rptCrossRef"></ul>
+      <div id="extendControls" style="display:none;margin-top:16px;text-align:center;"></div>
     </div>
     <div class="rpt-card" id="rptConclusion" style="margin-bottom:16px;"></div>
     <p class="timestamp" id="rptTime"></p>
@@ -155,6 +190,100 @@
 </div>
 
 <script>
+// ============================================================
+// BACKGROUND: two real 3D coils, left + right (CSS 3D transforms,
+// no canvas/WebGL) -- spinning in mirrored directions
+// ============================================================
+(function(){
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  const RADIUS = 130;        // px the coil's rungs/articles sit out from the center axis
+  const ANGLE_STEP = 15;     // degrees of rotation per V_STEP of height -- how tightly the coil winds
+  const V_STEP = 15;         // px of vertical rise per rung
+  const N_RUNGS = 50;        // ~2.1 full turns of visible structure
+  const N_ARTICLES = 12;     // "articles" riding down the slide
+  const COIL_SPAN = N_RUNGS * V_STEP;
+
+  function createCoil(trackId, spinDir){
+    const track = document.getElementById(trackId);
+    if(!track) return null;
+
+    const rungs = [];
+    for(let i = 0; i < N_RUNGS; i++){
+      const el = document.createElement('div');
+      el.className = 'rung';
+      track.appendChild(el);
+      rungs.push({el, y: i * V_STEP - COIL_SPAN / 2});
+    }
+
+    const articles = [];
+    for(let i = 0; i < N_ARTICLES; i++){
+      const el = document.createElement('div');
+      el.className = 'article3d';
+      track.appendChild(el);
+      articles.push({el, baseY: (i / N_ARTICLES) * COIL_SPAN});
+    }
+
+    function place(el, y, globalPhase){
+      // Same helix formula for rungs and articles alike, so articles ride
+      // the exact path the slide's structure traces: angle is a function
+      // of height along the coil (that's what makes it a HELIX, not just
+      // a rotating disc), plus a global phase so the whole thing can
+      // twist together as the page scrolls.
+      const angle = (y / V_STEP) * ANGLE_STEP + globalPhase;
+      const rad = angle * Math.PI / 180;
+      const depth = Math.cos(rad);                 // 1 = facing viewer, -1 = far side
+      const scale = 0.55 + (depth + 1) / 2 * 0.65;
+      const opacity = 0.1 + (depth + 1) / 2 * 0.55;
+      el.style.transform = `translateY(${y}px) rotateY(${angle}deg) translateZ(${RADIUS}px) scale(${scale})`;
+      el.style.opacity = opacity.toFixed(2);
+      el.style.zIndex = Math.round((depth + 1) * 500);
+    }
+
+    return function frame(t, scrollY){
+      // spinDir mirrors the two coils' rotation -- left and right visibly
+      // turn opposite ways, reading as a deliberate matched pair rather
+      // than two copies of the same thing.
+      const globalPhase = spinDir * (scrollY * 0.09 + (reduceMotion ? 0 : t * 0.15));
+      rungs.forEach(r => place(r.el, r.y, globalPhase));
+      articles.forEach(a => {
+        // Articles' height is driven by scroll and wraps endlessly, so
+        // they visibly travel DOWN the coil as you scroll rather than
+        // just spinning in place with the structure.
+        let y = ((a.baseY - scrollY * 0.5) % COIL_SPAN + COIL_SPAN) % COIL_SPAN - COIL_SPAN / 2;
+        place(a.el, y, globalPhase);
+      });
+    };
+  }
+
+  const frameLeft = createCoil('coilTrackLeft', 1);
+  const frameRight = createCoil('coilTrackRight', -1);
+  let t = 0;
+
+  function frame(){
+    const scrollY = window.scrollY || window.pageYOffset || 0;
+    if(frameLeft) frameLeft(t, scrollY);
+    if(frameRight) frameRight(t, scrollY);
+  }
+
+  function loop(){
+    frame();
+    if(!reduceMotion){
+      t += 1;
+      requestAnimationFrame(loop);
+    }
+  }
+
+  document.addEventListener('visibilitychange', () => {
+    if(!document.hidden && !reduceMotion) requestAnimationFrame(loop);
+  });
+  window.addEventListener('scroll', () => { if(reduceMotion) frame(); }, {passive: true});
+  window.addEventListener('resize', frame);
+
+  frame();
+  if(!reduceMotion) requestAnimationFrame(loop);
+})();
+
 let currentStepEl = null;
 
 let currentStepError = false;
@@ -210,6 +339,147 @@ function markDone(el, ok=true){
 // a 4-batch classification step done after just the first batch.
 function concludeCurrentStep(){
   if(currentStepEl) markDone(currentStepEl, !currentStepError);
+}
+
+// Shared per-event handlers -- used by both the main run (startRun) and
+// "Load more real filers" (runExtend) so the two don't duplicate this
+// logic. The only real difference between the two call sites is whether
+// #steps gets cleared first and whether the progress bar/report grid
+// reset -- the event-to-DOM rendering itself is identical either way.
+function handleStepEvent(d){
+  concludeCurrentStep();
+  addStep(d.label, d.detail);
+}
+
+function handleResultEvent(d){
+  if(currentStepEl){
+    const div = document.createElement('div');
+    div.className = 'step-detail';
+    div.style.marginTop = '6px';
+    div.textContent = d.label + (d.detail ? ': ' + d.detail : '');
+    currentStepEl.appendChild(div);
+  }
+}
+
+function handleCheckerEvent(d){
+  if(!currentStepEl) return;
+  const body = currentStepEl.querySelector('.step-body');
+  const row = document.createElement('div');
+  row.className = 'checker-row';
+  row.innerHTML = `<span class="checker-name">${d.source}</span>` +
+    `<span>${d.entity ? `<span class="checker-entity">${d.entity}</span>` : ''}` +
+    `<span class="checker-badge ${d.hit ? 'hit':'miss'}">${d.hit ? 'hit':'miss'}</span></span>`;
+  body.appendChild(row);
+
+  // Live chart, not just a growing list: rebuilds every real checker
+  // response so the hit/miss split visibly fills in source by source,
+  // instead of only appearing once at the end in the final report.
+  if(!currentStepHitCounts) currentStepHitCounts = {hit: 0, miss: 0};
+  currentStepHitCounts[d.hit ? 'hit' : 'miss']++;
+  let chartEl = currentStepEl.querySelector('.step-chart');
+  if(!chartEl){
+    chartEl = document.createElement('div');
+    chartEl.className = 'step-chart';
+    currentStepEl.insertBefore(chartEl, body);
+  }
+  renderBarChart(chartEl, [
+    {label: 'Hit', value: currentStepHitCounts.hit, color: 'var(--good)'},
+    {label: 'Miss', value: currentStepHitCounts.miss, color: 'var(--ink-muted)'},
+  ]);
+}
+
+function handleVerdictEvent(d){
+  if(!currentStepEl) return;
+  const badge = document.createElement('div');
+  badge.className = 'verdict-badge ' + d.confidence;
+  badge.textContent = d.confidence + (d.company_name ? ': ' + d.company_name : '');
+  currentStepEl.appendChild(badge);
+  // Every outcome gets its plurality read shown, not just conflicting
+  // ones -- a clean VERIFIED result says "6 of 6 agree" just as plainly
+  // as a real disagreement names its minority. Only the styling changes:
+  // neutral for a clean agreement, warning-colored when a real minority
+  // exists, so the color still communicates at a glance which is which.
+  if(d.reason){
+    const note = document.createElement('div');
+    note.className = d.has_disagreement ? 'step-note' : 'step-note step-note-neutral';
+    note.textContent = d.reason;
+    currentStepEl.appendChild(note);
+  }
+}
+
+function handleStepErrorEvent(d){
+  currentStepError = true;
+  const div = document.createElement('div');
+  div.className = 'step-note';
+  div.textContent = d.label;
+  if(currentStepEl) currentStepEl.appendChild(div);
+}
+
+// ---- "Load more real filers" (extend beyond the first MAX_CROSS_REF_CANDIDATES) ----
+let lastReport = null;       // the full report object, so extend can merge new cross_ref entries into it
+let candidatesShown = 0;
+let candidatesTotal = 0;
+
+function updateExtendControls(){
+  const wrap = document.getElementById('extendControls');
+  if(!wrap) return;
+  if(!lastReport || !candidatesTotal){
+    wrap.style.display = 'none';
+    return;
+  }
+  wrap.style.display = 'block';
+  const remaining = candidatesTotal - candidatesShown;
+  if(remaining <= 0){
+    wrap.innerHTML = `<span style="color:var(--ink-muted);font-size:13px;">All ${candidatesTotal} real filer${candidatesTotal===1?'':'s'} in this docket have been cross-referenced.</span>`;
+    return;
+  }
+  wrap.innerHTML = `<a href="#" id="extendLink" onclick="runExtend();return false;" ` +
+    `style="color:var(--accent);text-decoration:underline;font-size:13px;font-weight:600;">` +
+    `Load more real filers (${remaining} more in this docket)</a>`;
+}
+
+function runExtend(){
+  const link = document.getElementById('extendLink');
+  if(!link) return;
+  const skip = candidatesShown;
+  link.textContent = 'Loading more real filers…';
+  link.style.pointerEvents = 'none';
+  link.style.opacity = '0.6';
+
+  const es = new EventSource(`/api/extend?skip=${skip}`);
+  armWatchdog();
+  const on = (type, handler) => es.addEventListener(type, (e) => { armWatchdog(); handler(e); });
+
+  on('step', (e) => handleStepEvent(JSON.parse(e.data)));
+  on('result', (e) => handleResultEvent(JSON.parse(e.data)));
+  on('checker', (e) => handleCheckerEvent(JSON.parse(e.data)));
+  on('verdict', (e) => handleVerdictEvent(JSON.parse(e.data)));
+  on('step_error', (e) => handleStepErrorEvent(JSON.parse(e.data)));
+
+  on('extend_result', (e) => {
+    concludeCurrentStep();
+    clearWatchdog();
+    const d = JSON.parse(e.data);
+    if(lastReport){
+      lastReport.cross_ref = (lastReport.cross_ref || []).concat(d.new_cross_ref);
+      renderReport(lastReport);
+    }
+    candidatesShown += d.new_cross_ref.length;
+    candidatesTotal = d.candidates_total || candidatesTotal;
+    updateExtendControls();
+    es.close();
+  });
+
+  es.onerror = () => {
+    clearWatchdog();
+    concludeCurrentStep();
+    updateExtendControls();
+    const note = document.createElement('p');
+    note.style.cssText = 'text-align:center;font-size:13px;color:var(--ink-muted);margin-top:16px;';
+    note.textContent = 'Connection interrupted while loading more real filers. Try again below.';
+    document.getElementById('trace').appendChild(note);
+    es.close();
+  };
 }
 
 function onStartToggle(cb){
@@ -287,6 +557,9 @@ function startRun(url, mode){
   currentStepEl = null;
   currentStepError = false;
   resetProgress();
+  lastReport = null;
+  candidatesShown = 0;
+  candidatesTotal = 0;
 
   const tag = document.getElementById('liveTag');
   if(mode === 'live'){
@@ -315,66 +588,10 @@ function startRun(url, mode){
     }
   });
 
-  on('step', (e) => {
-    concludeCurrentStep();
-    const d = JSON.parse(e.data);
-    addStep(d.label, d.detail);
-  });
-
-  on('result', (e) => {
-    const d = JSON.parse(e.data);
-    if(currentStepEl){
-      const div = document.createElement('div');
-      div.className = 'step-detail';
-      div.style.marginTop = '6px';
-      div.textContent = d.label + (d.detail ? ': ' + d.detail : '');
-      currentStepEl.appendChild(div);
-    }
-  });
-
-  on('checker', (e) => {
-    const d = JSON.parse(e.data);
-    if(!currentStepEl) return;
-    const body = currentStepEl.querySelector('.step-body');
-    const row = document.createElement('div');
-    row.className = 'checker-row';
-    row.innerHTML = `<span class="checker-name">${d.source}</span>` +
-      `<span>${d.entity ? `<span class="checker-entity">${d.entity}</span>` : ''}` +
-      `<span class="checker-badge ${d.hit ? 'hit':'miss'}">${d.hit ? 'hit':'miss'}</span></span>`;
-    body.appendChild(row);
-
-    // Live chart, not just a growing list: rebuilds every real checker
-    // response so the hit/miss split visibly fills in source by source,
-    // instead of only appearing once at the end in the final report.
-    if(!currentStepHitCounts) currentStepHitCounts = {hit: 0, miss: 0};
-    currentStepHitCounts[d.hit ? 'hit' : 'miss']++;
-    let chartEl = currentStepEl.querySelector('.step-chart');
-    if(!chartEl){
-      chartEl = document.createElement('div');
-      chartEl.className = 'step-chart';
-      currentStepEl.insertBefore(chartEl, body);
-    }
-    renderBarChart(chartEl, [
-      {label: 'Hit', value: currentStepHitCounts.hit, color: 'var(--good)'},
-      {label: 'Miss', value: currentStepHitCounts.miss, color: 'var(--ink-muted)'},
-    ]);
-  });
-
-  on('verdict', (e) => {
-    const d = JSON.parse(e.data);
-    if(!currentStepEl) return;
-    const badge = document.createElement('div');
-    badge.className = 'verdict-badge ' + d.confidence;
-    badge.textContent = d.confidence + (d.company_name ? ': ' + d.company_name : '');
-    currentStepEl.appendChild(badge);
-    if(d.confidence === 'conflicting' && d.reason){
-      const note = document.createElement('div');
-      note.className = 'step-note';
-      note.textContent = d.reason;
-      currentStepEl.appendChild(note);
-    }
-  });
-
+  on('step', (e) => handleStepEvent(JSON.parse(e.data)));
+  on('result', (e) => handleResultEvent(JSON.parse(e.data)));
+  on('checker', (e) => handleCheckerEvent(JSON.parse(e.data)));
+  on('verdict', (e) => handleVerdictEvent(JSON.parse(e.data)));
   // Named 'step_error', not 'error' -- 'error' is a reserved EventSource
   // event name (it's also what fires on a real connection failure, via
   // es.onerror below), and a custom SSE event literally called "error"
@@ -384,18 +601,15 @@ function startRun(url, mode){
   // es.onerror, which calls es.close(), silently killing the whole run
   // right there -- no further steps, no report, no visible explanation,
   // just a frozen page. Renaming the custom event fixes it for good.
-  on('step_error', (e) => {
-    const d = JSON.parse(e.data);
-    currentStepError = true;
-    const div = document.createElement('div');
-    div.className = 'step-note';
-    div.textContent = d.label;
-    if(currentStepEl) currentStepEl.appendChild(div);
-  });
+  on('step_error', (e) => handleStepErrorEvent(JSON.parse(e.data)));
 
   on('report', (e) => {
     const d = JSON.parse(e.data);
-    renderReport(d.data);
+    lastReport = d.data;
+    candidatesShown = d.data.candidates_shown || 0;
+    candidatesTotal = d.data.candidates_total || 0;
+    renderReport(lastReport);
+    updateExtendControls();
   });
 
   on('done', () => {
@@ -518,8 +732,9 @@ function renderReport(r){
   (r.cross_ref || []).forEach(v => {
     const li = document.createElement('li');
     const loc = [v.county, v.state].filter(Boolean).join(', ');
-    li.innerHTML = `<span>${v.project_name || v.queue_id}${loc ? ` <span style="color:var(--ink-muted)">(${loc})</span>` : ''}</span>` +
-      `<span class="verdict-badge ${v.confidence}" style="margin:0;">${v.confidence}</span>`;
+    li.innerHTML = `<div class="rpt-list-row"><span>${v.project_name || v.queue_id}${loc ? ` <span style="color:var(--ink-muted)">(${loc})</span>` : ''}</span>` +
+      `<span class="verdict-badge ${v.confidence}" style="margin:0;">${v.confidence}</span></div>` +
+      (v.reason ? `<div class="rpt-list-reason${v.has_disagreement ? ' has-disagreement' : ''}">${v.reason}</div>` : '');
     list.appendChild(li);
   });
   if (!(r.cross_ref || []).length){
@@ -528,30 +743,37 @@ function renderReport(r){
 
   // Conclusion: synthesized from this run's actual numbers, not fixed
   // text -- so it stays honest across live runs vs. replays vs. a run
-  // where a section failed.
+  // where a section failed. Written in a tightened, editorial voice (per
+  // explicit direction: read like a briefing worth forwarding, not a
+  // test-run status log) -- every number is still pulled straight from
+  // the real fields above, nothing here is invented or rounded up for
+  // effect.
   const parts = [];
   if (r.tx && r.tx.total_queue_gw_approx){
-    parts.push(`Texas's live queue stands at roughly <strong>${r.tx.total_queue_gw_approx.toFixed(0)} GW</strong>` +
-      (r.tx.data_center_pct ? `, about <strong>${r.tx.data_center_pct}%</strong> of it data centers` : '') + `.`);
+    parts.push(`Texas's large-load queue has swelled to roughly <strong>${r.tx.total_queue_gw_approx.toFixed(0)} GW</strong>` +
+      (r.tx.data_center_pct ? ` — <strong>${r.tx.data_center_pct}%</strong> of it data centers.` : '.'));
   }
   if (r.va && r.va.n_documents){
-    parts.push(`Virginia's SCC docket has <strong>${r.va.n_documents}</strong> real filings on record.`);
+    parts.push(`Virginia's regulator is sitting on <strong>${r.va.n_documents} live filings</strong> behind Dominion's large-load customers.`);
   }
   const n = (r.cross_ref || []).length;
   if (n){
-    const verifiedN = confCounts.verified, conflictN = confCounts.conflicting;
-    parts.push(`This run cross-referenced <strong>${n}</strong> real ${n === 1 ? 'filer' : 'filers'} pulled live from that docket` +
-      (verifiedN || conflictN
-        ? `: ${[verifiedN ? `${verifiedN} verified` : null, conflictN ? `${conflictN} flagged conflicting` : null].filter(Boolean).join(', ')}.`
-        : `.`));
+    const {verified: v, candidate: c, conflicting: k} = confCounts;
+    const bits = [
+      v ? `<strong>${v}</strong> confirmed outright` : null,
+      k ? `<strong>${k}</strong> returned conflicting corporate identities — worth a second look before anyone signs anything` : null,
+      c ? `<strong>${c}</strong> still unconfirmed` : null,
+    ].filter(Boolean);
+    parts.push(`${n === 1 ? 'One real applicant was' : `${n} real applicants were`} checked against public record just now` +
+      (bits.length ? `: ${bits.join(', ')}.` : '.'));
   }
   const concl = document.getElementById('rptConclusion');
   if (parts.length){
-    concl.innerHTML = `<h3>What this run found</h3><p>${parts.join(' ')} These numbers were pulled live, just now, ` +
-      `directly from the real regulators above — not from a sample file or a cached snapshot. That's the whole point: ` +
-      `this data already exists publicly, it's just never been collected in one place and watched over time until now.</p>`;
+    concl.innerHTML = `<h3>The Briefing</h3><p>${parts.join(' ')} Every figure above came straight from the regulators ` +
+      `themselves, live, this second — no samples, no models, no cache. The data was always public. ` +
+      `It just took someone to watch it.</p>`;
   } else {
-    concl.innerHTML = `<h3>What this run found</h3><p>No live sources returned usable data this run — see the real errors in the trace above.</p>`;
+    concl.innerHTML = `<h3>The Briefing</h3><p>No live sources returned usable data this run — see the real errors in the trace above.</p>`;
   }
 
   document.getElementById('rptTime').textContent = 'Report generated ' + (r.generated_at || '') +

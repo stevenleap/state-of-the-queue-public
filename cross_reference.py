@@ -85,6 +85,7 @@ import json
 import argparse
 import uuid as _uuid
 import requests
+import concurrent.futures as _futures
 from dotenv import load_dotenv
 import known_projects_db as db
 from steel_client import steel_scrape, extract_text
@@ -166,7 +167,117 @@ def _normalize_entity(name: str) -> str:
     return _KNOWN_ALIASES.get(n, n)
 
 
-def _entities_match(a: str, b: str) -> bool:
+_LLM_MATCH_CACHE = {}
+
+
+_PAREN_SUFFIX_RE = _re.compile(r"\s*\([^)]*\)")
+
+
+def _llm_entities_match(a: str, b: str) -> bool:
+    """Escalation for cases the cheap token-overlap check above can't
+    resolve: brand-name variants of the same real company (e.g. "Amazon
+    Data Center Locations (AWS)" vs "AMAZON COM INC (AMZN)" -- confirmed
+    live these got wrongly flagged CONFLICTING) and real parent/subsidiary
+    or acquisition relationships (e.g. "STACK Infrastructure" and its real
+    2024 acquirer "Blue Owl Capital", confirmed via Apollo Global
+    Management's own press release plus DCD/Reuters/Bloomberg coverage).
+
+    GROUNDED IN A REAL LIVE SEARCH, not just the model's own memorized
+    knowledge -- confirmed necessary by direct testing, not assumed:
+    asked plainly "who owns Verrus LLC," deepseek-v4-flash burned its
+    entire token budget on hidden reasoning tokens and produced no answer
+    at all; given more room, it landed on UNCERTAIN. A live Tavily search
+    resolves this correctly where bare model knowledge could not -- and
+    also caught a real mistake in this project's own earlier assumption:
+    "Verrus, LLC" and "KKR Infrastructure Conglomerate LLC" were assumed
+    to be a parent/subsidiary pair worth fixing, but real search evidence
+    (TechCrunch, DCD, Sidewalk Infrastructure Partners' own site) shows
+    Verrus is actually backed by Sidewalk Infrastructure Partners (an
+    Alphabet spin-out) -- a DIFFERENT company than KKR entirely. The
+    original CONFLICTING result for that pair was correct, not a bug;
+    grounding in real evidence is what keeps this from "fixing" that into
+    a false positive.
+
+    A hardcoded alias table (_KNOWN_ALIASES above) can't generalize to
+    companies it's never seen -- this asks a real LLM the specific
+    judgment instead, per explicit direction, using real retrieved text
+    as evidence rather than trusting the model's background knowledge
+    (which this module's own testing found unreliable for exactly this
+    kind of question).
+
+    Deliberately conservative, same "don't guess, flag for a human" ethos
+    as the rest of this module: only an explicit YES counts as a match;
+    NO and UNCERTAIN both return False, same as a missing API key or a
+    call failure. Only invoked when the cheap check already failed, not
+    for every pair -- keeps the common case fast and free. Cached in
+    memory per (a, b) pair for the life of the process, so re-clustering
+    the same names (e.g. across an initial run + an extend batch) doesn't
+    re-spend real API calls on a judgment already made."""
+    key = tuple(sorted((a.strip().lower(), b.strip().lower())))
+    if key in _LLM_MATCH_CACHE:
+        return _LLM_MATCH_CACHE[key]
+
+    api_key = os.environ.get("DEEPSEEK_API_KEY")
+    if not api_key:
+        _LLM_MATCH_CACHE[key] = False
+        return False
+
+    clean_a = _PAREN_SUFFIX_RE.sub("", a).strip()
+    clean_b = _PAREN_SUFFIX_RE.sub("", b).strip()
+    results, _err = _tavily_search(f'"{clean_a}" "{clean_b}" parent company OR subsidiary OR acquired OR owns')
+    if not results:
+        results, _err = _tavily_search(f"{clean_a} {clean_b} parent company owner acquisition")
+    evidence = "\n\n".join(
+        f"- {r.get('title', '')}: {(r.get('content') or '')[:400]}" for r in (results or [])[:5]
+    )
+
+    result = False
+    try:
+        from openai import OpenAI  # DeepSeek's API is OpenAI-compatible
+        client = OpenAI(api_key=api_key, base_url="https://api.deepseek.com")
+        resp = client.chat.completions.create(
+            model="deepseek-v4-flash",
+            messages=[
+                {"role": "system", "content": (
+                    "You are verifying whether two name strings pulled from public "
+                    "records refer to the same real-world company, for corporate "
+                    "entity resolution. You will be given real live search evidence -- "
+                    "base your answer ONLY on that evidence, not on your own background "
+                    "knowledge, which has been found unreliable for this specific task. "
+                    "Answer YES if the evidence confirms they're the same company, a "
+                    "brand/product name of each other, or a parent/subsidiary/"
+                    "acquisition relationship. Answer NO if the evidence shows they are "
+                    "different, unrelated companies -- including if the evidence names a "
+                    "DIFFERENT real relationship for one of them (that's a strong NO "
+                    "signal, not just an absence of evidence). Answer UNCERTAIN if the "
+                    "evidence doesn't clearly say either way. Respond with EXACTLY one "
+                    "word: YES, NO, or UNCERTAIN."
+                )},
+                {"role": "user", "content": (
+                    f'Name A: "{a}"\nName B: "{b}"\n\n'
+                    f'Search evidence:\n{evidence or "(no search results found)"}'
+                )},
+            ],
+            temperature=0,
+            max_tokens=800,
+        )
+        answer = (resp.choices[0].message.content or "").strip().upper()
+        result = answer.startswith("YES")
+    except Exception:
+        result = False
+
+    _LLM_MATCH_CACHE[key] = result
+    return result
+
+
+def _entities_match_cheap(a: str, b: str) -> bool:
+    """The fast, free, no-network half of entity matching: exact match
+    after normalization, or token-subset overlap. Split out from
+    _entities_match so clustering (see _cluster_named_hits) can run this
+    first, for every hit, before spending any of its bounded LLM-
+    escalation budget -- most comparisons resolve here or don't need to
+    resolve at all (two unrelated low-confidence titles that were never
+    going to affect the verdict either way)."""
     na, nb = _normalize_entity(a), _normalize_entity(b)
     if not na or not nb:
         return False
@@ -178,6 +289,18 @@ def _entities_match(a: str, b: str) -> bool:
         return False
     shorter, longer = (toks_a, toks_b) if len(toks_a) <= len(toks_b) else (toks_b, toks_a)
     return shorter.issubset(longer)
+
+
+def _entities_match(a: str, b: str) -> bool:
+    """Full check for a single yes/no on one pair: the cheap heuristic
+    first, then an LLM escalation if that fails. Clustering itself
+    (_cluster_named_hits) does NOT call this directly -- it uses the
+    cheap check for its first pass and a separately bounded/parallel
+    escalation pass, since a plain one-escalation-per-comparison approach
+    made every non-overlapping pair fire a real search + LLM call and
+    took 215.8s for a single 3-candidate live run, confirmed by direct
+    testing, not assumed."""
+    return _entities_match_cheap(a, b) or _llm_entities_match(a, b)
 
 
 def _extract_td_cells(row_html: str) -> list:
@@ -621,24 +744,69 @@ ALL_CHECKERS = [
 ]
 
 
+MAX_LLM_ESCALATIONS_PER_CLUSTER_CALL = 4  # bounds real search+LLM calls per
+# clustering run to a small constant, not one per pair -- see
+# _cluster_named_hits docstring for why this cap exists.
+
+
 def _cluster_named_hits(named_hits: list) -> list:
-    """Greedy clustering by _entities_match -- fine at this scale (at
-    most ~10 checkers, so O(n^2) pairwise comparison is trivial). Each
-    cluster is a list of hits whose entity_name all mutually matched the
-    cluster's first (representative) member. Not a perfect transitive-
-    closure clustering, but good enough for ~10 items and easy to audit
-    by reading the output."""
+    """Two passes. Pass 1: greedy clustering using ONLY the cheap, free
+    check (_entities_match_cheap) -- fine at this scale (at most ~10
+    checkers, so O(n^2) pairwise comparison is trivial when it's just
+    string normalization, no network calls). Pass 2: a SEPARATELY
+    bounded, PARALLEL escalation -- the largest/most-authoritative
+    resulting cluster gets checked against up to
+    MAX_LLM_ESCALATIONS_PER_CLUSTER_CALL rival clusters using the real
+    LLM+search-grounded judgment (catches brand variants and real parent/
+    subsidiary relationships the cheap check can't see), run concurrently
+    so wall-clock time is roughly the slowest single call, not the sum.
+
+    This two-pass, bounded design exists because a naive "escalate every
+    non-matching pair, one at a time" version was tested directly and
+    took 215.8 SECONDS for a single 3-candidate live run (vs ~20-45s
+    before real LLM-based matching existed) -- confirmed by live timing,
+    not assumed. Only the biggest/highest-confidence cluster is checked
+    against rivals, since that's the comparison that actually changes the
+    final verdict and displayed company_name; two low-confidence
+    singleton clusters merging with each other almost never does.
+    Clusters beyond the escalation budget are left unmerged -- the same
+    conservative default this module already uses when it doesn't have
+    enough signal to call something a match."""
     clusters = []
     for h in named_hits:
         placed = False
         for cluster in clusters:
-            if _entities_match(h["entity_name"], cluster[0]["entity_name"]):
+            if _entities_match_cheap(h["entity_name"], cluster[0]["entity_name"]):
                 cluster.append(h)
                 placed = True
                 break
         if not placed:
             clusters.append([h])
-    return clusters
+
+    if len(clusters) <= 1:
+        return clusters
+
+    clusters.sort(key=lambda c: (any(h.get("entity_confidence") == "high" for h in c), len(c)), reverse=True)
+    top = clusters[0]
+    rivals = clusters[1:1 + MAX_LLM_ESCALATIONS_PER_CLUSTER_CALL]
+    leftover = clusters[1 + MAX_LLM_ESCALATIONS_PER_CLUSTER_CALL:]
+
+    if not rivals:
+        return clusters
+
+    with _futures.ThreadPoolExecutor(max_workers=len(rivals)) as pool:
+        matches = list(pool.map(
+            lambda c: _llm_entities_match(top[0]["entity_name"], c[0]["entity_name"]), rivals))
+
+    merged = list(top)
+    unmatched_rivals = []
+    for c, is_match in zip(rivals, matches):
+        if is_match:
+            merged.extend(c)
+        else:
+            unmatched_rivals.append(c)
+
+    return [merged] + unmatched_rivals + leftover
 
 
 def cross_reference_one(project: dict) -> dict:
