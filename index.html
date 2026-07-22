@@ -1,0 +1,353 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>State of the Queue — the grid's hidden AI bottleneck</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<style>
+  :root{
+    --page:#f7f7f5;
+    --card:#ffffff;
+    --hairline:#e7e6e1;
+    --ink:#0b0b0b;
+    --ink-2:#5c5b56;
+    --ink-muted:#96948c;
+    --accent:#2a78d6;
+    --accent-wash:#eef4fc;
+    --bad:#c23131;
+    --shadow:0 1px 2px rgba(11,11,11,.04), 0 8px 24px rgba(11,11,11,.05);
+  }
+  *{box-sizing:border-box;}
+  @media (prefers-reduced-motion: reduce){ *{animation-duration:0.001ms !important; transition-duration:0.001ms !important;} }
+
+  body{
+    margin:0; background:var(--page); color:var(--ink);
+    font-family:'IBM Plex Sans', sans-serif;
+    -webkit-font-smoothing:antialiased;
+    line-height:1.5;
+  }
+  .num{ font-family:'IBM Plex Mono', monospace; font-variant-numeric:tabular-nums; }
+  a{ color:var(--accent); text-decoration:none; }
+  a:hover{ text-decoration:underline; }
+
+  .wrap{ max-width:920px; margin:0 auto; padding:52px 28px 90px; }
+
+  /* ---------- masthead ---------- */
+  header.masthead{
+    display:flex; justify-content:space-between; align-items:center; margin-bottom:56px;
+  }
+  .brand{ font-size:15px; font-weight:600; }
+  .brand span{ color:var(--ink-muted); font-weight:400; }
+  .updated{ font-size:13px; color:var(--ink-muted); }
+
+  /* ---------- hero ---------- */
+  .hero{ text-align:center; margin-bottom:64px; }
+  .hero-kicker{ font-size:14px; color:var(--ink-2); margin:0 0 18px; font-weight:500; }
+  .hero-number{ font-size:104px; font-weight:600; color:var(--accent); line-height:1; letter-spacing:-0.02em; }
+  .hero-sub{ font-size:19px; color:var(--ink); margin:18px auto 0; max-width:520px; line-height:1.45; }
+  .hero-sub strong{ font-weight:600; }
+  .hero-cite{ font-size:13px; color:var(--ink-muted); margin-top:14px; }
+
+  /* ---------- stat bar ---------- */
+  .statbar{
+    display:grid; grid-template-columns:repeat(4,1fr);
+    background:var(--card); border-radius:16px; box-shadow:var(--shadow);
+    margin-bottom:64px; overflow:hidden;
+  }
+  .statbar-item{ padding:28px 20px; text-align:center; border-left:1px solid var(--hairline); }
+  .statbar-item:first-child{ border-left:none; }
+  .sb-val{ font-size:26px; font-weight:600; }
+  .sb-lbl{ font-size:12.5px; color:var(--ink-muted); margin-top:8px; line-height:1.4; }
+  @media (max-width:700px){ .statbar{ grid-template-columns:1fr 1fr; } .statbar-item{ border-left:none; border-top:1px solid var(--hairline); } .statbar-item:nth-child(-n+2){ border-top:none; } }
+
+  /* ---------- section title ---------- */
+  .section-title{ font-size:20px; font-weight:600; margin:0 0 24px; }
+  .section-title .tag{
+    font-size:11px; font-weight:600; color:var(--ink-muted); background:var(--hairline);
+    border-radius:20px; padding:3px 10px; margin-left:10px; vertical-align:middle; text-transform:uppercase; letter-spacing:.04em;
+  }
+
+  /* ---------- state cards ---------- */
+  .cards2{ display:grid; grid-template-columns:1fr 1fr; gap:20px; margin-bottom:64px; }
+  @media (max-width:700px){ .cards2{ grid-template-columns:1fr; } }
+  .state-card{ background:var(--card); border-radius:16px; box-shadow:var(--shadow); padding:30px; }
+  .state-card-top{ display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:20px; }
+  .state-card h3{ font-size:19px; font-weight:600; margin:0 0 3px; }
+  .state-card .grid-op{ font-size:13px; color:var(--ink-muted); margin:0; }
+  .asof-badge{ font-size:11px; color:var(--ink-2); background:var(--page); border-radius:20px; padding:5px 11px; white-space:nowrap; }
+  .state-stats{ list-style:none; margin:0; padding:0; }
+  .state-stats li{ padding:16px 0; border-top:1px solid var(--hairline); }
+  .state-stats li:first-child{ border-top:none; padding-top:0; }
+  .state-stats .s-label{ font-size:13px; color:var(--ink-2); margin-bottom:5px; }
+  .state-stats .s-value{ font-size:24px; font-weight:600; }
+  .state-stats .s-detail{ font-size:12.5px; color:var(--ink-muted); margin-top:4px; line-height:1.4; }
+  .state-foot{ margin:20px 0 0; padding-top:16px; border-top:1px solid var(--hairline); font-size:12px; color:var(--ink-muted); }
+  .state-foot a{ color:var(--ink-2); }
+
+  /* ---------- supporting (PJM) ---------- */
+  .support{ background:var(--card); border-radius:16px; box-shadow:var(--shadow); padding:32px; margin-bottom:40px; }
+  .support-top{ display:flex; justify-content:space-between; align-items:baseline; margin-bottom:4px; flex-wrap:wrap; gap:10px; }
+  .support-stats{ display:flex; gap:40px; margin:22px 0 20px; flex-wrap:wrap; }
+  .support-stat .v{ font-size:22px; font-weight:600; }
+  .support-stat .l{ font-size:12.5px; color:var(--ink-muted); margin-top:4px; }
+  .chart-holder{ height:200px; margin-top:8px; }
+  .fine{ font-size:12px; color:var(--ink-muted); margin:16px 0 0; line-height:1.5; }
+
+  footer{ text-align:center; font-size:12.5px; color:var(--ink-muted); }
+  footer .flag{ color:var(--bad); font-weight:600; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="masthead">
+    <div class="brand">State of the Queue <span>· load-side interconnection tracker</span></div>
+    <div class="updated">Updated <span id="gen">—</span></div>
+  </header>
+
+  <section class="hero">
+    <p class="hero-kicker">Texas — ERCOT large-load interconnection queue</p>
+    <div class="hero-number num" id="heroPct">—</div>
+    <p class="hero-sub">of <strong id="heroTotal">—</strong> in requests to connect large loads to the Texas grid — <strong>almost entirely data centers</strong> — is actually turned on and drawing power.</p>
+    <p class="hero-cite">Source: ERCOT's own Large Load Interconnection Status reports</p>
+  </section>
+
+  <section class="statbar" id="statbar"></section>
+
+  <p class="section-title">State-by-state detail</p>
+  <section class="cards2" id="stateCards"></section>
+
+  <section class="support">
+    <div class="support-top">
+      <p class="section-title" style="margin-bottom:0;">PJM generation queue <span class="tag">supporting context</span></p>
+    </div>
+    <div class="support-stats">
+      <div class="support-stat"><div class="v num" id="totalGW">—</div><div class="l" id="dcShare">—</div></div>
+      <div class="support-stat"><div class="v num" id="latestWait">—</div><div class="l">Median wait, <span id="latestYear">—</span> cohort (<span id="deltaVal">—</span> vs <span id="firstYear">—</span>)</div></div>
+    </div>
+    <div class="chart-holder"><canvas id="waitChart"></canvas></div>
+    <p class="fine">PJM publishes generation interconnection data, not a load-side queue — shown here for grid context. Figures above are from sample data pending a live PJM export.</p>
+  </section>
+
+  <footer>
+    <p><span class="flag">⚠</span> PJM figures are sample data, not a live export. Virginia &amp; Texas figures are real and sourced.</p>
+  </footer>
+
+</div>
+
+<script>
+// Used only if dashboard_data.json can't be fetched (e.g. opened as a
+// local file:// page instead of served from a host). Once this page is
+// deployed and dashboard_data.json sits next to it, that file always wins
+// and this block is ignored. Re-running pjm_pipeline.py on a real PJM
+// export regenerates dashboard_data.json -- no HTML edits needed.
+const FALLBACK_DATA = {
+  "generated": "2026-07-18",
+  "source_file": "sample_pjm_queue.csv",
+  "headline": {"total_active_gw": 38.3, "data_center_gw": 17.25, "data_center_share_pct": 45.0, "n_active_projects": 172},
+  "wait_time_trend": [
+    {"entry_year":2016,"median_wait_years":1.91,"n_resolved":18,"low_confidence":false},
+    {"entry_year":2017,"median_wait_years":2.21,"n_resolved":6,"low_confidence":false},
+    {"entry_year":2018,"median_wait_years":2.18,"n_resolved":11,"low_confidence":false},
+    {"entry_year":2019,"median_wait_years":2.72,"n_resolved":3,"low_confidence":true},
+    {"entry_year":2020,"median_wait_years":2.73,"n_resolved":11,"low_confidence":false},
+    {"entry_year":2021,"median_wait_years":3.17,"n_resolved":8,"low_confidence":false},
+    {"entry_year":2022,"median_wait_years":3.43,"n_resolved":8,"low_confidence":false}
+  ],
+  "withdrawal_rate": [
+    {"entry_year":2016,"withdrawal_rate":0.125,"n_total":24},
+    {"entry_year":2017,"withdrawal_rate":0.28,"n_total":25},
+    {"entry_year":2018,"withdrawal_rate":0.154,"n_total":26},
+    {"entry_year":2019,"withdrawal_rate":0.5,"n_total":16},
+    {"entry_year":2020,"withdrawal_rate":0.2,"n_total":20},
+    {"entry_year":2021,"withdrawal_rate":0.348,"n_total":23},
+    {"entry_year":2022,"withdrawal_rate":0.133,"n_total":15},
+    {"entry_year":2023,"withdrawal_rate":0.158,"n_total":19},
+    {"entry_year":2024,"withdrawal_rate":0.038,"n_total":26},
+    {"entry_year":2025,"withdrawal_rate":0.0,"n_total":18}
+  ],
+  "top_chokepoints": [
+    {"County":"Will","State":"IL","Transmission Owner":"ComEd","n_requests":18},
+    {"County":"Montgomery","State":"PA","Transmission Owner":"PECO","n_requests":17},
+    {"County":"Hendricks","State":"IN","Transmission Owner":"AEP","n_requests":17},
+    {"County":"Mercer","State":"NJ","Transmission Owner":"PSE&G","n_requests":17},
+    {"County":"Frederick","State":"MD","Transmission Owner":"BGE","n_requests":16}
+  ]
+};
+
+// Same fallback-if-unreachable approach as FALLBACK_DATA above -- kept in
+// sync with state_snapshots.json by hand for now (see that file's _readme
+// for why: Virginia has no automated tracker yet, Texas's tracker writes
+// to a separate history file that isn't auto-merged into this one yet).
+const FALLBACK_STATE_SNAPSHOTS = {
+  "generated": "2026-07-18",
+  "states": [
+    {
+      "code": "VA", "name": "Virginia", "grid_operator": "Dominion Energy (PJM territory)",
+      "docket_label": "Case No. PUR-2026-00011",
+      "docket_url": "https://www.scc.virginia.gov/docketsearch",
+      "as_of": "2026-06-30",
+      "stats": [
+        {"label": "Total large-load pipeline", "value": "~70 GW", "detail": "~25 GW with connection dates through 2031; ~45 GW still under study"},
+        {"label": "Queue vs. Dominion's actual peak load", "value": "70,000 MW vs 24,678 MW", "detail": "the pipeline is ~2.8x Dominion Zone's entire current all-time peak demand"},
+        {"label": "New-arrival wait time", "value": "4yr → 7yr", "detail": "Dominion told regulators 4 years in 2022, grown to 7 years by 2024"}
+      ],
+      "source_note": "Dominion's SCC testimony and filings, Case No. PUR-2026-00011."
+    },
+    {
+      "code": "TX", "name": "Texas", "grid_operator": "ERCOT",
+      "docket_label": "PUCT Project No. 58481",
+      "docket_url": "https://interchange.puc.texas.gov/Search/Filings?ControlNumber=58481",
+      "as_of": "2026-03-26",
+      "stats": [
+        {"label": "Total large-load queue", "value": "410,618 MW", "detail": "87.6% data centers (355,830 MW)"},
+        {"label": "Actually energized", "value": "~1.4%", "detail": "5,778 MW \"Observed Energized\" out of 410,618 MW total"},
+        {"label": "Queue growth in 13 days", "value": "238,629 → 410,618 MW", "detail": "a 137-submission, ~140,000 MW backlog cleared (2026-03-13 → 2026-03-26)"}
+      ],
+      "source_note": "ERCOT's own Large Load Interconnection Status reports, PUCT Project No. 58481."
+    }
+  ]
+};
+
+let data = FALLBACK_DATA;
+let stateData = FALLBACK_STATE_SNAPSHOTS;
+
+async function loadData(){
+  try {
+    const res = await fetch('./dashboard_data.json', {cache: 'no-store'});
+    if (res.ok) data = await res.json();
+  } catch (e) {
+    console.warn('dashboard_data.json not reachable, using embedded fallback', e);
+  }
+  try {
+    const res2 = await fetch('./state_snapshots.json', {cache: 'no-store'});
+    if (res2.ok) stateData = await res2.json();
+  } catch (e) {
+    console.warn('state_snapshots.json not reachable, using embedded fallback', e);
+  }
+  render();
+}
+
+function render(){
+
+document.getElementById('gen').textContent = data.generated;
+
+// ---- hero: Texas "actually energized" phantom-load stat, the pitch's own hook ----
+const tx = stateData.states.find(s => s.code === 'TX');
+if (tx) {
+  const total = tx.stats.find(s => s.label.toLowerCase().includes('total large-load queue'));
+  const energized = tx.stats.find(s => s.label.toLowerCase().includes('actually energized'));
+  document.getElementById('heroPct').textContent = energized ? energized.value : '—';
+  document.getElementById('heroTotal').textContent = total ? total.value : '—';
+}
+
+// ---- stat bar: fast-scan supporting numbers pulled from VA + TX ----
+const va = stateData.states.find(s => s.code === 'VA');
+const statbarItems = [];
+if (va) {
+  const vaTotal = va.stats.find(s => s.label.toLowerCase().includes('total large-load pipeline'));
+  const vaWait = va.stats.find(s => s.label.toLowerCase().includes('wait time'));
+  statbarItems.push({ v: vaTotal ? vaTotal.value : va.stats[0]?.value, l: 'Virginia queue (Dominion)' });
+  statbarItems.push({ v: vaWait ? vaWait.value : '—', l: 'Virginia wait time' });
+}
+if (tx) {
+  statbarItems.push({ v: tx.stats[0]?.value, l: 'Texas queue (ERCOT)' });
+  const dc = tx.stats.find(s => s.label.toLowerCase().includes('total large-load queue'));
+  statbarItems.push({ v: dc && dc.detail ? dc.detail.split(' ')[0] : '—', l: 'of Texas queue is data centers' });
+}
+const statbar = document.getElementById('statbar');
+statbarItems.forEach(it => {
+  const div = document.createElement('div');
+  div.className = 'statbar-item';
+  div.innerHTML = `<div class="sb-val num">${it.v ?? '—'}</div><div class="sb-lbl">${it.l}</div>`;
+  statbar.appendChild(div);
+});
+
+// ---- state detail cards ----
+const stateCards = document.getElementById('stateCards');
+stateData.states.forEach(s => {
+  const card = document.createElement('div');
+  card.className = 'state-card';
+  const statsHtml = s.stats.map(st => `
+    <li>
+      <div class="s-label">${st.label}</div>
+      <div class="s-value num">${st.value}</div>
+      ${st.detail ? `<div class="s-detail">${st.detail}</div>` : ''}
+    </li>`).join('');
+  card.innerHTML = `
+    <div class="state-card-top">
+      <div>
+        <h3>${s.name}</h3>
+        <p class="grid-op">${s.grid_operator}</p>
+      </div>
+      <span class="asof-badge">Snapshot · ${s.as_of}</span>
+    </div>
+    <ul class="state-stats">${statsHtml}</ul>
+    <p class="state-foot"><a href="${s.docket_url}" target="_blank" rel="noopener">${s.docket_label}</a> · ${s.source_note}</p>
+  `;
+  stateCards.appendChild(card);
+});
+
+// ---- PJM supporting section ----
+const trend = data.wait_time_trend;
+const first = trend[0], last = trend[trend.length-1];
+document.getElementById('latestWait').textContent = last.median_wait_years.toFixed(1) + ' yr';
+document.getElementById('latestYear').textContent = last.entry_year;
+document.getElementById('firstYear').textContent = first.entry_year;
+const delta = (last.median_wait_years - first.median_wait_years);
+document.getElementById('deltaVal').textContent = (delta>=0?'+':'') + delta.toFixed(1) + ' yr';
+
+document.getElementById('totalGW').textContent = data.headline.total_active_gw.toFixed(1) + ' GW';
+document.getElementById('dcShare').textContent = 'Active queue · ' + data.headline.data_center_share_pct + '% likely data center';
+
+const ctx = document.getElementById('waitChart');
+new Chart(ctx, {
+  type: 'line',
+  data: {
+    labels: trend.map(r => r.entry_year),
+    datasets: [{
+      data: trend.map(r => r.median_wait_years),
+      borderColor: '#2a78d6',
+      backgroundColor: 'rgba(42,120,214,0.06)',
+      pointBackgroundColor: trend.map(r => r.low_confidence ? '#ffffff' : '#2a78d6'),
+      pointBorderColor: '#2a78d6',
+      pointBorderWidth: 2,
+      pointRadius: trend.map(r => r.low_confidence ? 4 : 3),
+      pointHoverRadius: 5,
+      borderWidth: 2,
+      fill: true,
+      tension: 0.3,
+    }]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: {
+      legend: { display: false },
+      tooltip: {
+        backgroundColor: '#0b0b0b', titleColor: '#ffffff', bodyColor: '#e7e6e1',
+        borderWidth: 0, padding: 10, cornerRadius: 6,
+        titleFont: { family: 'IBM Plex Sans' }, bodyFont: { family: 'IBM Plex Sans' },
+        callbacks: {
+          label: (c) => {
+            const r = trend[c.dataIndex];
+            return `${r.median_wait_years} yr median · n=${r.n_resolved}` + (r.low_confidence ? ' (low confidence)' : '');
+          }
+        }
+      }
+    },
+    scales: {
+      x: { grid: { display: false }, ticks: { color: '#96948c', font: { family: 'IBM Plex Sans', size: 11 } } },
+      y: { grid: { color: '#e7e6e1' }, ticks: { color: '#96948c', font: { family: 'IBM Plex Sans', size: 11 } } }
+    }
+  }
+});
+
+} // end render()
+
+loadData();
+</script>
+</body>
+</html>

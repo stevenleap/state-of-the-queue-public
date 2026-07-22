@@ -1,0 +1,632 @@
+[
+  {
+    "queue_id": "A01",
+    "predicted_sector": "Other",
+    "confidence": 0.3,
+    "reasoning": "Project name is a generic substation/voltage reference with no load-type clue; capacity is large but location is not a known data center hub.",
+    "signals": [
+      "generic substation name",
+      "large capacity",
+      "not in known data center corridor"
+    ]
+  },
+  {
+    "queue_id": "A02",
+    "predicted_sector": "Other",
+    "confidence": 0.2,
+    "reasoning": "Name includes 'Oil CT' indicating a combustion turbine generator, likely a generation project rather than a load interconnection.",
+    "signals": [
+      "generation indicator (Oil CT)",
+      "generic name",
+      "large capacity"
+    ]
+  },
+  {
+    "queue_id": "A03",
+    "predicted_sector": "Other",
+    "confidence": 0.3,
+    "reasoning": "Name is a generic substation/voltage reference; capacity is moderate and location is not a known data center hub.",
+    "signals": [
+      "generic substation name",
+      "moderate capacity",
+      "not in known data center corridor"
+    ]
+  },
+  {
+    "queue_id": "A04",
+    "predicted_sector": "Other",
+    "confidence": 0.3,
+    "reasoning": "Same generic name as A03 but larger capacity; no load-type clue and location not a known data center hub.",
+    "signals": [
+      "generic substation name",
+      "large capacity",
+      "not in known data center corridor"
+    ]
+  },
+  {
+    "queue_id": "A05",
+    "predicted_sector": "Other",
+    "confidence": 0.3,
+    "reasoning": "Name is a county name with no load-type clue; capacity is large but Bergen County is not a known data center corridor.",
+    "signals": [
+      "generic location name",
+      "large capacity",
+      "not in known data center corridor"
+    ]
+  },
+  {
+    "queue_id": "A06",
+    "predicted_sector": "Other",
+    "confidence": 0.3,
+    "reasoning": "Name is a town name with no load-type clue; capacity is large but Gloucester County is not a known data center corridor.",
+    "signals": [
+      "generic location name",
+      "large capacity",
+      "not in known data center corridor"
+    ]
+  },
+  {
+    "queue_id": "A07",
+    "predicted_sector": "Other",
+    "confidence": 0.2,
+    "reasoning": "Name includes '120 MW' and is a generic substation reference; capacity is moderate and Montgomery County MD is not a major data center hub.",
+    "signals": [
+      "generic substation name",
+      "moderate capacity",
+      "not in known data center corridor"
+    ]
+  },
+  {
+    "queue_id": "A08",
+    "predicted_sector": "Other",
+    "confidence": 0.2,
+    "reasoning": "Name is a generic substation/voltage reference; small capacity suggests a distribution-level project, not a large load.",
+    "signals": [
+      "generic substation name",
+      "small capacity"
+    ]
+  },
+  {
+    "queue_id": "A09",
+    "predicted_sector": "Other",
+    "confidence": 0.2,
+    "reasoning": "Same generic name as A08; small capacity suggests a distribution-level project, not a large load.",
+    "signals": [
+      "generic substation name",
+      "small capacity"
+    ]
+  },
+  {
+    "queue_id": "A10",
+    "predicted_sector": "Other",
+    "confidence": 0.2,
+    "reasoning": "Name is a generic substation/voltage reference; very small capacity suggests a distribution-level project.",
+    "signals": [
+      "generic substation name",
+      "very small capacity"
+    ]
+  },
+  {
+    "queue_id": "A11",
+    "predicted_sector": "Other",
+    "confidence": 0.3,
+    "reasoning": "Name is a generic substation/voltage reference; capacity is large but Luzerne County is not a known data center corridor.",
+    "signals": [
+      "generic substation name",
+      "large capacity",
+      "not in known data center corridor"
+    ]
+  },
+  {
+    "queue_id": "A12",
+    "predicted_sector": "Other",
+    "confidence": 0.3,
+    "reasoning": "Name is a generic substation/voltage reference; capacity is large but Northampton County is not a known data center corridor.",
+    "signals": [
+      "generic substation name",
+      "large capacity",
+      "not in known data center corridor"
+    ]
+  },
+  {
+    "queue_id": "A13",
+    "predicted_sector": "Other",
+    "confidence": 0.3,
+    "reasoning": "Name is a generic substation/voltage reference; capacity is very large but Gloucester County is not a known data center corridor.",
+    "signals": [
+      "generic substation name",
+      "very large capacity",
+      "not in known data center corridor"
+    ]
+  },
+  {
+    "queue_id": "A14",
+    "predicted_sector": "Other",
+    "confidence": 0.3,
+    "reasoning": "Name is a town name with no load-type clue; capacity is large but Middlesex County is not a known data center corridor.",
+    "signals": [
+      "generic location name",
+      "large capacity",
+      "not in known data center corridor"
+    ]
+  },
+  {
+    "queue_id": "A15",
+    "predicted_sector": "Other",
+    "confidence": 0.3,
+    "reasoning": "Name is a generic substation/voltage reference; capacity is very large but Middlesex County is not a known data center corridor.",
+    "signals": [
+      "generic substation name",
+      "very large capacity",
+      "not in known data center corridor"
+    ]
+  },
+  {
+    "queue_id": "A16",
+    "predicted_sector": "Data Center",
+    "confidence": 0.7,
+    "reasoning": "Large capacity (800 MW) and generic project name 'Eagle Point' in Gloucester County, NJ, which is near data center hubs like Northern Virginia and has seen data center interest, though not a top-tier corridor.",
+    "signals": [
+      "large capacity (800 MW)",
+      "generic codename",
+      "county near known data center region"
+    ]
+  },
+  {
+    "queue_id": "A17",
+    "predicted_sector": "Data Center",
+    "confidence": 0.75,
+    "reasoning": "300 MW capacity and generic name 'Linden' in Union County, NJ, which is part of the New York metro area with growing data center activity.",
+    "signals": [
+      "large capacity (300 MW)",
+      "generic codename",
+      "county in data center-active region"
+    ]
+  },
+  {
+    "queue_id": "A18",
+    "predicted_sector": "Data Center",
+    "confidence": 0.7,
+    "reasoning": "557 MW capacity and generic name 'North Temple' in Berks County, PA, which is not a major data center hub but the large load suggests a hyperscale project.",
+    "signals": [
+      "large capacity (557 MW)",
+      "generic codename"
+    ]
+  },
+  {
+    "queue_id": "A19",
+    "predicted_sector": "Data Center",
+    "confidence": 0.7,
+    "reasoning": "521 MW capacity and generic name 'Eddystone' in Delaware County, PA, near Philadelphia, which has some data center development, though not a primary corridor.",
+    "signals": [
+      "large capacity (521 MW)",
+      "generic codename",
+      "county near urban data center market"
+    ]
+  },
+  {
+    "queue_id": "A20",
+    "predicted_sector": "Other",
+    "confidence": 0.6,
+    "reasoning": "Small capacity (10 MW) and generic name 'Juniata' in Dauphin County, PA, with no distinguishing features for data center or other specific load.",
+    "signals": [
+      "small capacity (10 MW)",
+      "generic codename"
+    ]
+  },
+  {
+    "queue_id": "A21",
+    "predicted_sector": "Data Center",
+    "confidence": 0.7,
+    "reasoning": "725 MW capacity and generic name 'Chichester' in Philadelphia County, PA, which is a major urban area with data center demand, though not a top-tier cluster.",
+    "signals": [
+      "large capacity (725 MW)",
+      "generic codename",
+      "county in major metro area"
+    ]
+  },
+  {
+    "queue_id": "A22",
+    "predicted_sector": "Data Center",
+    "confidence": 0.8,
+    "reasoning": "750 MW capacity and generic name 'Hudson' in Hudson County, NJ, which is part of the New York metro area with significant data center activity.",
+    "signals": [
+      "large capacity (750 MW)",
+      "generic codename",
+      "county in major data center region"
+    ]
+  },
+  {
+    "queue_id": "A23",
+    "predicted_sector": "Data Center",
+    "confidence": 0.65,
+    "reasoning": "257 MW capacity and generic name 'New Castle' in New Castle County, DE, which is near data center hubs like Northern Virginia, though Delaware itself is less prominent.",
+    "signals": [
+      "large capacity (257 MW)",
+      "generic codename",
+      "county near data center corridor"
+    ]
+  },
+  {
+    "queue_id": "A24",
+    "predicted_sector": "Data Center",
+    "confidence": 0.75,
+    "reasoning": "725 MW capacity and generic name 'South River' in Middlesex County, NJ, which is part of the New York metro area with growing data center development.",
+    "signals": [
+      "large capacity (725 MW)",
+      "generic codename",
+      "county in data center-active region"
+    ]
+  },
+  {
+    "queue_id": "A25",
+    "predicted_sector": "Data Center",
+    "confidence": 0.75,
+    "reasoning": "1000 MW capacity and generic name 'Hosensack' in Northampton County, PA, which is near the Lehigh Valley data center cluster, a known emerging hub.",
+    "signals": [
+      "very large capacity (1000 MW)",
+      "generic codename",
+      "county near known data center cluster"
+    ]
+  },
+  {
+    "queue_id": "A26",
+    "predicted_sector": "Other",
+    "confidence": 0.5,
+    "reasoning": "No capacity provided and generic name 'Linden' in Union County, NJ, making it impossible to assess load size or intent.",
+    "signals": [
+      "missing capacity",
+      "generic codename"
+    ]
+  },
+  {
+    "queue_id": "A27",
+    "predicted_sector": "Data Center",
+    "confidence": 0.7,
+    "reasoning": "515 MW capacity and generic name 'Passyunk' in Philadelphia County, PA, a major urban area with data center demand, though not a top-tier cluster.",
+    "signals": [
+      "large capacity (515 MW)",
+      "generic codename",
+      "county in major metro area"
+    ]
+  },
+  {
+    "queue_id": "A28",
+    "predicted_sector": "Other",
+    "confidence": 0.6,
+    "reasoning": "98 MW capacity and generic name 'Dover' in Kent County, DE, which is not a known data center hub and the capacity is moderate, not clearly indicative of any specific load.",
+    "signals": [
+      "moderate capacity (98 MW)",
+      "generic codename",
+      "county not in major data center region"
+    ]
+  },
+  {
+    "queue_id": "A29",
+    "predicted_sector": "Data Center",
+    "confidence": 0.7,
+    "reasoning": "465 MW capacity and generic name 'Colora Tap' in Cecil County, MD, which is near the Northern Virginia data center hub, the world's largest, making a hyperscale project likely.",
+    "signals": [
+      "large capacity (465 MW)",
+      "generic codename",
+      "county near major data center hub"
+    ]
+  },
+  {
+    "queue_id": "A30",
+    "predicted_sector": "Data Center",
+    "confidence": 0.7,
+    "reasoning": "465 MW capacity and generic name 'Colora Tap' in Cecil County, MD, near the Northern Virginia data center hub, consistent with a large data center project.",
+    "signals": [
+      "large capacity (465 MW)",
+      "generic codename",
+      "county near major data center hub"
+    ]
+  },
+  {
+    "queue_id": "A31",
+    "predicted_sector": "Other",
+    "confidence": 0.6,
+    "reasoning": "Small capacity (44 MW) and generic substation name suggest a typical utility or distribution project, not a data center.",
+    "signals": [
+      "low capacity",
+      "generic substation name"
+    ]
+  },
+  {
+    "queue_id": "A32",
+    "predicted_sector": "Other",
+    "confidence": 0.7,
+    "reasoning": "Very small capacity (14 MW) and simple name indicate a minor grid upgrade or local load, not a data center.",
+    "signals": [
+      "very low capacity",
+      "generic name"
+    ]
+  },
+  {
+    "queue_id": "A33",
+    "predicted_sector": "Other",
+    "confidence": 0.7,
+    "reasoning": "Same as Montour #1, very small capacity and generic name point to a small utility project.",
+    "signals": [
+      "very low capacity",
+      "generic name"
+    ]
+  },
+  {
+    "queue_id": "A34",
+    "predicted_sector": "Other",
+    "confidence": 0.7,
+    "reasoning": "Small capacity (14 MW) and substation name suggest a routine grid interconnection, not a data center.",
+    "signals": [
+      "low capacity",
+      "substation name"
+    ]
+  },
+  {
+    "queue_id": "A35",
+    "predicted_sector": "Other",
+    "confidence": 0.7,
+    "reasoning": "Very small capacity (10 MW) and distribution-level voltage indicate a local utility project.",
+    "signals": [
+      "very low capacity",
+      "distribution voltage"
+    ]
+  },
+  {
+    "queue_id": "A36",
+    "predicted_sector": "Other",
+    "confidence": 0.5,
+    "reasoning": "Large capacity (830 MW) but generic substation name and no data center corridor signal; could be a generation or transmission project.",
+    "signals": [
+      "large capacity",
+      "generic substation name",
+      "no data center cluster"
+    ]
+  },
+  {
+    "queue_id": "A37",
+    "predicted_sector": "Other",
+    "confidence": 0.5,
+    "reasoning": "Large capacity (749 MW) but generic substation name and county not a known data center hub; likely a transmission or generation project.",
+    "signals": [
+      "large capacity",
+      "generic substation name",
+      "no data center cluster"
+    ]
+  },
+  {
+    "queue_id": "A38",
+    "predicted_sector": "Other",
+    "confidence": 0.5,
+    "reasoning": "Large capacity (765 MW) but generic substation name and rural county suggest a transmission or generation project.",
+    "signals": [
+      "large capacity",
+      "generic substation name",
+      "no data center cluster"
+    ]
+  },
+  {
+    "queue_id": "A39",
+    "predicted_sector": "Other",
+    "confidence": 0.7,
+    "reasoning": "Moderate capacity (73 MW) and substation name indicate a typical grid upgrade, not a data center.",
+    "signals": [
+      "moderate capacity",
+      "substation name"
+    ]
+  },
+  {
+    "queue_id": "A40",
+    "predicted_sector": "Other",
+    "confidence": 0.5,
+    "reasoning": "Very large capacity (1271 MW) but name references a nuclear plant (TMI), likely a generation interconnection, not a data center.",
+    "signals": [
+      "very large capacity",
+      "nuclear plant reference"
+    ]
+  },
+  {
+    "queue_id": "A41",
+    "predicted_sector": "Other",
+    "confidence": 0.5,
+    "reasoning": "Large capacity (765 MW) and same TMI reference as above, consistent with generation interconnection.",
+    "signals": [
+      "large capacity",
+      "nuclear plant reference"
+    ]
+  },
+  {
+    "queue_id": "A42",
+    "predicted_sector": "Other",
+    "confidence": 0.5,
+    "reasoning": "Large capacity (449 MW) but generic substation name and county not a known data center cluster; likely transmission or generation.",
+    "signals": [
+      "large capacity",
+      "generic substation name",
+      "no data center cluster"
+    ]
+  },
+  {
+    "queue_id": "A43",
+    "predicted_sector": "Other",
+    "confidence": 0.5,
+    "reasoning": "Large capacity (472 MW) but generic substation name and county not a data center hub; likely a transmission project.",
+    "signals": [
+      "large capacity",
+      "generic substation name",
+      "no data center cluster"
+    ]
+  },
+  {
+    "queue_id": "A44",
+    "predicted_sector": "Other",
+    "confidence": 0.5,
+    "reasoning": "Large capacity (402 MW) but generic substation name and rural county suggest a transmission or generation project.",
+    "signals": [
+      "large capacity",
+      "generic substation name",
+      "no data center cluster"
+    ]
+  },
+  {
+    "queue_id": "A45",
+    "predicted_sector": "Other",
+    "confidence": 0.5,
+    "reasoning": "Large capacity (752 MW) but name references a nuclear plant (Oyster Creek), likely a generation interconnection.",
+    "signals": [
+      "large capacity",
+      "nuclear plant reference"
+    ]
+  },
+  {
+    "queue_id": "A46",
+    "predicted_sector": "Other",
+    "confidence": 0.3,
+    "reasoning": "The project name is generic and capacity is moderate, but no strong signals point to a specific end-use.",
+    "signals": [
+      "generic name",
+      "moderate capacity"
+    ]
+  },
+  {
+    "queue_id": "A47",
+    "predicted_sector": "Data Center",
+    "confidence": 0.7,
+    "reasoning": "Very large capacity (740 MW) and generic project name are consistent with hyperscale data center development, though Harford County is not a major known data center hub.",
+    "signals": [
+      "very large capacity",
+      "generic name"
+    ]
+  },
+  {
+    "queue_id": "A48",
+    "predicted_sector": "Data Center",
+    "confidence": 0.7,
+    "reasoning": "Very large capacity (750 MW) and generic name suggest a data center, but Union County, NJ is not a well-known data center corridor.",
+    "signals": [
+      "very large capacity",
+      "generic name"
+    ]
+  },
+  {
+    "queue_id": "A49",
+    "predicted_sector": "Data Center",
+    "confidence": 0.7,
+    "reasoning": "Very large capacity (750 MW) and generic name point to a data center, though Bergen County is not a major data center cluster.",
+    "signals": [
+      "very large capacity",
+      "generic name"
+    ]
+  },
+  {
+    "queue_id": "A50",
+    "predicted_sector": "Other",
+    "confidence": 0.2,
+    "reasoning": "No capacity provided and a generic location name offer insufficient signals for classification.",
+    "signals": [
+      "missing capacity",
+      "generic name"
+    ]
+  },
+  {
+    "queue_id": "A51",
+    "predicted_sector": "Other",
+    "confidence": 0.3,
+    "reasoning": "Moderate capacity (258 MW) and a generic city name provide no clear indication of end-use.",
+    "signals": [
+      "moderate capacity",
+      "generic name"
+    ]
+  },
+  {
+    "queue_id": "A52",
+    "predicted_sector": "Other",
+    "confidence": 0.2,
+    "reasoning": "No capacity and a generic location name yield insufficient information for classification.",
+    "signals": [
+      "missing capacity",
+      "generic name"
+    ]
+  },
+  {
+    "queue_id": "A53",
+    "predicted_sector": "Other",
+    "confidence": 0.3,
+    "reasoning": "Small capacity (25 MW) and a generic name are not distinctive of any particular load type.",
+    "signals": [
+      "small capacity",
+      "generic name"
+    ]
+  },
+  {
+    "queue_id": "A54",
+    "predicted_sector": "Other",
+    "confidence": 0.3,
+    "reasoning": "Small capacity (45 MW) and a generic name referencing a location provide no strong signals.",
+    "signals": [
+      "small capacity",
+      "generic name"
+    ]
+  },
+  {
+    "queue_id": "A55",
+    "predicted_sector": "Data Center",
+    "confidence": 0.7,
+    "reasoning": "Large capacity (500 MW) and generic name are consistent with a data center, though Ocean County is not a known data center hub.",
+    "signals": [
+      "large capacity",
+      "generic name"
+    ]
+  },
+  {
+    "queue_id": "A56",
+    "predicted_sector": "Data Center",
+    "confidence": 0.7,
+    "reasoning": "Large capacity (500 MW) and generic name suggest a data center, but Salem County is not a major data center corridor.",
+    "signals": [
+      "large capacity",
+      "generic name"
+    ]
+  },
+  {
+    "queue_id": "A57",
+    "predicted_sector": "Other",
+    "confidence": 0.3,
+    "reasoning": "Small capacity (30 MW) and a generic name offer no clear signals for classification.",
+    "signals": [
+      "small capacity",
+      "generic name"
+    ]
+  },
+  {
+    "queue_id": "A58",
+    "predicted_sector": "Data Center",
+    "confidence": 0.7,
+    "reasoning": "Large capacity (450 MW) and generic name point to a data center, though Prince George's County is not a well-known data center cluster.",
+    "signals": [
+      "large capacity",
+      "generic name"
+    ]
+  },
+  {
+    "queue_id": "A59",
+    "predicted_sector": "Other",
+    "confidence": 0.2,
+    "reasoning": "Zero capacity and a generic name provide no meaningful signals for classification.",
+    "signals": [
+      "zero capacity",
+      "generic name"
+    ]
+  },
+  {
+    "queue_id": "A59_W00",
+    "predicted_sector": "Other",
+    "confidence": 0.3,
+    "reasoning": "Moderate capacity (88 MW) and a generic name are not distinctive of any specific load type.",
+    "signals": [
+      "moderate capacity",
+      "generic name"
+    ]
+  }
+]

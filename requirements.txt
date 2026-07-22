@@ -1,0 +1,17 @@
+pandas>=2.0
+requests>=2.28
+python-dotenv  # optional, only if you want .env file support for STEEL_API_KEY / TAVILY_API_KEY / etc
+gridstatus
+openai        # only needed for llm_sector_matcher.py --provider deepseek (DeepSeek's API is OpenAI-compatible)
+anthropic     # only needed for llm_sector_matcher.py --provider anthropic
+pdfplumber    # only needed for ercot_large_load_tracker.py's PDF text extraction
+truststore    # optional but recommended -- fixes a real missing-intermediate-cert
+              # issue on interchange.puc.texas.gov that certifi's bundle alone
+              # doesn't resolve; makes `requests` use the OS trust store instead
+google-genai  # only needed for ercot_large_load_tracker.py's vision fallback --
+              # Gemini, not DeepSeek/Claude, since DeepSeek's public API has no
+              # vision input at all and Anthropic needs a funded key
+fastapi       # server.py -- the live demo backend
+uvicorn       # ASGI server that runs server.py, both locally and in production
+sse-starlette # server-sent events for server.py's live /api/run stream
+

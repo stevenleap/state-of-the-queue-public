@@ -1,0 +1,139 @@
+{
+  "generated": "2026-07-18",
+  "source_file": "sample_pjm_queue.csv",
+  "sectors_source": "none (Sector column defaulted/from input file)",
+  "headline": {
+    "total_active_gw": 38.3,
+    "data_center_gw": 17.25,
+    "data_center_share_pct": 45.0,
+    "n_active_projects": 172
+  },
+  "wait_time_trend": [
+    {
+      "entry_year": 2016,
+      "median_wait_years": 1.91,
+      "n_resolved": 18,
+      "low_confidence": false
+    },
+    {
+      "entry_year": 2017,
+      "median_wait_years": 2.21,
+      "n_resolved": 6,
+      "low_confidence": false
+    },
+    {
+      "entry_year": 2018,
+      "median_wait_years": 2.18,
+      "n_resolved": 11,
+      "low_confidence": false
+    },
+    {
+      "entry_year": 2019,
+      "median_wait_years": 2.72,
+      "n_resolved": 3,
+      "low_confidence": true
+    },
+    {
+      "entry_year": 2020,
+      "median_wait_years": 2.73,
+      "n_resolved": 11,
+      "low_confidence": false
+    },
+    {
+      "entry_year": 2021,
+      "median_wait_years": 3.17,
+      "n_resolved": 8,
+      "low_confidence": false
+    },
+    {
+      "entry_year": 2022,
+      "median_wait_years": 3.43,
+      "n_resolved": 8,
+      "low_confidence": false
+    }
+  ],
+  "withdrawal_rate": [
+    {
+      "entry_year": 2016,
+      "withdrawal_rate": 0.125,
+      "n_total": 24
+    },
+    {
+      "entry_year": 2017,
+      "withdrawal_rate": 0.28,
+      "n_total": 25
+    },
+    {
+      "entry_year": 2018,
+      "withdrawal_rate": 0.154,
+      "n_total": 26
+    },
+    {
+      "entry_year": 2019,
+      "withdrawal_rate": 0.5,
+      "n_total": 16
+    },
+    {
+      "entry_year": 2020,
+      "withdrawal_rate": 0.2,
+      "n_total": 20
+    },
+    {
+      "entry_year": 2021,
+      "withdrawal_rate": 0.348,
+      "n_total": 23
+    },
+    {
+      "entry_year": 2022,
+      "withdrawal_rate": 0.133,
+      "n_total": 15
+    },
+    {
+      "entry_year": 2023,
+      "withdrawal_rate": 0.158,
+      "n_total": 19
+    },
+    {
+      "entry_year": 2024,
+      "withdrawal_rate": 0.038,
+      "n_total": 26
+    },
+    {
+      "entry_year": 2025,
+      "withdrawal_rate": 0.0,
+      "n_total": 18
+    }
+  ],
+  "top_chokepoints": [
+    {
+      "County": "Will",
+      "State": "IL",
+      "Transmission Owner": "ComEd",
+      "n_requests": 18
+    },
+    {
+      "County": "Montgomery",
+      "State": "PA",
+      "Transmission Owner": "PECO",
+      "n_requests": 17
+    },
+    {
+      "County": "Hendricks",
+      "State": "IN",
+      "Transmission Owner": "AEP",
+      "n_requests": 17
+    },
+    {
+      "County": "Mercer",
+      "State": "NJ",
+      "Transmission Owner": "PSE&G",
+      "n_requests": 17
+    },
+    {
+      "County": "Frederick",
+      "State": "MD",
+      "Transmission Owner": "BGE",
+      "n_requests": 16
+    }
+  ]
+}

@@ -1,0 +1,584 @@
+[
+  {
+    "queue_id": "A16",
+    "from_cache": false,
+    "company_name": "Gloucester Data Center - Gloucester Township",
+    "confidence": "candidate",
+    "entity_clusters": [
+      {
+        "entity_name": "Gloucester Data Center - Gloucester Township",
+        "sources": [
+          "web_news",
+          "contractor_announcements"
+        ],
+        "has_high_confidence": false
+      },
+      {
+        "entity_name": "MID-ATLANTIC AREA COUNCIL",
+        "sources": [
+          "ferc_elibrary"
+        ],
+        "has_high_confidence": true
+      },
+      {
+        "entity_name": "[PDF] Completed and Certified Incentive Projects - NJEDA",
+        "sources": [
+          "incentive_announcements"
+        ],
+        "has_high_confidence": false
+      },
+      {
+        "entity_name": "Dominion Virginia Power's and Dominion North Carolina ...",
+        "sources": [
+          "utility_irp"
+        ],
+        "has_high_confidence": false
+      }
+    ],
+    "unnamed_hit_count": 0,
+    "evidence": [
+      {
+        "source": "sec_edgar",
+        "hit": false,
+        "n_results": 0
+      },
+      {
+        "source": "ferc_elibrary",
+        "hit": true,
+        "n_results": 29,
+        "docket_numbers": [],
+        "description": "PJM Interconnection, LLC on behalf of Mid-Atlantic Area Council's CD #2 containing FERC Form 715, Annual Transmission Planning and Evaluation Report. Parts 1 - 6.",
+        "entity_name": "MID-ATLANTIC AREA COUNCIL",
+        "entity_confidence": "high"
+      },
+      {
+        "source": "web_news",
+        "hit": true,
+        "n_results": 5,
+        "top_url": "https://glotwp.com/economic-development/gloucester-data-center",
+        "top_title": "Gloucester Data Center - Gloucester Township",
+        "entity_name": "Gloucester Data Center - Gloucester Township",
+        "entity_confidence": "low"
+      },
+      {
+        "source": "incentive_announcements",
+        "hit": true,
+        "n_results": 5,
+        "top_url": "https://www.njeda.gov/wp-content/uploads/2023/09/Comp-and-Cert-20230911.pdf",
+        "top_title": "[PDF] Completed and Certified Incentive Projects - NJEDA",
+        "entity_name": "[PDF] Completed and Certified Incentive Projects - NJEDA",
+        "entity_confidence": "low"
+      },
+      {
+        "source": "utility_irp",
+        "hit": true,
+        "n_results": 5,
+        "top_url": "https://www.scc.virginia.gov/docketsearch/DOCS/38jb01!.PDF",
+        "top_title": "Dominion Virginia Power's and Dominion North Carolina ...",
+        "entity_name": "Dominion Virginia Power's and Dominion North Carolina ...",
+        "entity_confidence": "low"
+      },
+      {
+        "source": "contractor_announcements",
+        "hit": true,
+        "n_results": 5,
+        "top_url": "https://glotwp.com/economic-development/gloucester-data-center",
+        "top_title": "Gloucester Data Center",
+        "entity_name": "Gloucester Data Center",
+        "entity_confidence": "low"
+      },
+      {
+        "source": "air_permits",
+        "hit": false,
+        "note": "NOT YET BUILT for state=NJ. VA is implemented as the template."
+      },
+      {
+        "source": "county_permits",
+        "hit": false,
+        "note": "NOT YET BUILT for Gloucester, NJ. No shared API across counties -- add one entry per county, prioritized by your real top_chokepoints once you have live PJM data."
+      },
+      {
+        "source": "puc_dockets",
+        "hit": false,
+        "note": "NOT YET BUILT for state=NJ. Registry empty -- same pattern as county_permits, add entries as researched."
+      },
+      {
+        "source": "property_records",
+        "hit": false,
+        "note": "NOT YET BUILT for Gloucester, NJ. Registry empty -- same pattern as county_permits."
+      }
+    ]
+  },
+  {
+    "queue_id": "A17",
+    "from_cache": false,
+    "company_name": "Carroll County Energy LLC",
+    "confidence": "conflicting",
+    "entity_clusters": [
+      {
+        "entity_name": "Carroll County Energy LLC",
+        "sources": [
+          "ferc_elibrary"
+        ],
+        "has_high_confidence": true
+      },
+      {
+        "entity_name": "Linden 230kV \u2014 Union, New Jersey",
+        "sources": [
+          "web_news"
+        ],
+        "has_high_confidence": false
+      },
+      {
+        "entity_name": "Timothy Sullivan Chief Executive Officer DATE: April 13, ...",
+        "sources": [
+          "incentive_announcements"
+        ],
+        "has_high_confidence": false
+      },
+      {
+        "entity_name": "PSEG Linden generating station - Global Energy Monitor",
+        "sources": [
+          "utility_irp"
+        ],
+        "has_high_confidence": false
+      },
+      {
+        "entity_name": "Construction Jobs, Employment in Linden, NJ",
+        "sources": [
+          "contractor_announcements"
+        ],
+        "has_high_confidence": false
+      }
+    ],
+    "unnamed_hit_count": 0,
+    "evidence": [
+      {
+        "source": "sec_edgar",
+        "hit": false,
+        "n_results": 0
+      },
+      {
+        "source": "ferc_elibrary",
+        "hit": true,
+        "n_results": 157,
+        "docket_numbers": [
+          "EC25-123-000"
+        ],
+        "description": "Joint Application for Authorization Under Section 203 of the Federal Power Act of Carroll County Energy LLC, et al., under EC25-123.",
+        "entity_name": "Carroll County Energy LLC",
+        "entity_confidence": "high"
+      },
+      {
+        "source": "web_news",
+        "hit": true,
+        "n_results": 5,
+        "top_url": "https://cleanview.co/power-projects/planned/natural-gas-power-plants/ohio/A01-722_linden_230kv/linden-230kv",
+        "top_title": "Linden 230kV \u2014 Union, New Jersey",
+        "entity_name": "Linden 230kV \u2014 Union, New Jersey",
+        "entity_confidence": "low"
+      },
+      {
+        "source": "incentive_announcements",
+        "hit": true,
+        "n_results": 2,
+        "top_url": "https://www.njeda.gov/wp-content/uploads/2022/05/April-13-2022-EDA-Board-Meeting_small.pdf",
+        "top_title": "Timothy Sullivan Chief Executive Officer DATE: April 13, ...",
+        "entity_name": "Timothy Sullivan Chief Executive Officer DATE: April 13, ...",
+        "entity_confidence": "low"
+      },
+      {
+        "source": "utility_irp",
+        "hit": true,
+        "n_results": 5,
+        "top_url": "https://www.gem.wiki/PSEG_Linden_generating_station",
+        "top_title": "PSEG Linden generating station - Global Energy Monitor",
+        "entity_name": "PSEG Linden generating station - Global Energy Monitor",
+        "entity_confidence": "low"
+      },
+      {
+        "source": "contractor_announcements",
+        "hit": true,
+        "n_results": 5,
+        "top_url": "https://www.indeed.com/q-construction-l-linden,-nj-jobs.html",
+        "top_title": "Construction Jobs, Employment in Linden, NJ",
+        "entity_name": "Construction Jobs, Employment in Linden, NJ",
+        "entity_confidence": "low"
+      },
+      {
+        "source": "air_permits",
+        "hit": false,
+        "note": "NOT YET BUILT for state=NJ. VA is implemented as the template."
+      },
+      {
+        "source": "county_permits",
+        "hit": false,
+        "note": "NOT YET BUILT for Union, NJ. No shared API across counties -- add one entry per county, prioritized by your real top_chokepoints once you have live PJM data."
+      },
+      {
+        "source": "puc_dockets",
+        "hit": false,
+        "note": "NOT YET BUILT for state=NJ. Registry empty -- same pattern as county_permits, add entries as researched."
+      },
+      {
+        "source": "property_records",
+        "hit": false,
+        "note": "NOT YET BUILT for Union, NJ. Registry empty -- same pattern as county_permits."
+      }
+    ]
+  },
+  {
+    "queue_id": "A18",
+    "from_cache": false,
+    "company_name": "ADMINISTRATIVE LAW JUDGES",
+    "confidence": "conflicting",
+    "entity_clusters": [
+      {
+        "entity_name": "ADMINISTRATIVE LAW JUDGES",
+        "sources": [
+          "ferc_elibrary"
+        ],
+        "has_high_confidence": true
+      },
+      {
+        "entity_name": "Montour 230 kV \u2014 Montour, PA",
+        "sources": [
+          "web_news"
+        ],
+        "has_high_confidence": false
+      },
+      {
+        "entity_name": "https://dced.pa.gov/wp-content/plugins/web-service...",
+        "sources": [
+          "incentive_announcements"
+        ],
+        "has_high_confidence": false
+      },
+      {
+        "entity_name": "2026-27 PLANNING CYCLE - WestConnect Documents",
+        "sources": [
+          "utility_irp"
+        ],
+        "has_high_confidence": false
+      },
+      {
+        "entity_name": "Meta Temple Data Center - JE Dunn Construction",
+        "sources": [
+          "contractor_announcements"
+        ],
+        "has_high_confidence": false
+      }
+    ],
+    "unnamed_hit_count": 0,
+    "evidence": [
+      {
+        "source": "sec_edgar",
+        "hit": false,
+        "n_results": 0
+      },
+      {
+        "source": "ferc_elibrary",
+        "hit": true,
+        "n_results": 49,
+        "docket_numbers": [
+          "ER24-254-002"
+        ],
+        "description": "Certification of Initial Decision and Official Record in Southwest Power Pool, Inc. under Docket No. ER24-254-002 (REJECTED EXHIBITS)",
+        "entity_name": "ADMINISTRATIVE LAW JUDGES",
+        "entity_confidence": "high"
+      },
+      {
+        "source": "web_news",
+        "hit": true,
+        "n_results": 5,
+        "top_url": "https://cleanview.co/planned-solar-projects/PA/AI2-474/montour-230-kv",
+        "top_title": "Montour 230 kV \u2014 Montour, PA",
+        "entity_name": "Montour 230 kV \u2014 Montour, PA",
+        "entity_confidence": "low"
+      },
+      {
+        "source": "incentive_announcements",
+        "hit": true,
+        "n_results": 5,
+        "top_url": "https://dced.pa.gov/wp-content/plugins/web-service/csv/ida_idc.csv",
+        "top_title": "https://dced.pa.gov/wp-content/plugins/web-service...",
+        "entity_name": "https://dced.pa.gov/wp-content/plugins/web-service...",
+        "entity_confidence": "low"
+      },
+      {
+        "source": "utility_irp",
+        "hit": true,
+        "n_results": 5,
+        "top_url": "https://doc.westconnect.com/Documents.aspx?NID=21608&dl=1",
+        "top_title": "2026-27 PLANNING CYCLE - WestConnect Documents",
+        "entity_name": "2026-27 PLANNING CYCLE - WestConnect Documents",
+        "entity_confidence": "low"
+      },
+      {
+        "source": "contractor_announcements",
+        "hit": true,
+        "n_results": 5,
+        "top_url": "https://jedunn.com/projects/meta-temple-data-center",
+        "top_title": "Meta Temple Data Center - JE Dunn Construction",
+        "entity_name": "Meta Temple Data Center - JE Dunn Construction",
+        "entity_confidence": "low"
+      },
+      {
+        "source": "air_permits",
+        "hit": false,
+        "note": "NOT YET BUILT for state=PA. VA is implemented as the template."
+      },
+      {
+        "source": "county_permits",
+        "hit": false,
+        "note": "NOT YET BUILT for Berks, PA. No shared API across counties -- add one entry per county, prioritized by your real top_chokepoints once you have live PJM data."
+      },
+      {
+        "source": "puc_dockets",
+        "hit": false,
+        "note": "NOT YET BUILT for state=PA. Registry empty -- same pattern as county_permits, add entries as researched."
+      },
+      {
+        "source": "property_records",
+        "hit": false,
+        "note": "NOT YET BUILT for Berks, PA. Registry empty -- same pattern as county_permits."
+      }
+    ]
+  },
+  {
+    "queue_id": "A19",
+    "from_cache": false,
+    "company_name": "Empire Generating Co, LLC",
+    "confidence": "conflicting",
+    "entity_clusters": [
+      {
+        "entity_name": "Empire Generating Co, LLC",
+        "sources": [
+          "ferc_elibrary"
+        ],
+        "has_high_confidence": true
+      },
+      {
+        "entity_name": "AI Data Centers coming to Delco? Here's what to expect \u2b07\ufe0f",
+        "sources": [
+          "web_news"
+        ],
+        "has_high_confidence": false
+      },
+      {
+        "entity_name": "https://dced.pa.gov/wp-content/themes/business2015...",
+        "sources": [
+          "incentive_announcements"
+        ],
+        "has_high_confidence": false
+      },
+      {
+        "entity_name": "PECO 2019 Submission of Supplemental Projects for ...",
+        "sources": [
+          "utility_irp"
+        ],
+        "has_high_confidence": false
+      },
+      {
+        "entity_name": "Data Center Cabling Contractor & Server Room PA",
+        "sources": [
+          "contractor_announcements"
+        ],
+        "has_high_confidence": false
+      }
+    ],
+    "unnamed_hit_count": 0,
+    "evidence": [
+      {
+        "source": "sec_edgar",
+        "hit": false,
+        "n_results": 0
+      },
+      {
+        "source": "ferc_elibrary",
+        "hit": true,
+        "n_results": 142,
+        "docket_numbers": [
+          "EC26-114-000"
+        ],
+        "description": "Supplement to 06/18/2026, Application for Authorization Under Section 203 of the Federal Power Act of Empire Generating Co, LLC under EC26-114.",
+        "entity_name": "Empire Generating Co, LLC",
+        "entity_confidence": "high"
+      },
+      {
+        "source": "web_news",
+        "hit": true,
+        "n_results": 5,
+        "top_url": "https://www.facebook.com/100066562607547/posts/breaking-ai-data-centers-coming-to-delco-heres-what-to-expect-%EF%B8%8F/1151970423698367",
+        "top_title": "AI Data Centers coming to Delco? Here's what to expect \u2b07\ufe0f",
+        "entity_name": "AI Data Centers coming to Delco? Here's what to expect \u2b07\ufe0f",
+        "entity_confidence": "low"
+      },
+      {
+        "source": "incentive_announcements",
+        "hit": true,
+        "n_results": 5,
+        "top_url": "https://dced.pa.gov/wp-content/themes/business2015/csv/eitc_eio_list.csv",
+        "top_title": "https://dced.pa.gov/wp-content/themes/business2015...",
+        "entity_name": "https://dced.pa.gov/wp-content/themes/business2015...",
+        "entity_confidence": "low"
+      },
+      {
+        "source": "utility_irp",
+        "hit": true,
+        "n_results": 5,
+        "top_url": "https://www.pjm.com/-/media/DotCom/committees-groups/committees/srrtep-ma/postings/2019/peco-local-plan-submission-for-2019-rtep.pdf",
+        "top_title": "PECO 2019 Submission of Supplemental Projects for ...",
+        "entity_name": "PECO 2019 Submission of Supplemental Projects for ...",
+        "entity_confidence": "low"
+      },
+      {
+        "source": "contractor_announcements",
+        "hit": true,
+        "n_results": 5,
+        "top_url": "https://www.kit-communications.com/data-center-computer-room-contractor-pa.htm",
+        "top_title": "Data Center Cabling Contractor & Server Room PA",
+        "entity_name": "Data Center Cabling Contractor & Server Room PA",
+        "entity_confidence": "low"
+      },
+      {
+        "source": "air_permits",
+        "hit": false,
+        "note": "NOT YET BUILT for state=PA. VA is implemented as the template."
+      },
+      {
+        "source": "county_permits",
+        "hit": false,
+        "note": "NOT YET BUILT for Delaware, PA. No shared API across counties -- add one entry per county, prioritized by your real top_chokepoints once you have live PJM data."
+      },
+      {
+        "source": "puc_dockets",
+        "hit": false,
+        "note": "NOT YET BUILT for state=PA. Registry empty -- same pattern as county_permits, add entries as researched."
+      },
+      {
+        "source": "property_records",
+        "hit": false,
+        "note": "NOT YET BUILT for Delaware, PA. Registry empty -- same pattern as county_permits."
+      }
+    ]
+  },
+  {
+    "queue_id": "A21",
+    "from_cache": false,
+    "company_name": "Empire Generating Co, LLC",
+    "confidence": "conflicting",
+    "entity_clusters": [
+      {
+        "entity_name": "Empire Generating Co, LLC",
+        "sources": [
+          "ferc_elibrary"
+        ],
+        "has_high_confidence": true
+      },
+      {
+        "entity_name": "Philadelphia Data Center - 365 Data Centers",
+        "sources": [
+          "web_news"
+        ],
+        "has_high_confidence": false
+      },
+      {
+        "entity_name": "PA Community Development Financial Institutions (CDFI) Network - PA Department of Community & Economic Development",
+        "sources": [
+          "incentive_announcements"
+        ],
+        "has_high_confidence": false
+      },
+      {
+        "entity_name": "Exelon - Pennsylvania Public Utility Commission",
+        "sources": [
+          "utility_irp"
+        ],
+        "has_high_confidence": false
+      },
+      {
+        "entity_name": "Top 10: Construction Companies Building Data Centres",
+        "sources": [
+          "contractor_announcements"
+        ],
+        "has_high_confidence": false
+      }
+    ],
+    "unnamed_hit_count": 0,
+    "evidence": [
+      {
+        "source": "sec_edgar",
+        "hit": false,
+        "n_results": 0
+      },
+      {
+        "source": "ferc_elibrary",
+        "hit": true,
+        "n_results": 97,
+        "docket_numbers": [
+          "EC26-114-000"
+        ],
+        "description": "Supplement to 06/18/2026, Application for Authorization Under Section 203 of the Federal Power Act of Empire Generating Co, LLC under EC26-114.",
+        "entity_name": "Empire Generating Co, LLC",
+        "entity_confidence": "high"
+      },
+      {
+        "source": "web_news",
+        "hit": true,
+        "n_results": 5,
+        "top_url": "https://365datacenters.com/philadelphia-data-center-2",
+        "top_title": "Philadelphia Data Center - 365 Data Centers",
+        "entity_name": "Philadelphia Data Center - 365 Data Centers",
+        "entity_confidence": "low"
+      },
+      {
+        "source": "incentive_announcements",
+        "hit": true,
+        "n_results": 5,
+        "top_url": "https://dced.pa.gov?p=123117",
+        "top_title": "PA Community Development Financial Institutions (CDFI) Network - PA Department of Community & Economic Development",
+        "entity_name": "PA Community Development Financial Institutions (CDFI) Network - PA Department of Community & Economic Development",
+        "entity_confidence": "low"
+      },
+      {
+        "source": "utility_irp",
+        "hit": true,
+        "n_results": 5,
+        "top_url": "https://www.puc.pa.gov/pcdocs/1099180.pdf",
+        "top_title": "Exelon - Pennsylvania Public Utility Commission",
+        "entity_name": "Exelon - Pennsylvania Public Utility Commission",
+        "entity_confidence": "low"
+      },
+      {
+        "source": "contractor_announcements",
+        "hit": true,
+        "n_results": 5,
+        "top_url": "https://datacentremagazine.com/top10/top-10-construction-companies-building-data-centres",
+        "top_title": "Top 10: Construction Companies Building Data Centres",
+        "entity_name": "Top 10: Construction Companies Building Data Centres",
+        "entity_confidence": "low"
+      },
+      {
+        "source": "air_permits",
+        "hit": false,
+        "note": "NOT YET BUILT for state=PA. VA is implemented as the template."
+      },
+      {
+        "source": "county_permits",
+        "hit": false,
+        "note": "NOT YET BUILT for Philadelphia, PA. No shared API across counties -- add one entry per county, prioritized by your real top_chokepoints once you have live PJM data."
+      },
+      {
+        "source": "puc_dockets",
+        "hit": false,
+        "note": "NOT YET BUILT for state=PA. Registry empty -- same pattern as county_permits, add entries as researched."
+      },
+      {
+        "source": "property_records",
+        "hit": false,
+        "note": "NOT YET BUILT for Philadelphia, PA. Registry empty -- same pattern as county_permits."
+      }
+    ]
+  }
+]

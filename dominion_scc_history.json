@@ -1,0 +1,1716 @@
+{
+  "case_number": "PUR-2026-00011",
+  "matter_no": 146728,
+  "known_doc_ids": [
+    390457,
+    390372,
+    390371,
+    390370,
+    390365,
+    390364,
+    390357,
+    390348,
+    390346,
+    390342,
+    390334,
+    390332,
+    390331,
+    389790,
+    389713,
+    388991,
+    388923,
+    388816,
+    388815,
+    388897,
+    388790,
+    388789,
+    388784,
+    388783,
+    388896,
+    388895,
+    388894,
+    388893,
+    388892,
+    388889,
+    388888,
+    388914,
+    388913,
+    388912,
+    388911,
+    388910,
+    388909,
+    388908,
+    388906,
+    388891,
+    388890,
+    388887,
+    388886,
+    388885,
+    388689,
+    388907,
+    388905,
+    388904,
+    388903,
+    388902,
+    388901,
+    388676,
+    388665,
+    388664,
+    388633,
+    388632,
+    388616,
+    388612,
+    388611,
+    388606,
+    388602,
+    388585,
+    388582,
+    388557,
+    388556,
+    388554,
+    388552,
+    388492,
+    388491,
+    388476,
+    388466,
+    388465,
+    388452,
+    388451,
+    388450,
+    388448,
+    388447,
+    388446,
+    388426,
+    388425,
+    388416,
+    388415,
+    388414,
+    388411,
+    388410,
+    388407,
+    388405,
+    388404,
+    388400,
+    388398,
+    388397,
+    388396,
+    388389,
+    388388,
+    388374,
+    388369,
+    388321,
+    388244,
+    388189,
+    388128,
+    388094,
+    388035,
+    387967,
+    387950,
+    387941,
+    387800,
+    387755,
+    387707,
+    387644,
+    387568,
+    387548,
+    387544,
+    387495,
+    387416,
+    387397,
+    387364,
+    387297,
+    387088,
+    387071,
+    387037,
+    386912,
+    386891,
+    386715,
+    386714,
+    386713
+  ],
+  "runs": [
+    {
+      "run_at": "2026-07-18T20:41:34",
+      "new_documents": [
+        {
+          "DocID": 386715,
+          "Document_Name": "Virginia Electric and Power Company - Application for approval of its large-load connection queue process standards - Direct Testimony of Jacqueline R. Vitiello.",
+          "Date_Filed": "2026-02-02T00:00:00.000",
+          "figures_extraction": "FAILED: No /Root object! - Is this really a PDF?"
+        },
+        {
+          "DocID": 386714,
+          "Document_Name": "Virginia Electric and Power Company - Application for approval of its large-load connection queue process standards - Direct Testimony of R. Matthew Gardner.",
+          "Date_Filed": "2026-02-02T00:00:00.000",
+          "figures_extraction": "FAILED: No /Root object! - Is this really a PDF?"
+        },
+        {
+          "DocID": 386713,
+          "Document_Name": "Virginia Electric and Power Company - Application for approval of its large-load connection queue process standards.",
+          "Date_Filed": "2026-02-02T00:00:00.000",
+          "figures_extraction": "FAILED: No /Root object! - Is this really a PDF?"
+        },
+        {
+          "DocID": 386891,
+          "Document_Name": "Google, LLC - Notice of Participation.",
+          "Date_Filed": "2026-02-10T00:00:00.000"
+        },
+        {
+          "DocID": 386912,
+          "Document_Name": "Microsoft Corporation - Notice of Participation.",
+          "Date_Filed": "2026-02-12T00:00:00.000"
+        },
+        {
+          "DocID": 387037,
+          "Document_Name": "Virginia Electric and Power Company - Order for Notice and Hearing - 02/19/2026.",
+          "Date_Filed": "2026-02-19T00:00:00.000",
+          "figures": {
+            "mw_gw_mentions": [
+              "300 MW",
+              "70,000 MW",
+              "25,000 MW",
+              "24,678 MW",
+              "3,000 MW",
+              "300 MW",
+              "300 MW",
+              "70,000 MW",
+              "25,000 MW",
+              "24,678 MW",
+              "3,000 MW"
+            ],
+            "project_count_mentions": []
+          },
+          "figures_extraction": "ok"
+        },
+        {
+          "DocID": 387071,
+          "Document_Name": "Data Center Coalition - Notice of Participation.",
+          "Date_Filed": "2026-02-20T00:00:00.000"
+        },
+        {
+          "DocID": 387088,
+          "Document_Name": "STACK Infrastructure, Inc. - Notice of Participation.",
+          "Date_Filed": "2026-02-23T00:00:00.000"
+        },
+        {
+          "DocID": 387297,
+          "Document_Name": "Amazon Data Services, Inc. - Notice of Participation.",
+          "Date_Filed": "2026-03-04T00:00:00.000"
+        },
+        {
+          "DocID": 387364,
+          "Document_Name": "Piedmont Environmental Council - Notice of Participation.",
+          "Date_Filed": "2026-03-06T00:00:00.000"
+        },
+        {
+          "DocID": 387416,
+          "Document_Name": "Walmart Inc. - Notice of Participation.",
+          "Date_Filed": "2026-03-09T00:00:00.000"
+        },
+        {
+          "DocID": 387397,
+          "Document_Name": "Old Dominion Electric Cooperative - Notice of Participation.",
+          "Date_Filed": "2026-03-09T00:00:00.000"
+        },
+        {
+          "DocID": 387495,
+          "Document_Name": "The AES Corporation - Notice of Participation.",
+          "Date_Filed": "2026-03-11T00:00:00.000"
+        },
+        {
+          "DocID": 387548,
+          "Document_Name": "Sierra Club and Natural Resources Defense Council - Motion for Admission Pro Hac Vice of Dorothy E. Jaffe.",
+          "Date_Filed": "2026-03-13T00:00:00.000"
+        },
+        {
+          "DocID": 387544,
+          "Document_Name": "Sierra Club and Natural Resources Defense Council  - Notice of Participation as Joint Respondents.",
+          "Date_Filed": "2026-03-13T00:00:00.000"
+        },
+        {
+          "DocID": 387568,
+          "Document_Name": "Virginia Electric and Power Company - Proof of Notice and Service.",
+          "Date_Filed": "2026-03-16T00:00:00.000"
+        },
+        {
+          "DocID": 387644,
+          "Document_Name": "Virginia Electric and Power Company - Memorandum attaching a comment submitted to the Commission for consideration by Ryan Wolniak.",
+          "Date_Filed": "2026-03-18T00:00:00.000"
+        },
+        {
+          "DocID": 387707,
+          "Document_Name": "Tract Holding Company I, LLC - Notice of Participation.",
+          "Date_Filed": "2026-03-20T00:00:00.000"
+        },
+        {
+          "DocID": 387755,
+          "Document_Name": "Office Of The Attorney General\u2019s Division Of Consumer Counsel - Notice of Participation.",
+          "Date_Filed": "2026-03-24T00:00:00.000"
+        },
+        {
+          "DocID": 387800,
+          "Document_Name": "Virginia Electric and Power Company - Memorandum attaching a comment submitted to the Commission for consideration by Robert Garris.",
+          "Date_Filed": "2026-03-25T00:00:00.000"
+        },
+        {
+          "DocID": 387967,
+          "Document_Name": "Sierra Club - Application to Appear Pro Hac Vice Before A Virginia Tribunal by Dorothy Elizabeth Jaffe along with a check for $250 payable to the Supreme Court of Virginia.",
+          "Date_Filed": "2026-03-30T00:00:00.000",
+          "figures": {
+            "mw_gw_mentions": [
+              "60 GW",
+              "100 MW"
+            ],
+            "project_count_mentions": []
+          },
+          "figures_extraction": "ok"
+        },
+        {
+          "DocID": 387950,
+          "Document_Name": "Verrus, LLC - Notice of Participation as Respondent.",
+          "Date_Filed": "2026-03-30T00:00:00.000"
+        },
+        {
+          "DocID": 387941,
+          "Document_Name": "Virginia Electric and Power Company - Memorandum attaching a comment submitted to the Commission for consideration by Charles Zumbaugh.",
+          "Date_Filed": "2026-03-30T00:00:00.000"
+        },
+        {
+          "DocID": 388035,
+          "Document_Name": "Virginia Electric and Power Company - Memorandum attaching a comment submitted to the Commission for consideration by John O\u2019Donnell.",
+          "Date_Filed": "2026-04-01T00:00:00.000"
+        },
+        {
+          "DocID": 388094,
+          "Document_Name": "Virginia Electric and Power Company - Hearing Examiner's Ruling - 04/02/2026.",
+          "Date_Filed": "2026-04-02T00:00:00.000"
+        },
+        {
+          "DocID": 388128,
+          "Document_Name": "Virginia Electric and Power Company - Letter to the Supreme Court enclosing the Pro Hac Vice Application, Motion, $250 check, and Hearing Examiner's Ruling for Dorothy E. Jaffe on behalf of Sierra Club.",
+          "Date_Filed": "2026-04-03T00:00:00.000",
+          "figures": {
+            "mw_gw_mentions": [],
+            "project_count_mentions": []
+          },
+          "figures_extraction": "no MW/GW/project-count figures matched"
+        },
+        {
+          "DocID": 388189,
+          "Document_Name": "Virginia Electric and Power Company - Proof of certified mailing of Pro Hac Vice for Grant Snyder to the Supreme Court of Virginia.",
+          "Date_Filed": "2026-04-06T00:00:00.000"
+        },
+        {
+          "DocID": 388244,
+          "Document_Name": "Office of the Attorney General, Division of Consumer Counsel - Notice of Removal of Counsel R. Cooper Vaughan and Update to Service Lists.",
+          "Date_Filed": "2026-04-08T00:00:00.000"
+        },
+        {
+          "DocID": 388321,
+          "Document_Name": "Virginia Electric and Power Company - Proof of Receipt by Supreme Court of Virginia of Pro Hac Vice of Dorothy Jaffe.",
+          "Date_Filed": "2026-04-13T00:00:00.000"
+        },
+        {
+          "DocID": 388374,
+          "Document_Name": "Virginia Electric and Power Company - Application to Appear Pro Hac Vice before a Virginia Tribunal for Sarah B. Nielsen and $250 Check for Supreme Court of Virginia enclosed.",
+          "Date_Filed": "2026-04-14T00:00:00.000",
+          "figures": {
+            "mw_gw_mentions": [],
+            "project_count_mentions": []
+          },
+          "figures_extraction": "no MW/GW/project-count figures matched"
+        },
+        {
+          "DocID": 388369,
+          "Document_Name": "Virginia Electric and Power Company - Motion for Pro Hac Vice Admission of Sarah B. Nielsen.",
+          "Date_Filed": "2026-04-14T00:00:00.000"
+        },
+        {
+          "DocID": 388425,
+          "Document_Name": "Emerald AI, Inc. - Direct Testimony of Ayse K. Coskun.",
+          "Date_Filed": "2026-04-15T00:00:00.000",
+          "figures": {
+            "mw_gw_mentions": [
+              "96 MW",
+              "96 MW",
+              "100 GW",
+              "100 GW",
+              "96 MW",
+              "100 GW",
+              "96 MW",
+              "31 GW",
+              "41 GW",
+              "125 GW",
+              "31 GW",
+              "1.38 GW",
+              "100 MW",
+              "100 MW",
+              "90 MW",
+              "2 GW",
+              "8.8 GW",
+              "62 GW",
+              "30 GW",
+              "35 GW"
+            ],
+            "project_count_mentions": [
+              "14",
+              "26",
+              "27",
+              "27"
+            ]
+          },
+          "figures_extraction": "ok"
+        },
+        {
+          "DocID": 388416,
+          "Document_Name": "Theresa Ghiorzi - Notice of Participation as Respondent.",
+          "Date_Filed": "2026-04-15T00:00:00.000"
+        },
+        {
+          "DocID": 388415,
+          "Document_Name": "Old Dominion Electric Cooperative - Direct Testimony of Kevin C. Miller.",
+          "Date_Filed": "2026-04-15T00:00:00.000",
+          "figures": {
+            "mw_gw_mentions": [
+              "300 MW",
+              "300 MW",
+              "3,000 MW",
+              "300 MW",
+              "300 MW",
+              "300 MW",
+              "300 MW",
+              "70,000 MW",
+              "1300 MW",
+              "1000 MW",
+              "1000 MW",
+              "25 MW",
+              "300 MW",
+              "70,000 MW",
+              "300 MW",
+              "300 MW",
+              "70,000 MW"
+            ],
+            "project_count_mentions": [
+              "19",
+              "15",
+              "8",
+              "2"
+            ]
+          },
+          "figures_extraction": "ok"
+        },
+        {
+          "DocID": 388414,
+          "Document_Name": "Amazon Data Services, Inc. - Direct Testimony of Cameron Brooks.",
+          "Date_Filed": "2026-04-15T00:00:00.000",
+          "figures": {
+            "mw_gw_mentions": [
+              "70,000 MW",
+              "24,678 MW",
+              "100 MW",
+              "300 MW",
+              "25,000 MW",
+              "45,000 MW",
+              "70,000 MW",
+              "24,678 MW",
+              "3,000 MW",
+              "70,000 MW",
+              "70,000 MW",
+              "25,000 MW",
+              "70,000 MW",
+              "25 GW",
+              "25 GW",
+              "25 GW",
+              "25 GW",
+              "300 MW",
+              "45,000 MW",
+              "45,000 MW"
+            ],
+            "project_count_mentions": [
+              "1",
+              "10",
+              "1",
+              "17",
+              "14",
+              "6",
+              "17",
+              "260430091"
+            ]
+          },
+          "figures_extraction": "ok"
+        },
+        {
+          "DocID": 388411,
+          "Document_Name": "Tract Holding Company I, LLC - Direct Testimony of Brandon Smith.",
+          "Date_Filed": "2026-04-15T00:00:00.000",
+          "figures": {
+            "mw_gw_mentions": [
+              "10 GW",
+              "1.2 GW",
+              "300 MW",
+              "300 MW"
+            ],
+            "project_count_mentions": [
+              "16",
+              "14",
+              "10",
+              "16",
+              "10",
+              "10",
+              "5"
+            ]
+          },
+          "figures_extraction": "ok"
+        },
+        {
+          "DocID": 388410,
+          "Document_Name": "Verrus, LLC - Direct Testimony of Jeff Bladen.",
+          "Date_Filed": "2026-04-15T00:00:00.000",
+          "figures": {
+            "mw_gw_mentions": [
+              "70,000 MW",
+              "6,600 MW",
+              "60 GW",
+              "70,000 MW",
+              "70 GW",
+              "3,000 MW",
+              "1,000 MW",
+              "200 GW",
+              "9,700 MW",
+              "700 MW",
+              "1,000 MW",
+              "500 MW",
+              "500 MW",
+              "1,000 MW",
+              "1 MW",
+              "0.4 MW",
+              "500 MW",
+              "250 MW",
+              "50 MW",
+              "100 MW"
+            ],
+            "project_count_mentions": []
+          },
+          "figures_extraction": "ok"
+        },
+        {
+          "DocID": 388407,
+          "Document_Name": "Google, LLC - Testimony of Carolyn A. Berry, Ph.D.",
+          "Date_Filed": "2026-04-15T00:00:00.000",
+          "figures": {
+            "mw_gw_mentions": [
+              "100 MW",
+              "300 MW",
+              "3 GW",
+              "100 MW",
+              "100 MW",
+              "300 MW",
+              "3 GW",
+              "27 GW",
+              "25 GW",
+              "45 GW",
+              "300 MW",
+              "100 MW",
+              "300 MW",
+              "3 GW",
+              "300 MW",
+              "3 GW",
+              "300 MW",
+              "3 GW",
+              "300 MW",
+              "900 MW"
+            ],
+            "project_count_mentions": [
+              "13",
+              "298",
+              "193",
+              "100",
+              "268",
+              "246",
+              "200",
+              "250",
+              "270",
+              "233",
+              "275",
+              "295",
+              "300",
+              "273",
+              "290",
+              "300",
+              "291",
+              "221",
+              "220",
+              "300"
+            ]
+          },
+          "figures_extraction": "ok"
+        },
+        {
+          "DocID": 388405,
+          "Document_Name": "Clenera DevCo, LLC - Notice of Participation.",
+          "Date_Filed": "2026-04-15T00:00:00.000"
+        },
+        {
+          "DocID": 388404,
+          "Document_Name": "CloudHQ LLC - Notice of Participation.",
+          "Date_Filed": "2026-04-15T00:00:00.000"
+        },
+        {
+          "DocID": 388400,
+          "Document_Name": "Piedmont Environmental Council - Direct Testimony of Gregory Abbott.",
+          "Date_Filed": "2026-04-15T00:00:00.000",
+          "figures": {
+            "mw_gw_mentions": [
+              "35,000 MW",
+              "24,678 MW",
+              "70,000 MW",
+              "100 MW",
+              "35,000 MW",
+              "24,678 MW",
+              "15 MW",
+              "3,596 MW",
+              "300 MW",
+              "70,000 MW",
+              "70,000 MW",
+              "70,000 MW",
+              "70,000 MW",
+              "300 MW",
+              "70,000 MW",
+              "300 MW",
+              "100 MW",
+              "35,000 MW",
+              "70,000 MW",
+              "6 MW"
+            ],
+            "project_count_mentions": [
+              "7",
+              "22",
+              "260430073",
+              "300",
+              "288",
+              "260",
+              "256",
+              "242",
+              "124",
+              "240",
+              "192",
+              "300",
+              "110",
+              "300",
+              "270",
+              "224",
+              "216",
+              "176",
+              "300",
+              "140"
+            ]
+          },
+          "figures_extraction": "ok"
+        },
+        {
+          "DocID": 388398,
+          "Document_Name": "Emerald AI, Inc. - Notice of Participation.",
+          "Date_Filed": "2026-04-15T00:00:00.000"
+        },
+        {
+          "DocID": 388397,
+          "Document_Name": "Sierra Club and Natural Resources Defense Council - Direct Testimony of Ron Nelson.",
+          "Date_Filed": "2026-04-15T00:00:00.000",
+          "figures": {
+            "mw_gw_mentions": [
+              "300 MW",
+              "70,000 MW",
+              "70,000 MW",
+              "300 MW",
+              "300 MW",
+              "300 MW",
+              "300 MW",
+              "1.2 GW",
+              "300 MW",
+              "300 MW",
+              "300 MW",
+              "300 MW",
+              "300 MW",
+              "300 MW",
+              "300 MW",
+              "300 MW",
+              "300 MW",
+              "300 MW",
+              "300 MW",
+              "1,200 MW"
+            ],
+            "project_count_mentions": [
+              "12"
+            ]
+          },
+          "figures_extraction": "ok"
+        },
+        {
+          "DocID": 388396,
+          "Document_Name": "Virginia Electric and Power Company - Hearing Examiner's Ruling - 04/15/2026.",
+          "Date_Filed": "2026-04-15T00:00:00.000"
+        },
+        {
+          "DocID": 388389,
+          "Document_Name": "Virginia Electric and Power Company - Prefiled Staff Testimony of Neil Joshipura, Division of Public Utility Regulation.",
+          "Date_Filed": "2026-04-15T00:00:00.000",
+          "figures": {
+            "mw_gw_mentions": [
+              "45,000 MW",
+              "70,000 MW",
+              "100 MW",
+              "300 MW",
+              "300 MW",
+              "300 MW",
+              "300 MW",
+              "300 MW",
+              "300 MW",
+              "300 MW",
+              "300 MW",
+              "70,000 MW",
+              "300 MW",
+              "300 MW",
+              "300 MW",
+              "1.2 GW",
+              "300 MW",
+              "300 MW",
+              "300 MW",
+              "300 MW"
+            ],
+            "project_count_mentions": [
+              "2",
+              "19",
+              "6",
+              "1",
+              "9",
+              "12",
+              "4",
+              "19",
+              "20",
+              "5",
+              "12",
+              "3",
+              "18",
+              "7",
+              "14",
+              "10"
+            ]
+          },
+          "figures_extraction": "ok"
+        },
+        {
+          "DocID": 388388,
+          "Document_Name": "Virginia Electric and Power Company - Prefiled Staff Testimony of Andrew T. Boehnlein, Division of Public Utility Regulation.",
+          "Date_Filed": "2026-04-15T00:00:00.000",
+          "figures": {
+            "mw_gw_mentions": [
+              "27,000 MW",
+              "27,507 MW",
+              "20,018 MW",
+              "19,896 MW",
+              "300 MW",
+              "70,000 MW",
+              "25,000 MW",
+              "45,000 MW",
+              "300 MW",
+              "361 MW",
+              "300 MW",
+              "300 MW",
+              "300 MW",
+              "300 MW",
+              "300 MW",
+              "6 MW",
+              "7 MW",
+              "100 MW",
+              "45,000 MW",
+              "2 MW"
+            ],
+            "project_count_mentions": [
+              "8",
+              "9",
+              "1",
+              "8",
+              "111",
+              "111",
+              "300",
+              "288",
+              "260",
+              "256",
+              "242",
+              "124",
+              "240",
+              "192",
+              "300",
+              "110",
+              "300",
+              "270",
+              "224",
+              "216"
+            ]
+          },
+          "figures_extraction": "ok"
+        },
+        {
+          "DocID": 388452,
+          "Document_Name": "Virginia Electric and Power Company - Motion for Extension of Rebuttal Testimony Deadline, Scheduling of a Pre-Hearing Conference, and Request for Expedited Treatment.",
+          "Date_Filed": "2026-04-16T00:00:00.000",
+          "figures": {
+            "mw_gw_mentions": [],
+            "project_count_mentions": []
+          },
+          "figures_extraction": "no MW/GW/project-count figures matched"
+        },
+        {
+          "DocID": 388451,
+          "Document_Name": "Verrus, LLC\u2019s - Motions for Pro Hac Vice Admission of Kim T. Smaczniak.",
+          "Date_Filed": "2026-04-16T00:00:00.000"
+        },
+        {
+          "DocID": 388450,
+          "Document_Name": "Verrus, LLC\u2019s - Motions for Pro Hac Vice Admission of Samuel T. Walsh",
+          "Date_Filed": "2026-04-16T00:00:00.000"
+        },
+        {
+          "DocID": 388448,
+          "Document_Name": "Virginia Electric and Power Company - Application to Appear Pro Hac Vice Before a Virginia Tribunal for Samuel T. Walsh and  $250 check enclosed for the Supreme Court of Virginia.",
+          "Date_Filed": "2026-04-16T00:00:00.000",
+          "figures": {
+            "mw_gw_mentions": [],
+            "project_count_mentions": []
+          },
+          "figures_extraction": "no MW/GW/project-count figures matched"
+        },
+        {
+          "DocID": 388447,
+          "Document_Name": "Virginia Electric and Power Company - Application to Appear Pro Hac Vice Before a Virginia Tribunal for Kim T. Smaczniak and  $250 check enclosed for the Supreme Court of Virginia.",
+          "Date_Filed": "2026-04-16T00:00:00.000",
+          "figures": {
+            "mw_gw_mentions": [],
+            "project_count_mentions": []
+          },
+          "figures_extraction": "no MW/GW/project-count figures matched"
+        },
+        {
+          "DocID": 388446,
+          "Document_Name": "Virginia Electric and Power Company - Proof of certified mailing of the Pro Hac Vice to the Supreme Court for Sarah B. Nielsen.",
+          "Date_Filed": "2026-04-16T00:00:00.000"
+        },
+        {
+          "DocID": 388426,
+          "Document_Name": "Board of Supervisors of Fauquier County - Comments.",
+          "Date_Filed": "2026-04-16T00:00:00.000"
+        },
+        {
+          "DocID": 388476,
+          "Document_Name": "Amazon Data Services, Inc., Walmart Inc, Google, LLC, Microsoft Corporation, Data Center Coalition, Piedmont Environmental Council, STACK Infrastructure, Inc., et al - Response to Virginia Electric and Power Company's Motion.",
+          "Date_Filed": "2026-04-17T00:00:00.000"
+        },
+        {
+          "DocID": 388466,
+          "Document_Name": "Virginia Electric and Power Company - Hearing Examiner's Ruling - 04/17/2026.",
+          "Date_Filed": "2026-04-17T00:00:00.000"
+        },
+        {
+          "DocID": 388465,
+          "Document_Name": "Virginia Electric and Power Company - Hearing Examiner's Ruling - 04/17/2026.",
+          "Date_Filed": "2026-04-17T00:00:00.000"
+        },
+        {
+          "DocID": 388492,
+          "Document_Name": "Virginia Electric and Power Company - Order Granting Extension - 04/20/2026.",
+          "Date_Filed": "2026-04-20T00:00:00.000",
+          "figures": {
+            "mw_gw_mentions": [],
+            "project_count_mentions": []
+          },
+          "figures_extraction": "no MW/GW/project-count figures matched"
+        },
+        {
+          "DocID": 388491,
+          "Document_Name": "Virginia Electric and Power Company - Reply in Support of Company's Motion for Extension of Rebuttal Testimony Deadline, Scheduling of a Pre-Hearing Conference, and Request for Expedited Treatment.",
+          "Date_Filed": "2026-04-20T00:00:00.000",
+          "figures": {
+            "mw_gw_mentions": [],
+            "project_count_mentions": []
+          },
+          "figures_extraction": "no MW/GW/project-count figures matched"
+        },
+        {
+          "DocID": 388557,
+          "Document_Name": "Virginia Electric and Power Company -  Letter to the Supreme Court enclosing the Pro Hac Vice Application, Motion, $250 Check, and Hearing Examiner\u2019s Ruling for Samuel T. Walsh on behalf of Verrus, LLC.",
+          "Date_Filed": "2026-04-21T00:00:00.000",
+          "figures": {
+            "mw_gw_mentions": [],
+            "project_count_mentions": []
+          },
+          "figures_extraction": "no MW/GW/project-count figures matched"
+        },
+        {
+          "DocID": 388556,
+          "Document_Name": "Virginia Electric and Power Company -  Letter to the Supreme Court enclosing the Pro Hac Vice Application, Motion, $250 Check, and Hearing Examiner\u2019s Ruling for Kim Smaczniak on behalf of Verrus, LLC.",
+          "Date_Filed": "2026-04-21T00:00:00.000",
+          "figures": {
+            "mw_gw_mentions": [],
+            "project_count_mentions": []
+          },
+          "figures_extraction": "no MW/GW/project-count figures matched"
+        },
+        {
+          "DocID": 388554,
+          "Document_Name": "Virginia's Electric Cooperatives - Comments.",
+          "Date_Filed": "2026-04-21T00:00:00.000"
+        },
+        {
+          "DocID": 388552,
+          "Document_Name": "Virginia Electric and Power Company - Memorandum attaching 1 comment submitted to the Commission for consideration by Amanvir Chahal.",
+          "Date_Filed": "2026-04-21T00:00:00.000"
+        },
+        {
+          "DocID": 388582,
+          "Document_Name": "Virginia Electric and Power Company - Memorandum attaching a comment submitted to the Commission for consideration by Kenneth Alexander, Ph.D., Mayor, City of Norfolk.",
+          "Date_Filed": "2026-04-22T00:00:00.000"
+        },
+        {
+          "DocID": 388612,
+          "Document_Name": "Virginia Electric and Power Company - Rebuttal Testimony of Jacqueline R. Vitiello.",
+          "Date_Filed": "2026-04-23T00:00:00.000",
+          "figures": {
+            "mw_gw_mentions": [
+              "300 MW",
+              "300 MW",
+              "300 MW",
+              "300 MW",
+              "300 MW",
+              "300 MW",
+              "300 MW",
+              "300 MW",
+              "3 GW",
+              "45 GW",
+              "3 GW",
+              "300 MW",
+              "300 MW",
+              "300 MW",
+              "1.2 GW",
+              "300 MW",
+              "300 MW",
+              "300 MW",
+              "300 MW",
+              "300 MW"
+            ],
+            "project_count_mentions": [
+              "8",
+              "16"
+            ]
+          },
+          "figures_extraction": "ok"
+        },
+        {
+          "DocID": 388611,
+          "Document_Name": "Virginia Electric and Power Company - Rebuttal Testimony of R. Matthew Gardner.",
+          "Date_Filed": "2026-04-23T00:00:00.000",
+          "figures": {
+            "mw_gw_mentions": [],
+            "project_count_mentions": []
+          },
+          "figures_extraction": "no MW/GW/project-count figures matched"
+        },
+        {
+          "DocID": 388606,
+          "Document_Name": "Emerald Al, Inc. - Application to Appear Pro Hac Vice Before a Virginia Tribunal for Michael N. Panfil and $250 check enclosed for the Supreme Court of Virginia.",
+          "Date_Filed": "2026-04-23T00:00:00.000",
+          "figures": {
+            "mw_gw_mentions": [],
+            "project_count_mentions": []
+          },
+          "figures_extraction": "no MW/GW/project-count figures matched"
+        },
+        {
+          "DocID": 388602,
+          "Document_Name": "Virginia Electric and Power Company - Hearing Examiner's Ruling - 04/23/26.",
+          "Date_Filed": "2026-04-23T00:00:00.000"
+        },
+        {
+          "DocID": 388585,
+          "Document_Name": "Emerald AI, Inc. - Motion for Admission Pro Hac Vice of Michael Nolan Panfil.",
+          "Date_Filed": "2026-04-23T00:00:00.000"
+        },
+        {
+          "DocID": 388633,
+          "Document_Name": "Green Energy Ventures, LLC - Notice of Participation.",
+          "Date_Filed": "2026-04-24T00:00:00.000"
+        },
+        {
+          "DocID": 388632,
+          "Document_Name": "Virginia Electric and Power Company - Proof of certified mailing of Pro Hac Vice for Michael N. Panfil to the Supreme Court of Virginia.",
+          "Date_Filed": "2026-04-24T00:00:00.000"
+        },
+        {
+          "DocID": 388616,
+          "Document_Name": "Virginia Electric and Power Company -  Letter to the Supreme Court enclosing the Pro Hac Vice Application, Motion, $250 Check, and Hearing Examiner\u2019s Ruling for Michael Panfil on behalf of Emerald A.I. Inc.",
+          "Date_Filed": "2026-04-24T00:00:00.000",
+          "figures": {
+            "mw_gw_mentions": [],
+            "project_count_mentions": []
+          },
+          "figures_extraction": "no MW/GW/project-count figures matched"
+        },
+        {
+          "DocID": 388665,
+          "Document_Name": "Virginia Electric and Power Company - Proof of Receipt by Supreme Court of Virginia of Pro Hac Vice of Kim Smaczniak.",
+          "Date_Filed": "2026-04-27T00:00:00.000"
+        },
+        {
+          "DocID": 388664,
+          "Document_Name": "Virginia Electric and Power Company - Proof of Receipt by Supreme Court of Virginia of Pro Hac Vice of Samuel T. Walsh.",
+          "Date_Filed": "2026-04-27T00:00:00.000"
+        },
+        {
+          "DocID": 388907,
+          "Document_Name": "Virginia Electric & Power Company - Exhibit 7 - Dominion Response to Amazon's Interrogatory Request 2-6.",
+          "Date_Filed": "2026-04-28T00:00:00.000"
+        },
+        {
+          "DocID": 388905,
+          "Document_Name": "Virginia Electric & Power Company \u2013 Exhibit 5 \u2013 Direct Testimony of Jacqueline R. Vitiello on behalf of Virginia Electric & Power Company, filed with the Commission on 02/02/2026, as corrected during Proceeding.",
+          "Date_Filed": "2026-04-28T00:00:00.000",
+          "figures": {
+            "mw_gw_mentions": [
+              "300 MW",
+              "300 MW",
+              "100 MW",
+              "300 MW",
+              "300 MW",
+              "100 MW",
+              "300 MW"
+            ],
+            "project_count_mentions": [
+              "20"
+            ]
+          },
+          "figures_extraction": "ok"
+        },
+        {
+          "DocID": 388904,
+          "Document_Name": "Virginia Electric & Power Company \u2013 Exhibit 4 \u2013 Direct Testimony of R. Matthew Gardner on behalf of Virginia Electric & Power Company, filed with the Commission on 02/02/2026.",
+          "Date_Filed": "2026-04-28T00:00:00.000",
+          "figures": {
+            "mw_gw_mentions": [
+              "45,000 MW",
+              "70,000 MW",
+              "24,678 MW",
+              "3,000 MW",
+              "100 MW"
+            ],
+            "project_count_mentions": [
+              "17"
+            ]
+          },
+          "figures_extraction": "ok"
+        },
+        {
+          "DocID": 388903,
+          "Document_Name": "Virginia Electric & Power Company \u2013 Exhibit 3 \u2013 Application of Virginia Electric & Power Company, filed with the Commission on 02/02/2026.",
+          "Date_Filed": "2026-04-28T00:00:00.000",
+          "figures": {
+            "mw_gw_mentions": [
+              "45,000 MW",
+              "70,000 MW",
+              "24,678 MW",
+              "3,000 MW",
+              "100 MW",
+              "300 MW"
+            ],
+            "project_count_mentions": []
+          },
+          "figures_extraction": "ok"
+        },
+        {
+          "DocID": 388902,
+          "Document_Name": "Virginia Electric & Power Company \u2013 Exhibit 2 \u2013 Proof of  Notice, filed with the Commission on 03/16/2026.",
+          "Date_Filed": "2026-04-28T00:00:00.000"
+        },
+        {
+          "DocID": 388901,
+          "Document_Name": "Virginia Electric & Power Company \u2013 Exhibit 1 \u2013 Direct Testimony of Ayse K. Coskun, Ph.D. on behalf of Emerald AI, Inc., filed with the Commission on 04/15/2026.",
+          "Date_Filed": "2026-04-28T00:00:00.000",
+          "figures": {
+            "mw_gw_mentions": [
+              "96 MW",
+              "96 MW",
+              "100 GW",
+              "100 GW",
+              "96 MW",
+              "100 GW",
+              "96 MW",
+              "31 GW",
+              "41 GW",
+              "125 GW",
+              "31 GW",
+              "1.38 GW",
+              "100 MW",
+              "100 MW",
+              "90 MW",
+              "2 GW",
+              "8.8 GW",
+              "62 GW",
+              "30 GW",
+              "35 GW"
+            ],
+            "project_count_mentions": [
+              "14",
+              "26",
+              "27",
+              "27"
+            ]
+          },
+          "figures_extraction": "ok"
+        },
+        {
+          "DocID": 388676,
+          "Document_Name": "Virginia Electric and Power Company - Proof of Receipt by Supreme Court of Virginia of Pro Hac Vice of Sarah B. Neilsen.",
+          "Date_Filed": "2026-04-28T00:00:00.000"
+        },
+        {
+          "DocID": 388914,
+          "Document_Name": "Virginia Electric & Power Company \u2013 Exhibit 14 \u2013 Georgia Power Rules & Regulations Webcast Document.",
+          "Date_Filed": "2026-04-29T00:00:00.000"
+        },
+        {
+          "DocID": 388913,
+          "Document_Name": "Virginia Electric & Power Company \u2013 Exhibit 13 \u2013 Direct Testimony of Cameron Brooks on behalf of Amazon Data Services, Inc., filed with the Commission on 04/15/2026.",
+          "Date_Filed": "2026-04-29T00:00:00.000",
+          "figures": {
+            "mw_gw_mentions": [
+              "70,000 MW",
+              "24,678 MW",
+              "100 MW",
+              "300 MW",
+              "25,000 MW",
+              "45,000 MW",
+              "70,000 MW",
+              "24,678 MW",
+              "3,000 MW",
+              "70,000 MW",
+              "70,000 MW",
+              "25,000 MW",
+              "70,000 MW",
+              "25 GW",
+              "25 GW",
+              "25 GW",
+              "25 GW",
+              "300 MW",
+              "45,000 MW",
+              "45,000 MW"
+            ],
+            "project_count_mentions": [
+              "1",
+              "10",
+              "1",
+              "17",
+              "14",
+              "6",
+              "17",
+              "260520088"
+            ]
+          },
+          "figures_extraction": "ok"
+        },
+        {
+          "DocID": 388912,
+          "Document_Name": "Virginia Electric & Power Company \u2013 Exhibit 12 \u2013 Dominion Response to Commission Staff's Interrogatory Request 3-55.",
+          "Date_Filed": "2026-04-29T00:00:00.000"
+        },
+        {
+          "DocID": 388911,
+          "Document_Name": "Virginia Electric & Power Company \u2013 Exhibit 11 \u2013 Dominion Response to Google's Interrogatory Request 2-2.",
+          "Date_Filed": "2026-04-29T00:00:00.000"
+        },
+        {
+          "DocID": 388910,
+          "Document_Name": "Virginia Electric & Power Company \u2013 Exhibit 10 \u2013 Direct Testimony of Carolyn A. Berry, Ph.D., on behalf of Google, LLC, filed with the Commission on 04/15/2026.",
+          "Date_Filed": "2026-04-29T00:00:00.000",
+          "figures": {
+            "mw_gw_mentions": [
+              "100 MW",
+              "300 MW",
+              "3 GW",
+              "100 MW",
+              "100 MW",
+              "300 MW",
+              "3 GW",
+              "27 GW",
+              "25 GW",
+              "45 GW",
+              "300 MW",
+              "100 MW",
+              "300 MW",
+              "3 GW",
+              "300 MW",
+              "3 GW",
+              "300 MW",
+              "3 GW",
+              "300 MW",
+              "900 MW"
+            ],
+            "project_count_mentions": [
+              "13",
+              "298",
+              "193",
+              "100",
+              "268",
+              "246",
+              "200",
+              "250",
+              "270",
+              "233",
+              "275",
+              "295",
+              "300",
+              "273",
+              "290",
+              "300",
+              "291",
+              "221",
+              "220",
+              "300"
+            ]
+          },
+          "figures_extraction": "ok"
+        },
+        {
+          "DocID": 388909,
+          "Document_Name": "Virginia Electric & Power Company \u2013 Exhibit 9 \u2013 Direct Testimony of Jeff Bladen on behalf of Verrus, LLC, filed with the Commission on 04/15/2026.",
+          "Date_Filed": "2026-04-29T00:00:00.000",
+          "figures": {
+            "mw_gw_mentions": [
+              "70,000 MW",
+              "6,600 MW",
+              "60 GW",
+              "70,000 MW",
+              "70 GW",
+              "3,000 MW",
+              "1,000 MW",
+              "200 GW",
+              "9,700 MW",
+              "700 MW",
+              "1,000 MW",
+              "500 MW",
+              "500 MW",
+              "1,000 MW",
+              "1 MW",
+              "0.4 MW",
+              "500 MW",
+              "250 MW",
+              "50 MW",
+              "100 MW"
+            ],
+            "project_count_mentions": []
+          },
+          "figures_extraction": "ok"
+        },
+        {
+          "DocID": 388908,
+          "Document_Name": "Virginia Electric & Power Company \u2013 Exhibit 8 \u2013 Direct Testimony of Ron Nelson on behalf of the Sierra Club & The Natural Resources Defense Council, filed with the Commission on 04/15/2026.",
+          "Date_Filed": "2026-04-29T00:00:00.000",
+          "figures": {
+            "mw_gw_mentions": [
+              "300 MW",
+              "70,000 MW",
+              "70,000 MW",
+              "300 MW",
+              "300 MW",
+              "300 MW",
+              "300 MW",
+              "1.2 GW",
+              "300 MW",
+              "300 MW",
+              "300 MW",
+              "300 MW",
+              "300 MW",
+              "300 MW",
+              "300 MW",
+              "300 MW",
+              "300 MW",
+              "300 MW",
+              "300 MW",
+              "1,200 MW"
+            ],
+            "project_count_mentions": [
+              "12"
+            ]
+          },
+          "figures_extraction": "ok"
+        },
+        {
+          "DocID": 388906,
+          "Document_Name": "Virginia Electric & Power Company - Exhibit 6 - Revised Walmart Exhibit 1: Delivery Point Request Stage Timeline.",
+          "Date_Filed": "2026-04-29T00:00:00.000"
+        },
+        {
+          "DocID": 388891,
+          "Document_Name": "Virginia Electric & Power Company \u2013 Exhibit 21 \u2013 Rebuttal Testimony of R. Matthew Gardner on behalf of Virginia Electric & Power Company, filed with the Commission on 04/23/2026, as corrected during Proceeding.",
+          "Date_Filed": "2026-04-29T00:00:00.000",
+          "figures": {
+            "mw_gw_mentions": [],
+            "project_count_mentions": []
+          },
+          "figures_extraction": "no MW/GW/project-count figures matched"
+        },
+        {
+          "DocID": 388890,
+          "Document_Name": "Virginia Electric & Power Company \u2013 Exhibit 20 \u2013 Dominion Response to Google\u2019s Interrogatory Request 7-15.",
+          "Date_Filed": "2026-04-29T00:00:00.000"
+        },
+        {
+          "DocID": 388887,
+          "Document_Name": "Virginia Electric & Power Company \u2013 Exhibit 17 \u2013 Direct Testimony and Exhibits of Brandon Smith on behalf of Tract Holding Company I, LLC, filed with the Commission on 04/15/2026.",
+          "Date_Filed": "2026-04-29T00:00:00.000",
+          "figures": {
+            "mw_gw_mentions": [
+              "10 GW",
+              "1.2 GW",
+              "300 MW",
+              "300 MW"
+            ],
+            "project_count_mentions": [
+              "16",
+              "14",
+              "10",
+              "16",
+              "10",
+              "10",
+              "5"
+            ]
+          },
+          "figures_extraction": "ok"
+        },
+        {
+          "DocID": 388886,
+          "Document_Name": "Virginia Electric & Power Company \u2013 Exhibit 16 \u2013 Direct Testimony of Kevin C. Miller on behalf of Old Dominion Electric Cooperative, filed with the Commission on 04/15/2026.",
+          "Date_Filed": "2026-04-29T00:00:00.000",
+          "figures_extraction": "FAILED: No /Root object! - Is this really a PDF?"
+        },
+        {
+          "DocID": 388885,
+          "Document_Name": "Virginia Electric & Power Company \u2013 Exhibit 15 \u2013 Direct Testimony of Gregory Abbott on behalf of the Piedmont Environmental Council, filed with the Commission on 04/15/2026.",
+          "Date_Filed": "2026-04-29T00:00:00.000",
+          "figures": {
+            "mw_gw_mentions": [
+              "35,000 MW",
+              "24,678 MW",
+              "70,000 MW",
+              "100 MW",
+              "35,000 MW",
+              "24,678 MW",
+              "15 MW",
+              "3,596 MW",
+              "300 MW",
+              "70,000 MW",
+              "70,000 MW",
+              "70,000 MW",
+              "70,000 MW",
+              "300 MW",
+              "70,000 MW",
+              "300 MW",
+              "100 MW",
+              "35,000 MW",
+              "70,000 MW",
+              "6 MW"
+            ],
+            "project_count_mentions": [
+              "7",
+              "22",
+              "260530001",
+              "300",
+              "288",
+              "260",
+              "256",
+              "242",
+              "124",
+              "240",
+              "192",
+              "300",
+              "110",
+              "300",
+              "270",
+              "224",
+              "216",
+              "176",
+              "300",
+              "140"
+            ]
+          },
+          "figures_extraction": "ok"
+        },
+        {
+          "DocID": 388689,
+          "Document_Name": "Virginia Electric and Power Company - Proof of Receipt by Supreme Court of Virginia of Pro Hac Vice of Michael N. Panfil.",
+          "Date_Filed": "2026-04-29T00:00:00.000"
+        },
+        {
+          "DocID": 388896,
+          "Document_Name": "Virginia Electric & Power Company \u2013 Exhibit 26 \u2013 Dominion Response to ODEC\u2019s Interrogatory Request 2-12.",
+          "Date_Filed": "2026-04-30T00:00:00.000"
+        },
+        {
+          "DocID": 388895,
+          "Document_Name": "Virginia Electric & Power Company \u2013 Exhibit 25 \u2013 Rebuttal Testimony of Jacqueline R. Vitiello on behalf of Virginia Electric & Power Company, filed with the Commission on 04/23/2026, as corrected during Proceeding.",
+          "Date_Filed": "2026-04-30T00:00:00.000",
+          "figures": {
+            "mw_gw_mentions": [
+              "300 MW",
+              "300 MW",
+              "300 MW",
+              "300 MW",
+              "300 MW",
+              "300 MW",
+              "300 MW",
+              "300 MW",
+              "3 GW",
+              "45 GW",
+              "3 GW",
+              "300 MW",
+              "300 MW",
+              "300 MW",
+              "1.2 GW",
+              "300 MW",
+              "300 MW",
+              "300 MW",
+              "300 MW",
+              "300 MW"
+            ],
+            "project_count_mentions": [
+              "8",
+              "16"
+            ]
+          },
+          "figures_extraction": "ok"
+        },
+        {
+          "DocID": 388894,
+          "Document_Name": "Virginia Electric & Power Company \u2013 Exhibit 24 \u2013 Dominion Response to Amazon\u2019s Interrogatory Request 2-7.",
+          "Date_Filed": "2026-04-30T00:00:00.000"
+        },
+        {
+          "DocID": 388893,
+          "Document_Name": "Virginia Electric & Power Company \u2013 Exhibit 23 \u2013 Dominion Response to Google\u2019s Interrogatory Request 7-16.",
+          "Date_Filed": "2026-04-30T00:00:00.000"
+        },
+        {
+          "DocID": 388892,
+          "Document_Name": "Virginia Electric & Power Company \u2013 Exhibit 22 \u2013 Dominion's Illustrative PJM Regional Transmission Expansion Planning Process Map.",
+          "Date_Filed": "2026-04-30T00:00:00.000"
+        },
+        {
+          "DocID": 388889,
+          "Document_Name": "Virginia Electric & Power Company \u2013 Exhibit 19 \u2013 Prefiled Testimony of Neil Joshipura on behalf of Commission Staff, filed with the Commission on 04/15/2026.",
+          "Date_Filed": "2026-04-30T00:00:00.000",
+          "figures": {
+            "mw_gw_mentions": [
+              "45,000 MW",
+              "70,000 MW",
+              "100 MW",
+              "300 MW",
+              "300 MW",
+              "300 MW",
+              "300 MW",
+              "300 MW",
+              "300 MW",
+              "300 MW",
+              "300 MW",
+              "70,000 MW",
+              "300 MW",
+              "300 MW",
+              "300 MW",
+              "1.2 GW",
+              "300 MW",
+              "300 MW",
+              "300 MW",
+              "300 MW"
+            ],
+            "project_count_mentions": [
+              "2",
+              "19",
+              "6",
+              "1",
+              "9",
+              "12",
+              "4",
+              "19",
+              "20",
+              "5",
+              "12",
+              "3",
+              "18",
+              "7",
+              "14",
+              "10"
+            ]
+          },
+          "figures_extraction": "ok"
+        },
+        {
+          "DocID": 388888,
+          "Document_Name": "Virginia Electric & Power Company \u2013 Exhibit 18 \u2013 Prefiled Testimony of Andrew T. Boehnlein on behalf of Commission Staff, filed\rwith the Commission on 04/15/2026.",
+          "Date_Filed": "2026-04-30T00:00:00.000",
+          "figures": {
+            "mw_gw_mentions": [
+              "27,000 MW",
+              "27,507 MW",
+              "20,018 MW",
+              "19,896 MW",
+              "300 MW",
+              "70,000 MW",
+              "25,000 MW",
+              "45,000 MW",
+              "300 MW",
+              "361 MW",
+              "300 MW",
+              "300 MW",
+              "300 MW",
+              "300 MW",
+              "300 MW",
+              "6 MW",
+              "7 MW",
+              "100 MW",
+              "45,000 MW",
+              "2 MW"
+            ],
+            "project_count_mentions": [
+              "8",
+              "9",
+              "1",
+              "8",
+              "111",
+              "111",
+              "300",
+              "288",
+              "260",
+              "256",
+              "242",
+              "124",
+              "240",
+              "192",
+              "300",
+              "110",
+              "300",
+              "270",
+              "224",
+              "216"
+            ]
+          },
+          "figures_extraction": "ok"
+        },
+        {
+          "DocID": 388897,
+          "Document_Name": "Virginia Electric and Power Company - Case heard on 04/28/2026 -04/30/2026 before the Honorable Commissioner Kelsey A. Bagot, Chairman, Presiding; Appearances: V. B. Link, S. Nielsen, B. Jackson, & D. J. DePippo, Counsel for",
+          "Date_Filed": "2026-05-04T00:00:00.000"
+        },
+        {
+          "DocID": 388790,
+          "Document_Name": "Virginia Electric and Power Company - Min-U-Script of Hearing - Day 2-  04/29/2026 from 9:30 a.m. to 5:31 p.m. (Part 2 of 2)",
+          "Date_Filed": "2026-05-04T00:00:00.000"
+        },
+        {
+          "DocID": 388789,
+          "Document_Name": "Virginia Electric and Power Company - Transcript and Word Index of Hearing - Day 2 - 04/29/2026 from 9:30 a.m. to 5:31 p.m. (Part 1 of 2)",
+          "Date_Filed": "2026-05-04T00:00:00.000"
+        },
+        {
+          "DocID": 388784,
+          "Document_Name": "Virginia Electric and Power Company - Min-U-Script of Hearing - 04/28/2026, 10:00 a.m. to 5:31 p.m. (Part 2 of 2)",
+          "Date_Filed": "2026-05-04T00:00:00.000"
+        },
+        {
+          "DocID": 388783,
+          "Document_Name": "Virginia Electric and Power Company - Transcript and Word Index of Hearing - 04/28/2026, 10:00 a.m. to 5:31 p.m. (Part 1 of 2)",
+          "Date_Filed": "2026-05-04T00:00:00.000"
+        },
+        {
+          "DocID": 388816,
+          "Document_Name": "Virginia Electric and Power Company - Min-U-Script of Hearing - Day 3 -  04/30/2026 from 9:30 a.m. to 4:10 p.m. (Part 2 of 2)",
+          "Date_Filed": "2026-05-05T00:00:00.000"
+        },
+        {
+          "DocID": 388815,
+          "Document_Name": "Virginia Electric and Power Company - Transcript and Word Index of Hearing - Day 3 - 04/30/2026 from 9:30 a.m. to 4:10 p.m. (Part 1 of 2)",
+          "Date_Filed": "2026-05-05T00:00:00.000"
+        },
+        {
+          "DocID": 388923,
+          "Document_Name": "Virginia Electric & Power Company \u2013 Exhibit 27 \u2013 Dominion's Engineering Letter of Authorization (\u201cELOA\u201d), Construction Letter of Authorization (\u201cCLOA\u201d), and Electric Service Agreement (\u201cESA\u201d).",
+          "Date_Filed": "2026-05-06T00:00:00.000"
+        },
+        {
+          "DocID": 388991,
+          "Document_Name": "Virginia Electric and Power Company - Interim Order Establishing Additional Proceeding - 05/12/2026.",
+          "Date_Filed": "2026-05-12T00:00:00.000",
+          "figures": {
+            "mw_gw_mentions": [],
+            "project_count_mentions": []
+          },
+          "figures_extraction": "no MW/GW/project-count figures matched"
+        },
+        {
+          "DocID": 389713,
+          "Document_Name": "Virginia Electric and Power Company - Notice of Appearance of Counsel.",
+          "Date_Filed": "2026-06-10T00:00:00.000"
+        },
+        {
+          "DocID": 389790,
+          "Document_Name": "Virginia Electric and Power Company - Status Report.",
+          "Date_Filed": "2026-06-12T00:00:00.000"
+        },
+        {
+          "DocID": 390372,
+          "Document_Name": "Walmart Inc. - Letter in lieu of Post-Hearing Brief.",
+          "Date_Filed": "2026-06-30T00:00:00.000",
+          "figures": {
+            "mw_gw_mentions": [],
+            "project_count_mentions": []
+          },
+          "figures_extraction": "no MW/GW/project-count figures matched"
+        },
+        {
+          "DocID": 390371,
+          "Document_Name": "Verrus, LLC - Brief.",
+          "Date_Filed": "2026-06-30T00:00:00.000",
+          "figures": {
+            "mw_gw_mentions": [
+              "70,000 MW",
+              "16.2 GW",
+              "13.5 GW",
+              "30 GW",
+              "13.5 GW",
+              "30 GW",
+              "150 MW"
+            ],
+            "project_count_mentions": []
+          },
+          "figures_extraction": "ok"
+        },
+        {
+          "DocID": 390370,
+          "Document_Name": "Virginia Electric and Power Company - Memorandum attaching a comment submitted to the Commission for consideration by Delegate H. Otto Wachsmann, Jr. PharmD, Virginia House of Delegates, 83rd District.",
+          "Date_Filed": "2026-06-30T00:00:00.000"
+        },
+        {
+          "DocID": 390365,
+          "Document_Name": "Virginia Electric and Power Company - Staff Brief.",
+          "Date_Filed": "2026-06-30T00:00:00.000",
+          "figures": {
+            "mw_gw_mentions": [
+              "300 MW",
+              "100 MW"
+            ],
+            "project_count_mentions": []
+          },
+          "figures_extraction": "ok"
+        },
+        {
+          "DocID": 390364,
+          "Document_Name": "Virginia Electric and Power Company - Post-Hearing Brief.",
+          "Date_Filed": "2026-06-30T00:00:00.000",
+          "figures": {
+            "mw_gw_mentions": [],
+            "project_count_mentions": []
+          },
+          "figures_extraction": "no MW/GW/project-count figures matched"
+        },
+        {
+          "DocID": 390357,
+          "Document_Name": "STACK Infrastructure, Inc. - Post Hearing Brief.",
+          "Date_Filed": "2026-06-30T00:00:00.000",
+          "figures": {
+            "mw_gw_mentions": [
+              "1,000 MW",
+              "250 MW",
+              "1,000 MW",
+              "250 MW",
+              "250 MW",
+              "500 MW"
+            ],
+            "project_count_mentions": [
+              "2"
+            ]
+          },
+          "figures_extraction": "ok"
+        },
+        {
+          "DocID": 390348,
+          "Document_Name": "Emerald AI, Inc. - Brief.",
+          "Date_Filed": "2026-06-30T00:00:00.000",
+          "figures": {
+            "mw_gw_mentions": [],
+            "project_count_mentions": []
+          },
+          "figures_extraction": "no MW/GW/project-count figures matched"
+        },
+        {
+          "DocID": 390346,
+          "Document_Name": "Amazon Data Services, Inc. - Brief in response to the SCC's Interim Order Establishing Additional Proceeding entered on 05/12/2026.",
+          "Date_Filed": "2026-06-30T00:00:00.000",
+          "figures": {
+            "mw_gw_mentions": [],
+            "project_count_mentions": []
+          },
+          "figures_extraction": "no MW/GW/project-count figures matched"
+        },
+        {
+          "DocID": 390342,
+          "Document_Name": "Data Center Coalition - Notice of Removal of Counsel of Cassidy C. Galindo.",
+          "Date_Filed": "2026-06-30T00:00:00.000"
+        },
+        {
+          "DocID": 390334,
+          "Document_Name": "Theresa Ghiorzi - Brief.",
+          "Date_Filed": "2026-06-30T00:00:00.000",
+          "figures": {
+            "mw_gw_mentions": [
+              "70,000 MW",
+              "24,678 MW",
+              "3,000 MW",
+              "45,000 MW"
+            ],
+            "project_count_mentions": []
+          },
+          "figures_extraction": "ok"
+        },
+        {
+          "DocID": 390332,
+          "Document_Name": "Piedmont Environmental Council - Brief.",
+          "Date_Filed": "2026-06-30T00:00:00.000",
+          "figures": {
+            "mw_gw_mentions": [
+              "70,000 MW"
+            ],
+            "project_count_mentions": []
+          },
+          "figures_extraction": "ok"
+        },
+        {
+          "DocID": 390331,
+          "Document_Name": "Google, LLC - Brief Regarding Fast-Tack Interconnection.",
+          "Date_Filed": "2026-06-30T00:00:00.000",
+          "figures": {
+            "mw_gw_mentions": [
+              "100 MW",
+              "25 MW",
+              "25 MW",
+              "100 MW",
+              "160 MW",
+              "100 MW"
+            ],
+            "project_count_mentions": []
+          },
+          "figures_extraction": "ok"
+        },
+        {
+          "DocID": 390457,
+          "Document_Name": "Amazon Data Services, Inc. - Notice of Withdrawal of Clarice M. Gardner as Counsel.",
+          "Date_Filed": "2026-07-07T00:00:00.000"
+        }
+      ]
+    }
+  ]
+}

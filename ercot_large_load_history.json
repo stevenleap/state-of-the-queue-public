@@ -1,0 +1,26 @@
+[
+  {
+    "source_url": "https://www.ercot.com/files/docs/2026/03/12/March-TAC-Report.pdf",
+    "report_title": "Large Load Interconnection Status Update (Large Load Integration Team)",
+    "as_of_date": "2026-03-13",
+    "total_queue_mw": 238629,
+    "data_center_pct": 77.5,
+    "data_center_mw": 183469,
+    "approved_to_energize_mw": 9042,
+    "observed_peak_consumption_mw": 3883,
+    "note": "ERCOT flagged 137 new LLI submissions (~140,000 MW) received but not yet reflected in this snapshot -- see the 2026-03-26 record below. Small honest discrepancy WITHIN this same report: the 'Large Load Queue - Past 12 Months' chart (page 2) shows 238,629 MW for the 2026-03 snapshot (210,114 standalone + 28,515 co-located), while the 'Current Large Load Interconnection Queue' table (page 3, confirmed via the vision-fallback plumbing test) shows 238,630 MW as the Total (MW) for 2030 -- a 1 MW gap between two charts in ERCOT's own deck, not a transcription error here. Using 238,629 (the explicit monthly-snapshot figure).",
+    "extraction": "manual (verified by direct read of the source PDF)"
+  },
+  {
+    "source_url": "https://www.ercot.com/files/docs/2026/04/01/ERCOT_LargeLoad_Update_April2026_B-C_-Hearing.pdf",
+    "report_title": "ERCOT Update to Texas Senate Committee on Business & Commerce",
+    "as_of_date": "2026-03-26",
+    "total_queue_mw": 410618,
+    "data_center_pct": 87.6,
+    "data_center_mw": 355830,
+    "observed_energized_mw": 5778,
+    "approved_to_energize_not_operational_mw": 3241,
+    "note": "This snapshot's queue total is 172,000 MW higher than the 2026-03-13 report 13 days earlier -- consistent with that report's flagged backlog of 137 pending submissions clearing. Only ~1.4% of the total queue (5,778 / 410,618 MW) is 'Observed Energized.'",
+    "extraction": "manual (verified by direct read of the source PDF)"
+  }
+]

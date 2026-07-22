@@ -1,0 +1,261 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>State of the Queue — live</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --page:#f7f7f5; --card:#ffffff; --hairline:#e7e6e1;
+    --ink:#0b0b0b; --ink-2:#5c5b56; --ink-muted:#96948c;
+    --accent:#2a78d6; --accent-wash:#eef4fc;
+    --good:#0ca30c; --bad:#c23131; --warn:#b8790a;
+    --shadow:0 1px 2px rgba(11,11,11,.04), 0 8px 24px rgba(11,11,11,.05);
+  }
+  *{box-sizing:border-box;}
+  body{ margin:0; background:var(--page); color:var(--ink); font-family:'IBM Plex Sans',sans-serif; line-height:1.5; -webkit-font-smoothing:antialiased; }
+  .num{ font-family:'IBM Plex Mono',monospace; font-variant-numeric:tabular-nums; }
+  .wrap{ max-width:760px; margin:0 auto; padding:64px 28px 100px; }
+
+  /* ---- hook ---- */
+  #hook{ text-align:center; padding:60px 0; }
+  #hook .kicker{ font-size:14px; color:var(--ink-2); margin-bottom:16px; }
+  #hook h1{ font-size:38px; font-weight:600; line-height:1.25; margin:0 0 20px; letter-spacing:-0.01em; }
+  #hook h1 .accent{ color:var(--accent); }
+  #hook p{ font-size:16px; color:var(--ink-2); max-width:520px; margin:0 auto 40px; }
+  #runBtn{
+    font-family:'IBM Plex Sans',sans-serif; font-size:16px; font-weight:600; color:#fff;
+    background:var(--accent); border:none; border-radius:12px; padding:16px 36px; cursor:pointer;
+    box-shadow:0 4px 16px rgba(42,120,214,.25); transition:transform .1s ease;
+  }
+  #runBtn:hover{ transform:translateY(-1px); }
+  #runBtn:disabled{ opacity:.5; cursor:default; transform:none; }
+  #runSub{ font-size:12.5px; color:var(--ink-muted); margin-top:14px; }
+
+  /* ---- trace ---- */
+  #trace{ display:none; }
+  .trace-head{ display:flex; justify-content:space-between; align-items:baseline; margin-bottom:20px; }
+  .trace-head h2{ font-size:15px; font-weight:600; margin:0; }
+  .trace-head .live{ font-size:11px; color:var(--bad); font-weight:600; letter-spacing:.06em; }
+  .trace-head .live::before{ content:"●"; margin-right:5px; animation:pulse 1.4s infinite; }
+  @keyframes pulse{ 0%,100%{opacity:1;} 50%{opacity:.3;} }
+
+  .step{ background:var(--card); border-radius:12px; box-shadow:var(--shadow); padding:18px 20px; margin-bottom:10px; }
+  .step-label{ font-size:14px; font-weight:500; display:flex; align-items:center; gap:9px; }
+  .step-detail{ font-size:12px; color:var(--ink-muted); margin-top:4px; margin-left:23px; }
+  .spinner{ width:13px; height:13px; border-radius:50%; border:2px solid var(--hairline); border-top-color:var(--accent); animation:spin .7s linear infinite; flex:0 0 auto; }
+  @keyframes spin{ to{ transform:rotate(360deg); } }
+  .ok-dot{ width:13px; height:13px; border-radius:50%; background:var(--good); flex:0 0 auto; position:relative; }
+  .ok-dot::after{ content:"✓"; position:absolute; inset:0; color:#fff; font-size:9px; display:flex; align-items:center; justify-content:center; }
+  .err-dot{ width:13px; height:13px; border-radius:50%; background:var(--bad); flex:0 0 auto; }
+
+  .checker-row{ display:flex; justify-content:space-between; align-items:center; font-size:12.5px; padding:6px 0 6px 23px; border-top:1px solid var(--hairline); }
+  .checker-row:first-of-type{ border-top:1px solid var(--hairline); }
+  .checker-name{ color:var(--ink-2); }
+  .checker-badge{ font-size:11px; font-weight:600; padding:2px 8px; border-radius:10px; }
+  .checker-badge.hit{ background:#e7f6e7; color:var(--good); }
+  .checker-badge.miss{ background:var(--page); color:var(--ink-muted); }
+  .checker-entity{ font-size:11.5px; color:var(--ink-muted); margin-left:6px; }
+
+  .verdict-badge{ display:inline-block; font-size:11px; font-weight:600; padding:4px 11px; border-radius:20px; margin:8px 0 0 23px; text-transform:uppercase; letter-spacing:.03em; }
+  .verdict-badge.verified{ background:#e7f6e7; color:var(--good); }
+  .verdict-badge.candidate{ background:var(--accent-wash); color:var(--accent); }
+  .verdict-badge.conflicting{ background:#fdeee0; color:var(--warn); }
+  .verdict-badge.unresolved{ background:var(--page); color:var(--ink-muted); }
+
+  /* ---- report ---- */
+  #report{ display:none; margin-top:48px; }
+  #report .section-title{ font-size:20px; font-weight:600; margin:0 0 20px; }
+  .rpt-grid{ display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:16px; }
+  @media (max-width:640px){ .rpt-grid{ grid-template-columns:1fr; } }
+  .rpt-card{ background:var(--card); border-radius:14px; box-shadow:var(--shadow); padding:24px; }
+  .rpt-card h3{ font-size:13px; font-weight:600; margin:0 0 14px; color:var(--ink-2); }
+  .rpt-val{ font-size:26px; font-weight:600; }
+  .rpt-lbl{ font-size:12px; color:var(--ink-muted); margin-top:4px; }
+  .rpt-list{ list-style:none; margin:0; padding:0; font-size:12.5px; }
+  .rpt-list li{ padding:8px 0; border-top:1px solid var(--hairline); display:flex; justify-content:space-between; gap:10px;}
+  .rpt-list li:first-child{ border-top:none; padding-top:0; }
+  .timestamp{ text-align:center; font-size:12px; color:var(--ink-muted); margin-top:32px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <section id="hook">
+    <p class="kicker">State of the Queue</p>
+    <h1>The US grid is the hidden bottleneck<br>on the AI buildout — <span class="accent">watch us prove it, live.</span></h1>
+    <p>One button. Real requests to PJM, Virginia's SCC, and ERCOT, made right now — not a cached demo. See exactly what gets pulled, how it's verified, and what it adds up to.</p>
+    <button id="runBtn" onclick="runLive()">▶ Run it live</button>
+    <p id="runSub">Takes about a minute. Every number that follows is fetched at the moment you click.</p>
+  </section>
+
+  <section id="trace">
+    <div class="trace-head">
+      <h2>Live run</h2>
+      <span class="live" id="liveTag">LIVE</span>
+    </div>
+    <div id="steps"></div>
+  </section>
+
+  <section id="report">
+    <p class="section-title">Report — generated from this run</p>
+    <div class="rpt-grid" id="rptTop"></div>
+    <div class="rpt-card" style="margin-bottom:16px;">
+      <h3>PJM sample — classification &amp; cross-reference (live)</h3>
+      <ul class="rpt-list" id="rptCrossRef"></ul>
+    </div>
+    <p class="timestamp" id="rptTime"></p>
+  </section>
+
+</div>
+
+<script>
+let currentStepEl = null;
+
+function addStep(label, detail){
+  const el = document.createElement('div');
+  el.className = 'step';
+  el.innerHTML = `<div class="step-label"><span class="spinner"></span><span>${label}</span></div>` +
+                  (detail ? `<div class="step-detail">${detail}</div>` : '') +
+                  `<div class="step-body"></div>`;
+  document.getElementById('steps').appendChild(el);
+  currentStepEl = el;
+  el.scrollIntoView({behavior:'smooth', block:'end'});
+  return el;
+}
+
+function markDone(el, ok=true){
+  if(!el) return;
+  const spinner = el.querySelector('.spinner');
+  if(spinner) spinner.outerHTML = ok ? '<span class="ok-dot"></span>' : '<span class="err-dot"></span>';
+}
+
+function runLive(){
+  document.getElementById('runBtn').disabled = true;
+  document.getElementById('hook').style.opacity = '0.5';
+  document.getElementById('trace').style.display = 'block';
+  document.getElementById('trace').scrollIntoView({behavior:'smooth'});
+
+  const es = new EventSource('/api/run');
+
+  es.addEventListener('step', (e) => {
+    markDone(currentStepEl, true);
+    const d = JSON.parse(e.data);
+    addStep(d.label, d.detail);
+  });
+
+  es.addEventListener('result', (e) => {
+    const d = JSON.parse(e.data);
+    if(currentStepEl){
+      markDone(currentStepEl, true);
+      const detailEl = currentStepEl.querySelector('.step-detail');
+      const div = document.createElement('div');
+      div.className = 'step-detail';
+      div.style.marginTop = '6px';
+      div.textContent = d.label + (d.detail ? ' — ' + d.detail : '');
+      currentStepEl.appendChild(div);
+    }
+  });
+
+  es.addEventListener('checker', (e) => {
+    const d = JSON.parse(e.data);
+    if(!currentStepEl) return;
+    const body = currentStepEl.querySelector('.step-body');
+    const row = document.createElement('div');
+    row.className = 'checker-row';
+    row.innerHTML = `<span class="checker-name">${d.source}</span>` +
+      `<span>${d.entity ? `<span class="checker-entity">${d.entity}</span>` : ''}` +
+      `<span class="checker-badge ${d.hit ? 'hit':'miss'}">${d.hit ? 'hit':'miss'}</span></span>`;
+    body.appendChild(row);
+  });
+
+  es.addEventListener('verdict', (e) => {
+    const d = JSON.parse(e.data);
+    if(!currentStepEl) return;
+    const badge = document.createElement('div');
+    badge.className = 'verdict-badge ' + d.confidence;
+    badge.textContent = d.confidence + (d.company_name ? ' — ' + d.company_name : '');
+    currentStepEl.appendChild(badge);
+  });
+
+  es.addEventListener('error', (e) => {
+    const d = JSON.parse(e.data);
+    markDone(currentStepEl, false);
+    const div = document.createElement('div');
+    div.className = 'step-detail';
+    div.style.color = '#c23131';
+    div.textContent = d.label;
+    if(currentStepEl) currentStepEl.appendChild(div);
+  });
+
+  es.addEventListener('report', (e) => {
+    const d = JSON.parse(e.data);
+    renderReport(d.data);
+  });
+
+  es.addEventListener('done', () => {
+    markDone(currentStepEl, true);
+    document.getElementById('liveTag').textContent = 'COMPLETE';
+    document.getElementById('liveTag').style.color = 'var(--good)';
+    document.getElementById('liveTag').style.animation = 'none';
+    es.close();
+  });
+
+  es.onerror = () => {
+    document.getElementById('liveTag').textContent = 'CONNECTION LOST';
+    es.close();
+  };
+}
+
+function renderReport(r){
+  const top = document.getElementById('rptTop');
+  top.innerHTML = '';
+
+  if (r.tx && r.tx.total_queue_gw_approx){
+    const c = document.createElement('div');
+    c.className = 'rpt-card';
+    c.innerHTML = `<h3>Texas — ERCOT (just fetched)</h3>
+      <div class="rpt-val num">~${r.tx.total_queue_gw_approx.toFixed(0)} GW</div>
+      <div class="rpt-lbl">${r.tx.data_center_pct ? r.tx.data_center_pct + '% data centers' : ''}</div>`;
+    top.appendChild(c);
+  }
+  if (r.va && r.va.n_documents){
+    const c = document.createElement('div');
+    c.className = 'rpt-card';
+    c.innerHTML = `<h3>Virginia — SCC docket (just fetched)</h3>
+      <div class="rpt-val num">${r.va.n_documents}</div>
+      <div class="rpt-lbl">real filings on record, most recent ${r.va.most_recent_date || ''}</div>`;
+    top.appendChild(c);
+  }
+  if (r.pjm && r.pjm.total_rows_live){
+    const c = document.createElement('div');
+    c.className = 'rpt-card';
+    const dcCount = (r.pjm.by_sector && r.pjm.by_sector['Data Center']) || 0;
+    c.innerHTML = `<h3>PJM — live queue export</h3>
+      <div class="rpt-val num">${r.pjm.total_rows_live.toLocaleString()}</div>
+      <div class="rpt-lbl">real rows fetched live · ${dcCount} of ${r.pjm.sample_size}-row sample classified Data Center</div>`;
+    top.appendChild(c);
+  }
+
+  const list = document.getElementById('rptCrossRef');
+  list.innerHTML = '';
+  (r.cross_ref || []).forEach(v => {
+    const li = document.createElement('li');
+    const loc = [v.county, v.state].filter(Boolean).join(', ');
+    li.innerHTML = `<span>${v.project_name || v.queue_id}${loc ? ` <span style="color:var(--ink-muted)">(${loc})</span>` : ''}</span>` +
+      `<span class="verdict-badge ${v.confidence}" style="margin:0;">${v.confidence}</span>`;
+    list.appendChild(li);
+  });
+  if (!(r.cross_ref || []).length){
+    list.innerHTML = '<li>No Data Center candidates in this sample — real result, PJM\'s queue is mostly generation (see project notes).</li>';
+  }
+
+  document.getElementById('rptTime').textContent = 'Generated live ' + (r.generated_at || '');
+  document.getElementById('report').style.display = 'block';
+  document.getElementById('report').scrollIntoView({behavior:'smooth'});
+}
+</script>
+</body>
+</html>

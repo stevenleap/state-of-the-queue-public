@@ -1,0 +1,38 @@
+{
+  "_readme": "Hand-maintained for now, unlike dashboard_data.json (which pjm_pipeline.py regenerates from a live queue export). Virginia's figures come from Dominion's own SCC testimony (no automated tracker yet -- dominion_scc_tracker.py doesn't exist, see CLAUDE.md). Texas's figures are pulled from ercot_large_load_history.json, written by ercot_large_load_tracker.py -- update this file's TX block by hand whenever that history file gets a new record, until a small script does it automatically. Every stat here is a snapshot from a specific filing/report date, not live data -- render it with the as_of date visible, never as if it updates continuously.",
+  "generated": "2026-07-18",
+  "states": [
+    {
+      "code": "VA",
+      "name": "Virginia",
+      "grid_operator": "Dominion Energy (PJM territory)",
+      "docket_label": "Case No. PUR-2026-00011",
+      "docket_title": "For Approval of its Large-Load Connection Queue Process Standards",
+      "docket_url": "https://www.scc.virginia.gov/docketsearch",
+      "as_of": "2026-06-30",
+      "stats": [
+        {"label": "Total large-load pipeline", "value": "~70 GW", "detail": "~25 GW with connection dates through 2031; ~45 GW still under study"},
+        {"label": "Queue vs. Dominion's actual peak load", "value": "70,000 MW vs 24,678 MW", "detail": "the pipeline is ~2.8x Dominion Zone's entire current all-time peak demand"},
+        {"label": "Approved for connection by 2031", "value": "111", "detail": "projects"},
+        {"label": "Still waiting in queue", "value": "220", "detail": "projects"},
+        {"label": "New-arrival wait time", "value": "4yr → 7yr", "detail": "Dominion told regulators 4 years in 2022, grown to 7 years by 2024"}
+      ],
+      "source_note": "Dominion's SCC testimony and filings, Case No. PUR-2026-00011."
+    },
+    {
+      "code": "TX",
+      "name": "Texas",
+      "grid_operator": "ERCOT",
+      "docket_label": "PUCT Project No. 58481",
+      "docket_title": "Large Load Interconnection Standards (Senate Bill 6)",
+      "docket_url": "https://interchange.puc.texas.gov/Search/Filings?ControlNumber=58481",
+      "as_of": "2026-03-26",
+      "stats": [
+        {"label": "Total large-load queue", "value": "410,618 MW", "detail": "87.6% data centers (355,830 MW)"},
+        {"label": "Actually energized", "value": "~1.4%", "detail": "5,778 MW \"Observed Energized\" out of 410,618 MW total"},
+        {"label": "Queue growth in 13 days", "value": "238,629 → 410,618 MW", "detail": "a 137-submission, ~140,000 MW backlog cleared between the two snapshots (2026-03-13 → 2026-03-26)"}
+      ],
+      "source_note": "ERCOT's own Large Load Interconnection Status reports, PUCT Project No. 58481."
+    }
+  ]
+}
