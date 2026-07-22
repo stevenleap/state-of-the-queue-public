@@ -192,14 +192,26 @@ PENDING_BACKLOG_PATTERN = re.compile(
 
 def fetch_pdf(url: str) -> tuple[bytes, str]:
     """Returns (raw_pdf_bytes, extracted_text). Raw bytes are kept around
-    for vision_extract_total_mw()'s fallback -- no need to re-download."""
-    resp = requests.get(url, timeout=60, headers={"User-Agent": "Mozilla/5.0 (research; state-of-the-queue project)"})
+    for vision_extract_total_mw()'s fallback -- no need to re-download.
+
+    Raises RuntimeError rather than calling sys.exit() on failure -- this
+    is imported and called live by server.py's web request handler, and
+    SystemExit (what sys.exit() raises) isn't caught by `except Exception`,
+    so it would propagate out of the request and crash the whole server
+    process instead of just failing that one request. Same fix already
+    applied to fetch_latest_queue.py's fetch_queue_df() and
+    dominion_scc_tracker.py's get_case() for the same reason -- main()
+    below preserves the original CLI exit-with-message behavior."""
+    try:
+        resp = requests.get(url, timeout=60, headers={"User-Agent": "Mozilla/5.0 (research; state-of-the-queue project)"})
+    except requests.exceptions.RequestException as e:
+        raise RuntimeError(f"Network request to ERCOT failed: {e}")
     if resp.status_code != 200:
-        sys.exit(f"ERCOT returned HTTP {resp.status_code} for {url}.\n"
-                  f"This project doesn't have a stable URL for 'the latest report' yet "
-                  f"(see module docstring) -- confirm the URL is still correct via a "
-                  f"fresh web search for 'Large Load Interconnection Status Update ercot.com' "
-                  f"rather than reusing an old one.")
+        raise RuntimeError(f"ERCOT returned HTTP {resp.status_code} for {url}. "
+                            f"This project doesn't have a stable URL for 'the latest report' yet "
+                            f"(see module docstring) -- confirm the URL is still correct via a "
+                            f"fresh web search for 'Large Load Interconnection Status Update ercot.com' "
+                            f"rather than reusing an old one.")
     with pdfplumber.open(io.BytesIO(resp.content)) as pdf:
         text = "\n".join(page.extract_text() or "" for page in pdf.pages)
     return resp.content, text
@@ -360,7 +372,10 @@ def main():
 
     if args.url:
         print(f"Fetching {args.url} ...")
-        pdf_bytes, text = fetch_pdf(args.url)
+        try:
+            pdf_bytes, text = fetch_pdf(args.url)
+        except RuntimeError as e:
+            sys.exit(str(e))
         record = parse_report(text, args.url, pdf_bytes=pdf_bytes)
         if record["parse_status"] == "NO_FIGURES_MATCHED":
             print("\nWARNING: automated parsing found nothing recognizable in this PDF.\n"

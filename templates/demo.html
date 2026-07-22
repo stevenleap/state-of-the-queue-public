@@ -20,19 +20,29 @@
   .wrap{ max-width:760px; margin:0 auto; padding:64px 28px 100px; }
 
   /* ---- hook ---- */
-  #hook{ text-align:center; padding:60px 0; }
-  #hook .kicker{ font-size:14px; color:var(--ink-2); margin-bottom:16px; }
-  #hook h1{ font-size:38px; font-weight:600; line-height:1.25; margin:0 0 20px; letter-spacing:-0.01em; }
-  #hook h1 .accent{ color:var(--accent); }
-  #hook p{ font-size:16px; color:var(--ink-2); max-width:520px; margin:0 auto 40px; }
-  #runBtn{
-    font-family:'IBM Plex Sans',sans-serif; font-size:16px; font-weight:600; color:#fff;
-    background:var(--accent); border:none; border-radius:12px; padding:16px 36px; cursor:pointer;
-    box-shadow:0 4px 16px rgba(42,120,214,.25); transition:transform .1s ease;
+  #hook{ text-align:center; padding:80px 0 60px; }
+  #hook h1{ font-size:30px; font-weight:600; line-height:1.35; margin:0 0 40px; letter-spacing:-0.01em; max-width:560px; margin-left:auto; margin-right:auto; }
+
+  #checkbox{ display:none; }
+  .switch{
+    position:relative; width:90px; height:90px; margin:0 auto;
+    background-color:rgb(99,99,99); border-radius:50%; z-index:1; cursor:pointer;
+    display:flex; flex-direction:column; align-items:center; justify-content:center; gap:5px;
+    font-family:'IBM Plex Sans',sans-serif; font-size:0.9em; font-weight:700; color:rgb(37,37,37);
+    border:2px solid rgb(126,126,126); box-shadow:0px 0px 3px rgb(2,2,2) inset;
+    transition:box-shadow .2s ease, background-color .2s ease, border-color .2s ease;
   }
-  #runBtn:hover{ transform:translateY(-1px); }
-  #runBtn:disabled{ opacity:.5; cursor:default; transform:none; }
-  #runSub{ font-size:12.5px; color:var(--ink-muted); margin-top:14px; }
+  .svg{ position:relative; width:30%; height:30%; border-radius:50%; display:flex; align-items:center; justify-content:center; }
+  .svg path{ fill:rgb(37,37,37); }
+  #checkbox:checked + .switch .svg{ filter:drop-shadow(0px 0px 3px rgb(222,151,255)); }
+  #checkbox:checked + .switch .svg path{ fill:rgb(255,255,255); }
+  #checkbox:checked + .switch{
+    box-shadow:0px 0px 1px rgb(222,151,255) inset, 0px 0px 2px rgb(222,151,255) inset,
+      0px 0px 10px rgb(222,151,255) inset, 0px 0px 40px rgb(222,151,255),
+      0px 0px 100px rgb(222,151,255), 0px 0px 5px rgb(222,151,255);
+    border:2px solid rgb(255,255,255); background-color:rgb(152,107,172); color:rgb(255,255,255);
+  }
+  #checkbox:disabled + .switch{ cursor:default; opacity:.7; }
 
   /* ---- trace ---- */
   #trace{ display:none; }
@@ -49,7 +59,10 @@
   @keyframes spin{ to{ transform:rotate(360deg); } }
   .ok-dot{ width:13px; height:13px; border-radius:50%; background:var(--good); flex:0 0 auto; position:relative; }
   .ok-dot::after{ content:"✓"; position:absolute; inset:0; color:#fff; font-size:9px; display:flex; align-items:center; justify-content:center; }
-  .err-dot{ width:13px; height:13px; border-radius:50%; background:var(--bad); flex:0 0 auto; }
+  .err-dot{ width:13px; height:13px; border-radius:50%; background:var(--warn); flex:0 0 auto; position:relative; }
+  .err-dot::after{ content:"!"; position:absolute; inset:0; color:#fff; font-size:9px; font-weight:700; display:flex; align-items:center; justify-content:center; }
+  .step-note{ font-size:12px; color:var(--warn); margin-top:6px; }
+  .step.degraded{ border-left:3px solid var(--warn); }
 
   .checker-row{ display:flex; justify-content:space-between; align-items:center; font-size:12.5px; padding:6px 0 6px 23px; border-top:1px solid var(--hairline); }
   .checker-row:first-of-type{ border-top:1px solid var(--hairline); }
@@ -84,11 +97,15 @@
 <div class="wrap">
 
   <section id="hook">
-    <p class="kicker">State of the Queue</p>
-    <h1>The US grid is the hidden bottleneck<br>on the AI buildout — <span class="accent">watch us prove it, live.</span></h1>
-    <p>One button. Real requests to PJM, Virginia's SCC, and ERCOT, made right now — not a cached demo. See exactly what gets pulled, how it's verified, and what it adds up to.</p>
-    <button id="runBtn" onclick="runLive()">▶ Run it live</button>
-    <p id="runSub">Takes about a minute. Every number that follows is fetched at the moment you click.</p>
+    <h1>The average AI data center now waits 4 years just to get power.<br>We map exactly what's blocking them.</h1>
+    <input id="checkbox" type="checkbox" onchange="onStartToggle(this)">
+    <label class="switch" for="checkbox">
+      <svg viewBox="0 0 448 512" class="svg"><path d="M320 48a48 48 0 1 0 -96 0 48 48 0 1 0 96 0zM125.7 175.5c9.9-9.9 23.4-15.5 37.5-15.5c1.9 0 3.8 .1 5.6 .3L137.6 254c-9.3 28 1.7 58.8 26.8 74.5l86.2 53.9-25.4 88.8c-4.9 17 5 34.7 22 39.6s34.7-5 39.6-22l28.7-100.4c5.9-20.6-2.6-42.6-20.7-53.9L238 299l30.9-82.4 5.1 12.3C289 264.7 323.9 288 362.7 288H384c17.7 0 32-14.3 32-32s-14.3-32-32-32H362.7c-12.9 0-24.6-7.8-29.5-19.7l-6.3-15c-14.6-35.1-44.1-61.9-80.5-73.1l-48.7-15c-11.1-3.4-22.7-5.2-34.4-5.2c-31 0-60.8 12.3-82.7 34.3L57.4 153.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0l23.1-23.1zM91.2 352H32c-17.7 0-32 14.3-32 32s14.3 32 32 32h69.6c19 0 36.2-11.2 43.9-28.5L157 361.6l-9.5-6c-17.5-10.9-30.5-26.8-37.9-44.9L91.2 352z"></path></svg>Start
+    </label>
+    <p id="replayLink" style="display:none;text-align:center;margin-top:14px;font-size:13px;">
+      <a href="#" onclick="runReplay();return false;" style="color:var(--ink-muted);text-decoration:underline;">View last real run</a>
+      <span id="replayWhen" style="color:var(--ink-muted);"></span>
+    </p>
   </section>
 
   <section id="trace">
@@ -103,7 +120,7 @@
     <p class="section-title">Report — generated from this run</p>
     <div class="rpt-grid" id="rptTop"></div>
     <div class="rpt-card" style="margin-bottom:16px;">
-      <h3>PJM sample — classification &amp; cross-reference (live)</h3>
+      <h3>Real Virginia filers — cross-referenced live</h3>
       <ul class="rpt-list" id="rptCrossRef"></ul>
     </div>
     <p class="timestamp" id="rptTime"></p>
@@ -114,6 +131,8 @@
 <script>
 let currentStepEl = null;
 
+let currentStepError = false;
+
 function addStep(label, detail){
   const el = document.createElement('div');
   el.className = 'step';
@@ -122,6 +141,7 @@ function addStep(label, detail){
                   `<div class="step-body"></div>`;
   document.getElementById('steps').appendChild(el);
   currentStepEl = el;
+  currentStepError = false;
   el.scrollIntoView({behavior:'smooth', block:'end'});
   return el;
 }
@@ -130,36 +150,136 @@ function markDone(el, ok=true){
   if(!el) return;
   const spinner = el.querySelector('.spinner');
   if(spinner) spinner.outerHTML = ok ? '<span class="ok-dot"></span>' : '<span class="err-dot"></span>';
+  if(!ok) el.classList.add('degraded');
 }
 
-function runLive(){
-  document.getElementById('runBtn').disabled = true;
-  document.getElementById('hook').style.opacity = '0.5';
+// A step only concludes when the NEXT step starts, or the run ends --
+// not on every intermediate 'result'/'checker' event, which used to mark
+// a 4-batch classification step done after just the first batch.
+function concludeCurrentStep(){
+  if(currentStepEl) markDone(currentStepEl, !currentStepError);
+}
+
+function onStartToggle(cb){
+  if(!cb.checked) return;
+  cb.disabled = true;
+  startRun('/api/run', 'live');
+}
+
+function runReplay(){
+  const cb = document.getElementById('checkbox');
+  cb.checked = true;
+  cb.disabled = true;
+  startRun('/api/replay', 'replay');
+}
+
+let activeES = null;
+let stallTimer = null;
+let currentMode = 'live';
+
+// A real dead connection (hotspot drops, wifi dies) is NOT reliably
+// detected quickly by the browser's own EventSource -- tested directly by
+// cutting the network mid-run: the native onerror/"CONNECTION LOST" path
+// took well over 15 seconds to fire, during which the UI still showed a
+// normal-looking active spinner, indistinguishable from a merely slow
+// step. This watchdog doesn't wait on that: it resets on every real SSE
+// event, and if 20s pass with no activity, surfaces an explicit,
+// actionable prompt to bail to the saved real run -- so the presenter
+// gets a clear signal instead of staring at an ambiguous spinner.
+function armWatchdog(){
+  clearTimeout(stallTimer);
+  clearStallBanner();
+  stallTimer = setTimeout(showStallBanner, 20000);
+}
+
+function clearWatchdog(){
+  clearTimeout(stallTimer);
+  clearStallBanner();
+}
+
+function clearStallBanner(){
+  const b = document.getElementById('stallBanner');
+  if(b) b.remove();
+}
+
+function showStallBanner(){
+  if(document.getElementById('stallBanner')) return;
+  const banner = document.createElement('div');
+  banner.id = 'stallBanner';
+  banner.style.cssText = 'margin-top:12px;padding:14px 16px;border-radius:10px;' +
+    'border:1px solid var(--warn);background:rgba(200,140,0,0.08);font-size:13px;text-align:center;';
+  banner.innerHTML = 'No update in the last 20 seconds — this run may have stalled. ' +
+    '<a href="#" onclick="runReplay();return false;" style="color:var(--warn);text-decoration:underline;font-weight:600;">View last real run instead</a>';
+  document.getElementById('trace').appendChild(banner);
+}
+
+function startRun(url, mode){
+  currentMode = mode;
+  // If a run is already in progress (e.g. a live run stalled and the
+  // presenter clicks "View last real run" to recover mid-demo), close
+  // it first. Without this, the old EventSource keeps streaming into the
+  // same #steps container in the background while the new one starts,
+  // interleaving two runs' steps into one garbled trace -- caught by
+  // testing the actual "recover mid-presentation" scenario, not just the
+  // clean-start path.
+  if(activeES){
+    activeES.close();
+    activeES = null;
+  }
+  clearWatchdog();
+
   document.getElementById('trace').style.display = 'block';
   document.getElementById('trace').scrollIntoView({behavior:'smooth'});
+  document.getElementById('steps').innerHTML = '';
+  document.getElementById('report').style.display = 'none';
+  currentStepEl = null;
+  currentStepError = false;
 
-  const es = new EventSource('/api/run');
+  const tag = document.getElementById('liveTag');
+  if(mode === 'live'){
+    tag.textContent = 'LIVE';
+    tag.style.color = '';
+    tag.style.animation = '';
+  } else {
+    tag.textContent = 'REPLAY';
+    tag.style.color = 'var(--ink-muted)';
+    tag.style.animation = 'none';
+  }
 
-  es.addEventListener('step', (e) => {
-    markDone(currentStepEl, true);
+  const es = new EventSource(url);
+  activeES = es;
+  armWatchdog();  // starts ticking from connection-open, not the first event
+
+  // Every real event resets the stall watchdog -- wrapping addEventListener
+  // once here instead of repeating armWatchdog() in each handler below.
+  const on = (type, handler) => es.addEventListener(type, (e) => { armWatchdog(); handler(e); });
+
+  on('meta', (e) => {
+    const d = JSON.parse(e.data);
+    if(d.captured_at){
+      const when = new Date(d.captured_at).toLocaleString();
+      tag.textContent = 'REPLAY — captured ' + when;
+    }
+  });
+
+  on('step', (e) => {
+    concludeCurrentStep();
     const d = JSON.parse(e.data);
     addStep(d.label, d.detail);
   });
 
-  es.addEventListener('result', (e) => {
+  on('result', (e) => {
     const d = JSON.parse(e.data);
     if(currentStepEl){
-      markDone(currentStepEl, true);
-      const detailEl = currentStepEl.querySelector('.step-detail');
       const div = document.createElement('div');
       div.className = 'step-detail';
       div.style.marginTop = '6px';
-      div.textContent = d.label + (d.detail ? ' — ' + d.detail : '');
+      div.textContent = d.label + (d.detail ? ': ' + d.detail : '');
       currentStepEl.appendChild(div);
     }
   });
 
-  es.addEventListener('checker', (e) => {
+  on('checker', (e) => {
     const d = JSON.parse(e.data);
     if(!currentStepEl) return;
     const body = currentStepEl.querySelector('.step-body');
@@ -171,43 +291,86 @@ function runLive(){
     body.appendChild(row);
   });
 
-  es.addEventListener('verdict', (e) => {
+  on('verdict', (e) => {
     const d = JSON.parse(e.data);
     if(!currentStepEl) return;
     const badge = document.createElement('div');
     badge.className = 'verdict-badge ' + d.confidence;
-    badge.textContent = d.confidence + (d.company_name ? ' — ' + d.company_name : '');
+    badge.textContent = d.confidence + (d.company_name ? ': ' + d.company_name : '');
     currentStepEl.appendChild(badge);
+    if(d.confidence === 'conflicting' && d.reason){
+      const note = document.createElement('div');
+      note.className = 'step-note';
+      note.textContent = d.reason;
+      currentStepEl.appendChild(note);
+    }
   });
 
-  es.addEventListener('error', (e) => {
+  // Named 'step_error', not 'error' -- 'error' is a reserved EventSource
+  // event name (it's also what fires on a real connection failure, via
+  // es.onerror below), and a custom SSE event literally called "error"
+  // gets dispatched to that SAME native listener list. That collision was
+  // a real bug, caught by testing an actual live failure: the first real
+  // step-level error (e.g. Virginia's SCC check failing) triggered
+  // es.onerror, which calls es.close(), silently killing the whole run
+  // right there -- no further steps, no report, no visible explanation,
+  // just a frozen page. Renaming the custom event fixes it for good.
+  on('step_error', (e) => {
     const d = JSON.parse(e.data);
-    markDone(currentStepEl, false);
+    currentStepError = true;
     const div = document.createElement('div');
-    div.className = 'step-detail';
-    div.style.color = '#c23131';
+    div.className = 'step-note';
     div.textContent = d.label;
     if(currentStepEl) currentStepEl.appendChild(div);
   });
 
-  es.addEventListener('report', (e) => {
+  on('report', (e) => {
     const d = JSON.parse(e.data);
     renderReport(d.data);
   });
 
-  es.addEventListener('done', () => {
-    markDone(currentStepEl, true);
-    document.getElementById('liveTag').textContent = 'COMPLETE';
-    document.getElementById('liveTag').style.color = 'var(--good)';
-    document.getElementById('liveTag').style.animation = 'none';
+  on('done', () => {
+    clearWatchdog();
+    concludeCurrentStep();
+    if(mode === 'live'){
+      tag.textContent = 'COMPLETE';
+      tag.style.color = 'var(--good)';
+    } else {
+      tag.textContent += ' — complete';
+    }
+    tag.style.animation = 'none';
     es.close();
   });
 
   es.onerror = () => {
-    document.getElementById('liveTag').textContent = 'CONNECTION LOST';
+    clearWatchdog();
+    currentStepError = true;
+    concludeCurrentStep();
+    tag.textContent = mode === 'live' ? 'CONNECTION LOST' : 'REPLAY INTERRUPTED';
+    tag.style.color = 'var(--warn)';
+    tag.style.animation = 'none';
+    const note = document.createElement('p');
+    note.style.cssText = 'text-align:center;font-size:13px;color:var(--ink-muted);margin-top:16px;';
+    note.textContent = mode === 'live'
+      ? 'Connection interrupted. Numbers shown above are real and already fetched.'
+      : 'Replay interrupted. Reload and try again, or click Start for a live run.';
+    document.getElementById('trace').appendChild(note);
     es.close();
   };
 }
+
+async function initReplayLink(){
+  try {
+    const resp = await fetch('/api/replay/info');
+    const info = await resp.json();
+    if(info.available && info.captured_at){
+      const when = new Date(info.captured_at).toLocaleString();
+      document.getElementById('replayWhen').textContent = '(captured ' + when + ')';
+      document.getElementById('replayLink').style.display = 'block';
+    }
+  } catch (e) { /* no cached run available -- link just stays hidden */ }
+}
+initReplayLink();
 
 function renderReport(r){
   const top = document.getElementById('rptTop');
@@ -232,11 +395,15 @@ function renderReport(r){
   if (r.pjm && r.pjm.total_rows_live){
     const c = document.createElement('div');
     c.className = 'rpt-card';
-    const dcCount = (r.pjm.by_sector && r.pjm.by_sector['Data Center']) || 0;
-    c.innerHTML = `<h3>PJM — live queue export</h3>
+    c.innerHTML = `<h3>PJM — generation queue (context, not load)</h3>
       <div class="rpt-val num">${r.pjm.total_rows_live.toLocaleString()}</div>
-      <div class="rpt-lbl">real rows fetched live · ${dcCount} of ${r.pjm.sample_size}-row sample classified Data Center</div>`;
+      <div class="rpt-lbl">real generator interconnection requests, fetched live · not a data-center load claim</div>`;
     top.appendChild(c);
+  }
+
+  if (!top.children.length){
+    top.innerHTML = '<div class="rpt-card"><h3>No sources came back this run</h3>' +
+      '<div class="rpt-lbl">PJM, Virginia, and Texas all failed live this run — see the real errors in the trace above.</div></div>';
   }
 
   const list = document.getElementById('rptCrossRef');
@@ -249,10 +416,11 @@ function renderReport(r){
     list.appendChild(li);
   });
   if (!(r.cross_ref || []).length){
-    list.innerHTML = '<li>No Data Center candidates in this sample — real result, PJM\'s queue is mostly generation (see project notes).</li>';
+    list.innerHTML = '<li>No real filer names came back from the Virginia SCC check this run — see the trace above for the live error.</li>';
   }
 
-  document.getElementById('rptTime').textContent = 'Generated live ' + (r.generated_at || '');
+  document.getElementById('rptTime').textContent = 'Report generated ' + (r.generated_at || '') +
+    ' — see the run status above for whether this was live or a replay.';
   document.getElementById('report').style.display = 'block';
   document.getElementById('report').scrollIntoView({behavior:'smooth'});
 }

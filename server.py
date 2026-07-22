@@ -10,28 +10,39 @@ happens. This is the thing that gets clicked in front of judges.
 WHAT "LIVE" MEANS HERE, PRECISELY (read this before assuming a step is
 faked): every step below calls the exact same functions already built
 and live-tested earlier in this project (fetch_latest_queue.py,
-llm_sector_matcher.py, cross_reference.py, dominion_scc_tracker.py,
-ercot_large_load_tracker.py) -- imported directly, not shelled out to,
-not mocked. Two real, deliberate scope decisions were made to keep a
-live run demo-paced (roughly 60-120 seconds) instead of taking the
-20+ minutes a full run would (recall: classifying and cross-referencing
-all ~9,000 real PJM rows would each burn real DeepSeek/Tavily/Steel
-usage per row):
-  1. PJM: fetches the REAL full live queue export (every row, real),
-     but only classifies+cross-references a bounded live SAMPLE of it
-     (PJM_SAMPLE_SIZE rows) -- this is a real, live, unscripted run on
-     real data, just on a demo-appropriately-sized slice, not the full
-     ~9,000 rows. Labeled honestly in the UI as a sample.
-  2. Cross-referencing runs on a bounded number of the sample's
-     "Data Center" predictions (MAX_CROSS_REF_CANDIDATES) so one run
-     doesn't fire 9 real checkers x dozens of candidates live.
-  Virginia and Texas steps hit a specific real, known case number /
-  report URL rather than self-discovering one -- this project's own
-  research already confirmed neither SCC nor ERCOT expose a stable
-  "give me the latest one" endpoint (see CLAUDE.md), so a fixed real
-  target is the honest equivalent of "search for the current one" for
-  demo purposes. Every number that comes back is real and freshly
-  fetched at click-time, not pre-computed.
+cross_reference.py, dominion_scc_tracker.py, ercot_large_load_tracker.py)
+-- imported directly, not shelled out to, not mocked.
+
+PJM IS NOT A LOAD-SIDE DATA SOURCE. Its public export is confirmed
+generation-only (real generator interconnection requests, not data
+centers -- see CLAUDE.md's MAJOR UPDATE). It is fetched live here purely
+as a labeled, secondary comparison stat ("new power supply competing for
+the same grid capacity"), never as a source of cross-reference
+candidates -- an earlier version of this file tried classifying a live
+PJM sample via DeepSeek looking for "Data Center" predictions to feed
+the cross-reference step, which (a) is structurally close to a 0% hit
+rate on generation data, so it wasted most of a run's time to
+demonstrate nothing, and (b) looked like a broken search on screen when
+it came back empty. The actual load-side data in this demo is Virginia
+(Dominion/SCC docket) and Texas (ERCOT) -- both real regulatory sources
+that are specifically about large loads / data centers, not PJM.
+
+The real cross-reference candidates now come from Virginia's own SCC
+docket, fetched live just above that step: real filer/party names pulled
+out of the case's most recent real filings (Case No. PUR-2026-00011 is
+specifically "For Approval of its Large-Load Connection Queue Process
+Standards," so every non-procedural party in it is a real large-load/
+data-center entity by construction -- see _extract_va_candidates).
+Cross-referencing is bounded to MAX_CROSS_REF_CANDIDATES names so one run
+doesn't fire 9 real checkers x many candidates live.
+
+Virginia and Texas steps hit a specific real, known case number /
+report URL rather than self-discovering one -- this project's own
+research already confirmed neither SCC nor ERCOT expose a stable
+"give me the latest one" endpoint (see CLAUDE.md), so a fixed real
+target is the honest equivalent of "search for the current one" for
+demo purposes. Every number that comes back is real and freshly
+fetched at click-time, not pre-computed.
 
 Any step that fails live (a slow API, a timeout) yields a real error
 event and the run continues to the next step -- it does not fall back
@@ -44,29 +55,25 @@ Run locally:
 import io
 import json
 import asyncio
-from datetime import date
+from datetime import date, datetime, timezone
+from pathlib import Path
 
 from fastapi import FastAPI
 from fastapi.responses import HTMLResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 
 import fetch_latest_queue
-import llm_sector_matcher as lsm
 import cross_reference as cr
 import dominion_scc_tracker as dst
 import ercot_large_load_tracker as elt
 
 app = FastAPI()
 
-PJM_SAMPLE_SIZE = 60          # 4 real DeepSeek batches (BATCH_SIZE=15). 30 was tried live first and
-                               # landed on a real slice of the queue with zero "Data Center"
-                               # predictions -- an honest result, but it skips the demo's most
-                               # differentiated step. Earlier live testing this session (see
-                               # CLAUDE.md) found a 60-row slice reliably surfaces ~18 real
-                               # "Data Center" predictions from this same live feed, so 60 makes
-                               # the cross-reference step actually run without changing what's
-                               # real -- still every row live, still not cherry-picked results.
-MAX_CROSS_REF_CANDIDATES = 3  # each fires ~9 real checkers -- keep demo-paced
+MAX_CROSS_REF_CANDIDATES = 3  # each fires ~9 real checkers live -- keep demo-paced
+CACHE_PATH = Path("cached_runs/latest_run.json")  # see capture_demo_run.py / GET /api/replay
+REPLAY_EVENT_DELAY = 0.35     # seconds between replayed events -- paced for readability,
+                               # not a claim about real latency (real latency is preserved
+                               # nowhere in a replay; the timestamp is, which is the honest part)
 VA_CASE_NUMBER = "PUR-2026-00011"
 TX_REPORT_URL = "https://www.ercot.com/files/docs/2026/04/01/ERCOT_LargeLoad_Update_April2026_B-C_-Hearing.pdf"
 # ^ the hearing-deck variant, not the plain monthly TAC deck -- confirmed
@@ -103,6 +110,7 @@ async def cross_ref_one_live(project_name, county="", state="", tow="", out=None
                    entity=result.get("entity_name"), note=(result.get("note") or result.get("error") or "")[:140])
 
     named_hits = [h for h in hits if h.get("entity_name")]
+    reason = None
     if named_hits:
         clusters = cr._cluster_named_hits(named_hits)
         clusters.sort(key=len, reverse=True)
@@ -118,15 +126,54 @@ async def cross_ref_one_live(project_name, county="", state="", tow="", out=None
             confidence = "candidate"
         best = next((h for h in top if h.get("entity_confidence") == "high"), top[0])
         company_name = best["entity_name"]
+
+        # Name the actual disagreement on screen, not just the "conflicting"
+        # label, so a viewer doesn't need it explained out loud.
+        if confidence == "conflicting" and len(clusters) >= 2:
+            minority = clusters[1]
+            minority_sources = ", ".join(h["source"] for h in minority)
+            majority_sources = ", ".join(h["source"] for h in top)
+            reason = (f"{minority_sources} found “{minority[0]['entity_name']}”; "
+                      f"{majority_sources} agree on “{company_name}” instead.")
     else:
         confidence = "unresolved"
         company_name = None
 
     verdict = {"project_name": project_name, "county": county, "state": state,
-               "confidence": confidence, "company_name": company_name}
+               "confidence": confidence, "company_name": company_name, "reason": reason}
     if out is not None:
         out.append(verdict)
     yield sse("verdict", **verdict)
+
+
+def _extract_va_candidates(docs_sorted, case_name, limit=MAX_CROSS_REF_CANDIDATES):
+    """Pulls up to `limit` distinct real filer/party names out of Virginia's
+    most recent SCC filings -- these are the real cross-reference targets
+    for the live demo now, replacing PJM's generation rows (see run_pipeline
+    docstring for why). Document_Name is real, live text shaped like
+    "Amazon Data Services, Inc. - Notice of ..."; the party name is
+    everything before the first " - ". Filters out Dominion itself and
+    procedural parties (Staff, the Commission, the AG's office) since
+    those aren't data-center entities worth cross-referencing -- everyone
+    else in this specific docket (Case No. PUR-2026-00011, "Large-Load
+    Connection Queue Process Standards") is there because they're a real
+    large-load/data-center party, by construction of what the case is
+    about."""
+    exclude_markers = ("virginia electric", "state corporation commission", "commission staff",
+                        "office of the attorney general", "division of public utility",
+                        "old dominion electric", "division of consumer counsel")
+    seen = []
+    for d in docs_sorted:
+        name = d["Document_Name"].split(" - ", 1)[0].strip()
+        if len(name) < 3 or name.lower() == (case_name or "").lower():
+            continue
+        if any(m in name.lower() for m in exclude_markers):
+            continue
+        if name not in seen:
+            seen.append(name)
+        if len(seen) >= limit:
+            break
+    return seen
 
 
 async def run_pipeline():
@@ -136,116 +183,57 @@ async def run_pipeline():
     report = {"pjm": {}, "cross_ref": [], "va": {}, "tx": {}}
 
     # ---------------------------------------------------------- PJM fetch
-    yield sse("step", label="Fetching PJM's live interconnection queue export", detail="services.pjm.com")
+    # Context only, not a load-side claim: PJM's export is confirmed
+    # generation-only (see CLAUDE.md's MAJOR UPDATE), so it no longer
+    # feeds the cross-reference step below -- that used to mean gambling
+    # a live DeepSeek classification pass on ~0 odds of a real "Data
+    # Center" hit, which both wasted most of a run's time AND looked like
+    # a broken search on screen. Kept here only as what it actually is: a
+    # real, live comparison point for new generation SUPPLY, the
+    # secondary story this project's locked decisions already call for.
+    yield sse("step", label="Fetching PJM's live generation queue (context, not load data)", detail="services.pjm.com")
     try:
         df = await asyncio.to_thread(fetch_latest_queue.fetch_queue_df)
-    except RuntimeError as e:
-        yield sse("error", label=f"PJM fetch failed: {e}")
-        df = None
-
-    if df is not None:
         report["pjm"]["total_rows_live"] = len(df)
-        yield sse("result", label=f"{len(df):,} real rows fetched live from PJM's public feed",
-                   detail=f"columns include: {', '.join(str(c) for c in df.columns[:5])}...")
-
-        # ------------------------------------------------- classify sample
-        id_col = lsm.find_col(df, "Queue Number", "Queue ID", "Project ID")
-        name_col = lsm.find_col(df, "Project Name", "Name")
-        county_col = lsm.find_col(df, "County")
-        state_col = lsm.find_col(df, "State")
-        tow_col = lsm.find_col(df, "Transmission Owner")
-        mw_col = lsm.find_col(df, "MW Capacity", "Capacity (MW)", "Summer Capacity (MW)")
-
-        # Random sample, not the first N rows -- live-tested both ways: the
-        # first 60 rows of this live feed landed on zero "Data Center"
-        # predictions twice in a row (a real, honest result, but it skips
-        # the demo's most differentiated step). A random spread across the
-        # full live file is still 100% real data, just better coverage of
-        # a ~9,263-row file that's ordered in a way where the earliest rows
-        # aren't representative.
-        sample = df.sample(n=min(PJM_SAMPLE_SIZE, len(df)))
-        work = sample[[id_col, name_col, county_col, state_col, mw_col]].copy()
-        work.columns = ["queue_id", "project_name", "county", "state", "mw"]
-        work = work.dropna(subset=["queue_id"])
-
-        yield sse("step", label=f"Classifying a live sample of {len(work)} real queue entries via DeepSeek",
-                   detail=f"{PJM_SAMPLE_SIZE} of {len(df):,} rows -- full run would burn real API usage on all of them")
-
-        results = []
-        n_batches = (len(work) - 1) // lsm.BATCH_SIZE + 1
-        for i, start in enumerate(range(0, len(work), lsm.BATCH_SIZE), 1):
-            batch = work.iloc[start:start + lsm.BATCH_SIZE]
-            batch_json = batch.to_json(orient="records")
-            try:
-                raw = await asyncio.to_thread(lsm.call_deepseek, batch_json)
-                raw = raw.strip()
-                if raw.startswith("```"):
-                    raw = raw.strip("`")
-                    raw = raw.split("\n", 1)[1] if "\n" in raw else raw
-                parsed = json.loads(raw)
-                results.extend(parsed)
-                yield sse("result", label=f"DeepSeek batch {i}/{n_batches}: {len(parsed)} entries classified live")
-            except Exception as e:
-                yield sse("error", label=f"DeepSeek batch {i}/{n_batches} failed: {e}")
-
-        by_sector = {}
-        for r in results:
-            by_sector[r.get("predicted_sector", "Unknown")] = by_sector.get(r.get("predicted_sector", "Unknown"), 0) + 1
-        report["pjm"]["sample_size"] = len(work)
-        report["pjm"]["by_sector"] = by_sector
-        yield sse("result", label="Live classification complete", detail=json.dumps(by_sector))
+        yield sse("result", label=f"{len(df):,} real generator interconnection requests fetched live from PJM",
+                   detail="supporting context: new power supply competing for the same grid capacity, not data-center load")
+    except RuntimeError as e:
+        yield sse("step_error", label=f"PJM fetch failed: {e}")
 
     # ------------------------------------------------------------- Virginia
-    # Runs before cross-referencing on purpose: if this live PJM sample
-    # doesn't turn up a real "Data Center" prediction (a real, honest,
-    # and -- per this project's own core finding -- LIKELY outcome, since
-    # PJM's export is confirmed generation-only), the verification engine
-    # still gets demonstrated live against a real, already-on-screen name
-    # instead of silently skipping the demo's most differentiated step.
-    va_filer_name = None
-    yield sse("step", label=f"Checking Virginia SCC docket live", detail=f"Case No. {VA_CASE_NUMBER}")
+    docs_sorted = []
+    case_name = None
+    yield sse("step", label="Checking Virginia SCC docket live", detail=f"Case No. {VA_CASE_NUMBER}")
     try:
         case = await asyncio.to_thread(dst.get_case, VA_CASE_NUMBER)
+        case_name = case["Case_Name"]
         docs = await asyncio.to_thread(dst.get_documents, case["MATTER_NO"])
         docs_sorted = sorted(docs, key=lambda d: d["Date_Filed"], reverse=True)
-        report["va"] = {"case_name": case["Case_Name"], "n_documents": len(docs),
+        report["va"] = {"case_name": case_name, "n_documents": len(docs),
                          "most_recent": docs_sorted[0]["Document_Name"] if docs_sorted else None,
                          "most_recent_date": docs_sorted[0]["Date_Filed"][:10] if docs_sorted else None}
-        yield sse("result", label=f"{len(docs)} real filings on record for {case['Case_Name']}",
+        yield sse("result", label=f"{len(docs)} real filings on record for {case_name}",
                    detail=f"most recent ({docs_sorted[0]['Date_Filed'][:10]}): {docs_sorted[0]['Document_Name'][:110]}" if docs_sorted else "")
-        if docs_sorted:
-            va_filer_name = docs_sorted[0]["Document_Name"].split(" - ", 1)[0].strip()
     except Exception as e:
-        yield sse("error", label=f"Virginia SCC check failed: {e}")
+        yield sse("step_error", label=f"Virginia SCC check failed: {e}")
 
     # ---------------------------------------------- cross-reference, live
-    if df is not None:
-        lookup = {str(row[id_col]): {"project_name": row[name_col], "county": row[county_col],
-                                      "state": row[state_col], "transmission_owner": row[tow_col] if tow_col else ""}
-                  for _, row in sample.iterrows()}
-        candidates = [r for r in results if r.get("predicted_sector") == "Data Center"][:MAX_CROSS_REF_CANDIDATES]
+    # Targets are real large-load filers pulled live from the VA docket
+    # just checked above -- guaranteed data-center-relevant by what that
+    # docket is (Case No. PUR-2026-00011 is specifically about large-load
+    # connection queue standards), so this step no longer depends on a
+    # PJM sample turning up a hit it structurally can't.
+    candidates = _extract_va_candidates(docs_sorted, case_name)
+    for name in candidates:
+        verdict_out = []
+        async for event in cross_ref_one_live(name, out=verdict_out):
+            yield event
+        if verdict_out:
+            report["cross_ref"].append(verdict_out[0])
 
-        for c in candidates:
-            extra = lookup.get(str(c["queue_id"]), {})
-            verdict_out = []
-            async for event in cross_ref_one_live(extra.get("project_name", ""), extra.get("county", ""),
-                                                    extra.get("state", ""), extra.get("transmission_owner", ""),
-                                                    out=verdict_out):
-                yield event
-            if verdict_out:
-                verdict_out[0]["queue_id"] = c["queue_id"]
-                report["cross_ref"].append(verdict_out[0])
-
-        if not candidates and va_filer_name:
-            yield sse("result", label="No 'Data Center' predictions in this live PJM sample",
-                       detail="A real result -- PJM's own export is confirmed generation-only "
-                              "(see project notes). Demonstrating the same verification engine "
-                              f"against '{va_filer_name}', the real filer just found in Virginia's docket, instead.")
-            verdict_out = []
-            async for event in cross_ref_one_live(va_filer_name, out=verdict_out):
-                yield event
-            if verdict_out:
-                report["cross_ref"].append(verdict_out[0])
+    if not candidates:
+        yield sse("result", label="No real filer names available to cross-reference this run",
+                   detail="Virginia SCC check above didn't return usable filings live -- see the error, if any, just above.")
 
     # --------------------------------------------------------------- Texas
     yield sse("step", label="Fetching ERCOT's Large Load Interconnection Status report live", detail=TX_REPORT_URL)
@@ -260,7 +248,7 @@ async def run_pipeline():
         else:
             yield sse("result", label="Live parse complete", detail=record.get("parse_status", ""))
     except Exception as e:
-        yield sse("error", label=f"ERCOT fetch failed: {e}")
+        yield sse("step_error", label=f"ERCOT fetch failed: {e}")
 
     report["generated_at"] = date.today().isoformat()
     yield sse("report", data=report)
@@ -274,6 +262,46 @@ async def api_run():
             yield f"event: {event['event']}\ndata: {event['data']}\n\n"
     return StreamingResponse(gen(), media_type="text/event-stream",
                               headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"})
+
+
+@app.get("/api/replay/info")
+async def api_replay_info():
+    if not CACHE_PATH.exists():
+        return {"available": False}
+    try:
+        cached = json.loads(CACHE_PATH.read_text(encoding="utf-8"))
+    except (json.JSONDecodeError, OSError):
+        return {"available": False}
+    return {"available": True, "captured_at": cached.get("captured_at")}
+
+
+@app.get("/api/replay")
+async def api_replay():
+    """Streams back the exact real event sequence saved by
+    capture_demo_run.py -- same real numbers and verdicts, nothing
+    recomputed, just re-paced for readability instead of live latency.
+    Never claims to be a live run: the frontend labels this REPLAY with
+    the real captured_at timestamp, sourced from a `meta` event sent
+    first."""
+    async def gen():
+        if not CACHE_PATH.exists():
+            yield sse_line("error", label="No saved run yet -- run capture_demo_run.py first.")
+            return
+        try:
+            cached = json.loads(CACHE_PATH.read_text(encoding="utf-8"))
+        except (json.JSONDecodeError, OSError) as e:
+            yield sse_line("error", label=f"Saved run file unreadable: {e}")
+            return
+        yield sse_line("meta", captured_at=cached.get("captured_at"))
+        for event in cached.get("events", []):
+            await asyncio.sleep(REPLAY_EVENT_DELAY)
+            yield f"event: {event['event']}\ndata: {event['data']}\n\n"
+    return StreamingResponse(gen(), media_type="text/event-stream",
+                              headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"})
+
+
+def sse_line(event_type: str, **payload) -> str:
+    return f"event: {event_type}\ndata: {json.dumps({'type': event_type, **payload})}\n\n"
 
 
 @app.get("/", response_class=HTMLResponse)

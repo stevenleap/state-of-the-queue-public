@@ -146,16 +146,27 @@ HISTORY_PATH_DEFAULT = "dominion_scc_history.json"
 
 
 def get_case(case_number: str) -> dict:
+    # Raises RuntimeError rather than calling sys.exit() on failure -- this
+    # is imported and called live by server.py's web request handler, and
+    # SystemExit (what sys.exit() raises) isn't caught by `except Exception`,
+    # so it would propagate out of the request and crash the whole server
+    # process instead of just failing that one request. Same fix already
+    # applied to fetch_latest_queue.py's fetch_queue_df() for the same
+    # reason -- main() below preserves the original CLI exit-with-message
+    # behavior by catching this and calling sys.exit(str(e)) itself.
     params = {"$filter": f"substringof('{case_number}',Case_Number) eq true",
               "$orderby": "EstablishedDate desc",
               "$select": "MATTER_NO,Case_Number,Case_Name,Case_Caption,Case_Established_Date,STATUS,EstablishedDate"}
-    resp = requests.get(CASE_SEARCH_URL, params=params, headers=HEADERS, timeout=30)
-    resp.raise_for_status()
-    results = resp.json()
+    try:
+        resp = requests.get(CASE_SEARCH_URL, params=params, headers=HEADERS, timeout=30)
+        resp.raise_for_status()
+        results = resp.json()
+    except requests.exceptions.RequestException as e:
+        raise RuntimeError(f"Network request to Virginia SCC failed: {e}")
     if not results:
-        sys.exit(f"No case found for case number {case_number!r}. Case numbers don't change once "
-                  f"docketed -- confirm the real one at https://www.scc.virginia.gov/docketsearch "
-                  f"before assuming this script itself is broken.")
+        raise RuntimeError(f"No case found for case number {case_number!r}. Case numbers don't change once "
+                            f"docketed -- confirm the real one at https://www.scc.virginia.gov/docketsearch "
+                            f"before assuming this script itself is broken.")
     return results[0]
 
 
@@ -232,7 +243,10 @@ def main():
                           "Read the matched context before citing anything this finds, see module docstring.")
     args = ap.parse_args()
 
-    case = get_case(args.case_number)
+    try:
+        case = get_case(args.case_number)
+    except RuntimeError as e:
+        sys.exit(str(e))
     matter_no = case["MATTER_NO"]
     print(f"Case {case['Case_Number']} ({case['Case_Name']}) -- MATTER_NO {matter_no}, status {case['STATUS']}")
     print(f"Caption: {case['Case_Caption']}")

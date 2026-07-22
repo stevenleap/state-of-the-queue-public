@@ -5,6 +5,248 @@ this folder. It's the full handoff from a planning conversation in
 claude.ai — that conversation isn't visible here, so treat this document
 as the complete record of what's been decided and built so far.
 
+## SESSION UPDATE 2026-07-21 (continued) — failure-state hardening: two real crash bugs found and fixed by testing actual failure paths, not just the happy path
+
+Night Hack is 2026-07-24 (3 days out at the time of this update), confirmed
+genuinely "live demos only, no slides, no localhost" -- re-confirmed
+directly, so any earlier mention of "8 Google Slides" elsewhere does not
+apply to this event. All slide prep is stopped; focus is entirely on the
+live tool.
+
+Tested the actual failure paths (VA SCC fetch failing, ERCOT PDF fetch
+failing) rather than just the happy path, per explicit instruction to fix
+what's found rather than only report on it. Found and fixed two real bugs
+that would have broken the live demo in front of judges, plus verified
+the replay-as-recovery flow actually works:
+
+1. **Real crash bug: `dominion_scc_tracker.get_case()` and
+   `ercot_large_load_tracker.fetch_pdf()` both called `sys.exit()` on
+   failure** (a fine pattern for a CLI script, wrong for a function
+   imported and called live by a web server). `sys.exit()` raises
+   `SystemExit`, which does NOT inherit from `Exception` -- so
+   `server.py`'s `except Exception as e:` around these calls silently
+   fails to catch it, and the real risk is `SystemExit` propagating out
+   of the async generator and taking down the whole uvicorn process, not
+   just failing one request. Confirmed by direct reproduction: calling
+   `get_case()` with a bogus case number raised `SystemExit`, not
+   `RuntimeError`, before the fix. This is the exact same class of bug
+   already found and fixed once before in this project (`fetch_
+   latest_queue.py`'s `fetch_queue_df()`, see its own code comment: "on
+   failure rather than sys.exit(), since a web server shouldn't die") --
+   just never applied to the two newer live-demo dependencies. **Fixed
+   the same way**: both now raise `RuntimeError` instead; each module's
+   own `main()` CLI entry point wraps the call in `try/except RuntimeError:
+   sys.exit(str(e))` to preserve the original CLI behavior. Re-verified
+   directly after the fix: both now raise `RuntimeError`, confirmed via
+   direct reproduction again, not just re-reading the diff.
+
+2. **Real bug, more serious: naming the custom SSE event type "error"
+   collided with EventSource's own reserved `error` event**, and this one
+   was NOT found by code review -- it only showed up by actually running
+   a forced live failure through a real browser via Playwright and
+   watching it happen. `error` is a reserved EventSource event name (it's
+   what fires natively on a real connection failure, handled via
+   `es.onerror`); a custom server-sent event literally named `error` gets
+   dispatched to that SAME listener list. Since `es.onerror`'s handler
+   calls `es.close()`, the first real step-level failure (Virginia's SCC
+   check, ERCOT's fetch, or a PJM fetch failure) was silently killing the
+   entire EventSource connection right there -- no further steps, no
+   report, no visible explanation, just a permanently frozen page with a
+   spinner that never resolves. Confirmed exactly this behavior in a real
+   browser before the fix (steps stopped dead right after the forced VA
+   error, 45s timeout, no console errors logged either -- it would have
+   looked like an unexplained hang in front of judges, arguably worse
+   than a visible error). **Fixed** by renaming the custom event from
+   `error` to `step_error` on both ends (`server.py`'s three `sse(...)`
+   call sites, `templates/demo.html`'s listener). Re-verified after the
+   fix with the same forced-failure Playwright test: the run now
+   correctly continues past a VA or TX failure through to a real
+   `COMPLETE` state, with the failed step visibly marked (amber icon,
+   left border, readable real error text -- not a raw traceback) and the
+   report rendering sensibly with just the sections that succeeded.
+
+3. **Verified replay-as-mid-demo-recovery actually works, then found and
+   fixed a real gap in it.** Tested clicking "View last real run" while a
+   live run was still genuinely in progress (the actual scenario: a live
+   run is going badly, presenter needs to bail to the saved backup
+   without reloading the page). Found the previous EventSource was never
+   closed when a new one started, so the old (possibly stuck or still
+   erroring) live run's events kept landing in the same `#steps`
+   container alongside the new replay's, corrupting shared JS state
+   (`currentStepEl`) and interleaving two runs' output into one garbled
+   trace. **Fixed**: `templates/demo.html` now tracks the active
+   `EventSource` in a module-level `activeES` and closes it before
+   starting any new run (live or replay). Re-tested the exact recovery
+   scenario after the fix (start a live run against a server forced to
+   fail on ERCOT, wait 2.5s mid-run, click "View last real run"): final
+   state is exactly the 6 real replay steps, zero duplicates, clean
+   "REPLAY -- captured [time] -- complete" tag, no console errors. This
+   is a fast, one-click, non-awkward recovery now -- confirmed by testing
+   the actual failure-recovery flow, not just the clean-start path.
+
+All three fixes verified end to end with Playwright against real forced
+failures (not just unit-level reasoning), then the real config was
+restored (`VA_CASE_NUMBER` back to `PUR-2026-00011`, `TX_REPORT_URL` back
+to the real hearing-deck URL) and a final clean live run re-timed at
+27.7s, well under the 60-90s ceiling. `cached_runs/latest_run.json`
+re-captured fresh after all fixes, so the replay backup reflects the
+current, hardened pipeline. **Re-run `capture_demo_run.py` again right
+before presenting**, same as always, to keep the captured timestamp
+credible on the day.
+
+**Follow-up same day: both remaining gaps closed, plus a real network-
+resilience finding.**
+
+4. **Slow single checker, tested for real with a genuine 45s delay
+   (screen-recorded via Playwright video, not just reasoned about):**
+   temporarily forced `check_incentive_announcements` to sleep 45s,
+   watched the actual UI throughout. Confirmed it looks intentional the
+   whole time: the cross-reference step's spinner keeps animating, and
+   already-completed checker rows (sec_edgar, ferc_elibrary, both with
+   real hits) stay visible while the slow one is pending -- a viewer sees
+   the pipeline visibly working through a real checklist, not a static
+   frozen screen. No console errors, resolved cleanly once the delay
+   ended. `.webm` video + timestamped frames kept in this session's
+   scratchpad for review.
+
+5. **Two sections failing in the same run (VA + ERCOT both broken at
+   once, not sequentially):** forced both, confirmed the server survives
+   and the run still completes (13.1s). Found and fixed a real, if minor,
+   found-by-testing bug: the PJM report card said "see the other real
+   load-side numbers on this report" unconditionally, which was actively
+   wrong when both other sections failed and there WERE no other numbers.
+   Reworded to be accurate regardless of what succeeded. Also added a
+   defensive "no sources came back this run" fallback for the (untested,
+   but now handled) case where PJM fails too and the report's top grid
+   would otherwise render completely blank with no explanation.
+
+6. **Network resilience, tested honestly, including a real methodology
+   correction made mid-investigation:** this sandboxed environment has no
+   real cellular/hotspot hardware, so "phone hotspot" was approximated
+   with Chrome DevTools Protocol network emulation -- flagged as a
+   substitute, not equivalent, from the start. Bandwidth/latency
+   throttling (simulating a crowded venue hotspot, ~400kbps/400ms
+   latency) genuinely works via CDP: a full live run still completed
+   correctly in 58.2s under that throttle (vs ~28-46s normal) -- slower,
+   not broken. **A hard "offline" cutoff via CDP turned out NOT to
+   actually sever an already-open SSE stream over loopback** -- caught
+   directly by screenshotting mid-"cutoff" and seeing the run had kept
+   making real progress regardless, not inferred. Corrected the test by
+   actually killing the uvicorn server process mid-run instead (a real
+   severed connection, whatever the underlying cause): the browser's
+   native disconnect detection ("CONNECTION LOST") fired in a real,
+   measured **9.4 seconds** -- faster than initially feared, and fast
+   enough that a presenter wouldn't be left guessing for long. Also added
+   a second, independent safety net while investigating: `templates/
+   demo.html` now has a 20-second client-side stall watchdog (resets on
+   every real SSE event; if 20s pass with nothing, shows an explicit "no
+   update in 20s -- View last real run instead" banner) as insurance for
+   a *silent* degraded connection (packets stop arriving without a clean
+   reset -- a real possibility for an actual flaky hotspot, distinct from
+   the clean-kill scenario that was actually measured at 9.4s). Confirmed
+   the replay link stays clickable throughout any of this and recovers in
+   ~16-20s regardless of which detection path (native or watchdog) is the
+   one that actually fires. **Honest scope limit, stated plainly**: this
+   validates the demo's client-side robustness against a bad connection
+   between the browser and whatever server it's talking to. It does NOT
+   validate the pipeline's own outbound calls (PJM/VA/ERCOT/cross-ref)
+   under bad network, because those run server-side -- once deployed to
+   Render (required by Night Hack's no-localhost rule), those calls run
+   on Render's network, not whatever wifi/hotspot the presenter's laptop
+   is using. Venue network quality mainly threatens the browser-to-
+   Render leg (page load + the SSE stream), which is exactly what this
+   testing covered.
+
+All fixes re-verified end to end after the network testing: a final
+clean live run completed in 45.7s (normal variance, still comfortably
+under the 60-90s ceiling), and `cached_runs/latest_run.json` was
+re-captured fresh one more time to reflect the fully-tested final code.
+
+## SESSION UPDATE 2026-07-21 — live demo hardened: PJM decoupled from cross-ref, real replay cache built, 50%-coverage question answered honestly
+
+Four things, prompted directly by live-testing the demo end to end and a
+few pointed user reactions along the way.
+
+1. **Fixed the real reason PJM looked broken in the live demo, not just
+   its copy.** The original live pipeline (`server.py`) spent a live
+   DeepSeek classification pass on a random PJM sample hoping to find a
+   "Data Center" prediction to feed the cross-reference engine —
+   structurally close to a 0% hit rate, since PJM's export is confirmed
+   generation-only (see the MAJOR UPDATE below). This wasted most of a
+   run's ~104 seconds to reliably demonstrate nothing, and the resulting
+   report card ("0 of 60 classified Data Center") read like a failed
+   search on screen, not an intentional finding. **Root-caused and fixed,
+   not just relabeled:** `run_pipeline()` no longer classifies PJM at
+   all. PJM is now fetched live purely as a fast, honestly-labeled
+   context stat ("generation queue, context, not load"). The
+   cross-reference engine's real candidates now come from
+   `_extract_va_candidates()` — real filer/party names pulled live out of
+   Virginia's SCC docket (Case No. PUR-2026-00011 is specifically about
+   large-load connection queue standards, so every non-procedural party
+   in it is a genuine data-center-relevant entity by construction, not a
+   guess). Live-tested repeatedly: reliably surfaces 3 distinct real
+   candidates per run (e.g. "Amazon Data Services, Inc.," "Walmart Inc.,"
+   "Verrus, LLC") producing a real spread of verdicts (conflicting /
+   verified / candidate) every time, deterministically — no more gambling
+   on PJM. This also cut cold end-to-end runtime from **104.4s to 33.7s**
+   in the same fix, live-timed both before and after.
+
+2. **Built a real save/replay mechanism** so demo day doesn't have to bet
+   the whole pitch on live venue wifi. `capture_demo_run.py` runs the
+   exact real `run_pipeline()` once against live sources and saves the
+   full event stream plus a real UTC timestamp to
+   `cached_runs/latest_run.json`. Two new endpoints in `server.py`:
+   `GET /api/replay/info` (tells the frontend whether a cached run
+   exists and when it was captured) and `GET /api/replay` (streams that
+   *exact* real run back, re-paced for readability, live-timed at
+   16.1s). `templates/demo.html` now shows a "View last real run
+   (captured [timestamp])" link under the Start button, and the trace
+   header is explicitly tagged "REPLAY — captured [timestamp]" throughout
+   — never presented as happening live right now, same honesty discipline
+   as everywhere else in this project. Verified end to end with
+   Playwright: correct rendering, no console errors, real captured data
+   shown correctly. **Re-run `capture_demo_run.py` shortly before
+   presenting** so the captured timestamp stays credible; this is a
+   safety net alongside a live run, not a replacement for one.
+
+3. **Fixed a real found-in-the-wild framing bug**, caught via a live
+   Playwright screenshot review, not just code review: the report's PJM
+   card said "0 of 60-row sample classified Data Center" with no
+   context, which reads as a failed search to anyone who doesn't already
+   know PJM is generation-only. Now reads "PJM — generation queue
+   (context, not load)" with explicit subtext pointing to Virginia/Texas
+   for the real load data. Also fixed the report footer, which said
+   "Generated live [date]" even during a replay — contradicted the
+   REPLAY tag directly above it. Now reads "Report generated [date] —
+   see the run status above for whether this was live or a replay."
+
+4. **Answered "can we get real load-data coverage to 50%+ of the US?"
+   honestly, with real research, not a guess.** Short answer: no.
+   Verified the earlier Ohio/PA/Illinois docket leads are still real and
+   current, and searched for additional candidates (NC, NY, GA, AZ, CA).
+   Found two genuinely strong new candidates — **Illinois** (ICC Docket
+   P2026-0047: real filed figure, 75 large-load applications at ComEd
+   whose combined MW exceeds ComEd's all-time system peak) and **North
+   Carolina** (NCUC Docket E-100 Sub 101: Duke Energy now required to
+   file real semiannual large-load reports, a recurring-report pattern
+   like ERCOT's) — plus weaker candidates (NY Case 26-E-0045, Georgia's
+   PSC Data Center Fact Sheet, and two tariff-only dockets in Ohio/PA
+   that don't actually disclose queue-MW figures). **Honest coverage
+   math:** VA+TX today = ~31.7M people, ~9.5% of the US. Adding every
+   real candidate found (IL, NC, NY, GA, OH, PA) tops out around **~27-
+   30%**, and only ~20% if counting solely sources with genuine queue-MW
+   disclosures (VA, TX, IL, NC) rather than padding with tariff-only
+   dockets that wouldn't produce a real dashboard number. **Decision,
+   made explicitly by the user after seeing this math: do not chase
+   50%.** Ship VA+TX as-is; the pitch leans on "the two largest,
+   most-contested AI data center markets in the country" rather than any
+   population-percentage claim. Pitch script's Close line and "explain
+   the hard part" section updated accordingly below — the latter also
+   corrected to describe the cross-reference engine working on the real
+   VA-derived names actually shown live now, rather than the old
+   PJM-anonymized-codename framing that's no longer what the demo
+   demonstrates on screen.
+
 ## SESSION UPDATE 2026-07-19 (continued) — vision fallback switched to Gemini, DeepSeek deprecation fixed
 
 Two more real things, prompted by a budget constraint (no funding for
@@ -685,6 +927,10 @@ project's history, and it would be an easy mistake to cite either as real.
 | `state_snapshots.json` | Real VA (Dominion/SCC) + TX (ERCOT) aggregate figures for the dashboard's state-docket cards | Still hand-maintained (see its `_readme` field), but VA's core queue figures (70,000 MW / 25,000 MW / 24,678 MW peak) are now pulled directly from a primary source via `dominion_scc_tracker.py`, not just news coverage — updated 2026-07-19. Not yet auto-regenerated from either tracker's output the way `dashboard_data.json` is from the PJM pipeline. |
 | `.env` / `.env.example` / `.gitignore` | Real API keys (gitignored) / template / ignore rules | `.env.example` and `.gitignore` created 2026-07-18; `.env` exists but is still empty of real keys in this environment — needs filling in with real DeepSeek/Anthropic/Tavily/Steel keys before the full pipeline can be live-tested end to end |
 | `README_BUILD.md` | Full setup + pipeline usage instructions | Current |
+| `server.py` | FastAPI backend for the live demo — the thing that gets clicked in front of judges. `GET /api/run` streams a real live pipeline run over SSE (PJM fetch → VA SCC docket check → cross-reference real VA-derived filer names → ERCOT fetch); `GET /api/replay` + `GET /api/replay/info` stream back a saved real run instead, for when live venue wifi can't be trusted. See its own module docstring for the current, most-detailed account of what's live vs. what's a labeled fallback. | **Live-tested end to end repeatedly, 2026-07-21.** Cold live run timed at 33.7s (down from 104.4s before PJM was decoupled from cross-referencing — see session update above). No cached files, sample CSVs, or replayed data anywhere in the `/api/run` path. |
+| `templates/demo.html` | Live demo frontend — hook, Start button (exact user-specified design), live SSE trace view, generated report. Fetches `/api/replay/info` on load to show/hide the "View last real run" link. | Verified with Playwright repeatedly (screenshots, console/page-error checks) across both live and replay paths, no errors found. |
+| `capture_demo_run.py` | Runs the real live pipeline once and saves it to `cached_runs/latest_run.json` (event stream + real UTC timestamp), for `server.py`'s `/api/replay` to serve. | **Built and live-tested 2026-07-21.** Re-run this shortly before presenting so the captured timestamp stays credible — it's a safety net alongside a live run, not a replacement. |
+| `cached_runs/latest_run.json` | The saved real run `capture_demo_run.py` produces | Real output from a live 2026-07-21 run, not synthetic — gets overwritten each time `capture_demo_run.py` is re-run |
 
 ### cross_reference.py source-by-source status
 - **Real, working:** SEC EDGAR (free govt API, no auth), FERC eLibrary
@@ -803,19 +1049,23 @@ own monthly large-load interconnection reports out of Texas — both are
 snapshots from real filings, refreshed as new ones land, not a live feed
 pretending to be more current than it is."
 
-**Explain the hard part, plain words:** "Here's the tricky part on the
-PJM side. When a company applies to connect a data center, the paperwork
-doesn't say Amazon or Microsoft. It says something like 'Project Cool
-Wood, 120 megawatts, South County.' Nobody tells you who it really is. So
-we built a system that reads every one of these anonymous applications
-and quietly checks it against everything public that might mention the
-same project — news stories, government filings, tax incentive
-announcements, environmental permits, and more. If two or more separate
-records point to the same real project, we mark it confirmed and save the
-real name. If we're not sure yet, we mark it unconfirmed instead of
-guessing. And once we've confirmed a project once, we never have to
-figure it out again — it goes into a growing library of already-solved
-projects, so every month gets faster and more complete than the last."
+**Explain the hard part, plain words:** "Here's the tricky part. Watch
+what just happened on screen — we pulled a real filer name straight out
+of Virginia's live docket, 'Amazon Data Services, Inc.,' and the system
+immediately went and checked it against everything public that might
+mention the same company: SEC filings, FERC's own record system, news
+coverage, incentive announcements, utility resource plans, construction
+postings. If two or more independent records agree on the same real
+entity, we mark it verified. If they disagree — like you just saw, where
+one source pulled up something unrelated — we don't paper over it, we
+flag it as conflicting and say exactly which source disagreed. If we're
+not sure yet, we mark it unconfirmed instead of guessing. This same
+engine is built for the harder version of this problem too: a lot of
+interconnection paperwork elsewhere doesn't name the real company at all
+— it says something like 'Project Cool Wood, 120 megawatts, South
+County' — and resolving those anonymous filings back to a real company
+is exactly what this same verification engine is for, once we're feeding
+it that kind of source."
 
 **Why it matters:** "This matters because right now, nobody outside the
 utility companies and grid operators can actually see this clearly. Not
@@ -842,10 +1092,12 @@ do — the real estate and infrastructure teams at the big cloud companies
 Free data for the public good, paid alerts for the people racing against
 the clock."
 
-**Close:** "We're live on PJM, Virginia, and Texas right now — the two
-biggest AI data center buildouts in the country, tracked with real,
-sourced numbers. Ask me to click into any of them and I'll show you
-exactly what's stuck, and why."
+**Close:** "We're already live on the two largest data center markets in
+the country — Virginia and Texas — tracked with real, sourced numbers,
+pulled fresh every time you click. PJM's on screen too, but only as
+context: new power supply competing for the same grid capacity, not a
+data-center claim. Ask me to click into Virginia or Texas and I'll show
+you exactly what's stuck, and why."
 
 ## Original niches / roadmap (from the founder's planning docs, for later)
 

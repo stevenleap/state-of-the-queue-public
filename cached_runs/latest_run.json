@@ -1,0 +1,181 @@
+{
+  "captured_at": "2026-07-22T03:54:16.915395+00:00",
+  "events": [
+    {
+      "event": "step",
+      "data": "{\"type\": \"step\", \"label\": \"Fetching PJM's live generation queue (context, not load data)\", \"detail\": \"services.pjm.com\"}"
+    },
+    {
+      "event": "result",
+      "data": "{\"type\": \"result\", \"label\": \"9,263 real generator interconnection requests fetched live from PJM\", \"detail\": \"supporting context: new power supply competing for the same grid capacity, not data-center load\"}"
+    },
+    {
+      "event": "step",
+      "data": "{\"type\": \"step\", \"label\": \"Checking Virginia SCC docket live\", \"detail\": \"Case No. PUR-2026-00011\"}"
+    },
+    {
+      "event": "result",
+      "data": "{\"type\": \"result\", \"label\": \"125 real filings on record for VIRGINIA ELECTRIC AND POWER CO\", \"detail\": \"most recent (2026-07-07): Amazon Data Services, Inc. - Notice of Withdrawal of Clarice M. Gardner as Counsel.\"}"
+    },
+    {
+      "event": "step",
+      "data": "{\"type\": \"step\", \"label\": \"Cross-referencing 'Amazon Data Services, Inc.'\"}"
+    },
+    {
+      "event": "checker",
+      "data": "{\"type\": \"checker\", \"source\": \"sec_edgar\", \"hit\": true, \"entity\": \"AMAZON COM INC  (AMZN)  (CIK 0001018724)\", \"note\": \"\"}"
+    },
+    {
+      "event": "checker",
+      "data": "{\"type\": \"checker\", \"source\": \"ferc_elibrary\", \"hit\": true, \"entity\": \"Maryland Office of People's Counsel\", \"note\": \"\"}"
+    },
+    {
+      "event": "checker",
+      "data": "{\"type\": \"checker\", \"source\": \"web_news\", \"hit\": true, \"entity\": \"AWS Data Centers - Amazon Web Services ...\", \"note\": \"\"}"
+    },
+    {
+      "event": "checker",
+      "data": "{\"type\": \"checker\", \"source\": \"incentive_announcements\", \"hit\": true, \"entity\": \"Incentives approved for $11 billion Amazon data center ...\", \"note\": \"\"}"
+    },
+    {
+      "event": "checker",
+      "data": "{\"type\": \"checker\", \"source\": \"utility_irp\", \"hit\": true, \"entity\": \"NPM - ORIGINATION: NV Energy seeks large-load approvals for AWS, Prologis, Novva, and Fleet data centers\", \"note\": \"\"}"
+    },
+    {
+      "event": "checker",
+      "data": "{\"type\": \"checker\", \"source\": \"contractor_announcements\", \"hit\": true, \"entity\": \"Manager of Construction, Data Center Construction\", \"note\": \"\"}"
+    },
+    {
+      "event": "checker",
+      "data": "{\"type\": \"checker\", \"source\": \"air_permits\", \"hit\": false, \"entity\": null, \"note\": \"NOT YET BUILT for state=. VA is implemented as the template.\"}"
+    },
+    {
+      "event": "checker",
+      "data": "{\"type\": \"checker\", \"source\": \"county_permits\", \"hit\": false, \"entity\": null, \"note\": \"NOT YET BUILT for , . No shared API across counties -- add one entry per county, prioritized by your real top_chokepoints once you have live\"}"
+    },
+    {
+      "event": "checker",
+      "data": "{\"type\": \"checker\", \"source\": \"puc_dockets\", \"hit\": false, \"entity\": null, \"note\": \"NOT YET BUILT for state=. Registry empty -- same pattern as county_permits, add entries as researched.\"}"
+    },
+    {
+      "event": "checker",
+      "data": "{\"type\": \"checker\", \"source\": \"property_records\", \"hit\": false, \"entity\": null, \"note\": \"NOT YET BUILT for , . Registry empty -- same pattern as county_permits.\"}"
+    },
+    {
+      "event": "verdict",
+      "data": "{\"type\": \"verdict\", \"project_name\": \"Amazon Data Services, Inc.\", \"county\": \"\", \"state\": \"\", \"confidence\": \"conflicting\", \"company_name\": \"AMAZON COM INC  (AMZN)  (CIK 0001018724)\", \"reason\": \"ferc_elibrary found \\u201cMaryland Office of People's Counsel\\u201d; sec_edgar agree on \\u201cAMAZON COM INC  (AMZN)  (CIK 0001018724)\\u201d instead.\"}"
+    },
+    {
+      "event": "step",
+      "data": "{\"type\": \"step\", \"label\": \"Cross-referencing 'Walmart Inc.'\"}"
+    },
+    {
+      "event": "checker",
+      "data": "{\"type\": \"checker\", \"source\": \"sec_edgar\", \"hit\": true, \"entity\": \"Walmart Inc.  (WMT)  (CIK 0000104169)\", \"note\": \"\"}"
+    },
+    {
+      "event": "checker",
+      "data": "{\"type\": \"checker\", \"source\": \"ferc_elibrary\", \"hit\": true, \"entity\": \"Union Electric Company d/b/a Ameren Missouri\", \"note\": \"\"}"
+    },
+    {
+      "event": "checker",
+      "data": "{\"type\": \"checker\", \"source\": \"web_news\", \"hit\": true, \"entity\": \"Walmart Data Center Facilities, Permits & Public Records\", \"note\": \"\"}"
+    },
+    {
+      "event": "checker",
+      "data": "{\"type\": \"checker\", \"source\": \"incentive_announcements\", \"hit\": true, \"entity\": \"Policy Snapshot: Data Center Incentives\", \"note\": \"\"}"
+    },
+    {
+      "event": "checker",
+      "data": "{\"type\": \"checker\", \"source\": \"utility_irp\", \"hit\": true, \"entity\": \"Sustainability\", \"note\": \"\"}"
+    },
+    {
+      "event": "checker",
+      "data": "{\"type\": \"checker\", \"source\": \"contractor_announcements\", \"hit\": true, \"entity\": \"Walmart\", \"note\": \"\"}"
+    },
+    {
+      "event": "checker",
+      "data": "{\"type\": \"checker\", \"source\": \"air_permits\", \"hit\": false, \"entity\": null, \"note\": \"NOT YET BUILT for state=. VA is implemented as the template.\"}"
+    },
+    {
+      "event": "checker",
+      "data": "{\"type\": \"checker\", \"source\": \"county_permits\", \"hit\": false, \"entity\": null, \"note\": \"NOT YET BUILT for , . No shared API across counties -- add one entry per county, prioritized by your real top_chokepoints once you have live\"}"
+    },
+    {
+      "event": "checker",
+      "data": "{\"type\": \"checker\", \"source\": \"puc_dockets\", \"hit\": false, \"entity\": null, \"note\": \"NOT YET BUILT for state=. Registry empty -- same pattern as county_permits, add entries as researched.\"}"
+    },
+    {
+      "event": "checker",
+      "data": "{\"type\": \"checker\", \"source\": \"property_records\", \"hit\": false, \"entity\": null, \"note\": \"NOT YET BUILT for , . Registry empty -- same pattern as county_permits.\"}"
+    },
+    {
+      "event": "verdict",
+      "data": "{\"type\": \"verdict\", \"project_name\": \"Walmart Inc.\", \"county\": \"\", \"state\": \"\", \"confidence\": \"verified\", \"company_name\": \"Walmart Inc.  (WMT)  (CIK 0000104169)\", \"reason\": null}"
+    },
+    {
+      "event": "step",
+      "data": "{\"type\": \"step\", \"label\": \"Cross-referencing 'Verrus, LLC'\"}"
+    },
+    {
+      "event": "checker",
+      "data": "{\"type\": \"checker\", \"source\": \"sec_edgar\", \"hit\": true, \"entity\": \"KKR Infrastructure Conglomerate LLC  (CIK 0001948056)\", \"note\": \"\"}"
+    },
+    {
+      "event": "checker",
+      "data": "{\"type\": \"checker\", \"source\": \"ferc_elibrary\", \"hit\": true, \"entity\": \"SECRETARY OF THE COMMISSION - FERC\", \"note\": \"\"}"
+    },
+    {
+      "event": "checker",
+      "data": "{\"type\": \"checker\", \"source\": \"web_news\", \"hit\": true, \"entity\": \"Verrus Flexible AI Data Centers United States\", \"note\": \"\"}"
+    },
+    {
+      "event": "checker",
+      "data": "{\"type\": \"checker\", \"source\": \"incentive_announcements\", \"hit\": true, \"entity\": \"Policy Snapshot: Data Center Incentives\", \"note\": \"\"}"
+    },
+    {
+      "event": "checker",
+      "data": "{\"type\": \"checker\", \"source\": \"utility_irp\", \"hit\": true, \"entity\": \"Integrated Resource Plans: An Introduction to Future ...\", \"note\": \"\"}"
+    },
+    {
+      "event": "checker",
+      "data": "{\"type\": \"checker\", \"source\": \"contractor_announcements\", \"hit\": true, \"entity\": \"Verrus\", \"note\": \"\"}"
+    },
+    {
+      "event": "checker",
+      "data": "{\"type\": \"checker\", \"source\": \"air_permits\", \"hit\": false, \"entity\": null, \"note\": \"NOT YET BUILT for state=. VA is implemented as the template.\"}"
+    },
+    {
+      "event": "checker",
+      "data": "{\"type\": \"checker\", \"source\": \"county_permits\", \"hit\": false, \"entity\": null, \"note\": \"NOT YET BUILT for , . No shared API across counties -- add one entry per county, prioritized by your real top_chokepoints once you have live\"}"
+    },
+    {
+      "event": "checker",
+      "data": "{\"type\": \"checker\", \"source\": \"puc_dockets\", \"hit\": false, \"entity\": null, \"note\": \"NOT YET BUILT for state=. Registry empty -- same pattern as county_permits, add entries as researched.\"}"
+    },
+    {
+      "event": "checker",
+      "data": "{\"type\": \"checker\", \"source\": \"property_records\", \"hit\": false, \"entity\": null, \"note\": \"NOT YET BUILT for , . Registry empty -- same pattern as county_permits.\"}"
+    },
+    {
+      "event": "verdict",
+      "data": "{\"type\": \"verdict\", \"project_name\": \"Verrus, LLC\", \"county\": \"\", \"state\": \"\", \"confidence\": \"candidate\", \"company_name\": \"Verrus Flexible AI Data Centers United States\", \"reason\": null}"
+    },
+    {
+      "event": "step",
+      "data": "{\"type\": \"step\", \"label\": \"Fetching ERCOT's Large Load Interconnection Status report live\", \"detail\": \"https://www.ercot.com/files/docs/2026/04/01/ERCOT_LargeLoad_Update_April2026_B-C_-Hearing.pdf\"}"
+    },
+    {
+      "event": "result",
+      "data": "{\"type\": \"result\", \"label\": \"Live parse: ~410 GW total queue, ~87.0% data centers\", \"detail\": \"parsed directly from the PDF fetched just now, not cached\"}"
+    },
+    {
+      "event": "report",
+      "data": "{\"type\": \"report\", \"data\": {\"pjm\": {\"total_rows_live\": 9263}, \"cross_ref\": [{\"project_name\": \"Amazon Data Services, Inc.\", \"county\": \"\", \"state\": \"\", \"confidence\": \"conflicting\", \"company_name\": \"AMAZON COM INC  (AMZN)  (CIK 0001018724)\", \"reason\": \"ferc_elibrary found \\u201cMaryland Office of People's Counsel\\u201d; sec_edgar agree on \\u201cAMAZON COM INC  (AMZN)  (CIK 0001018724)\\u201d instead.\"}, {\"project_name\": \"Walmart Inc.\", \"county\": \"\", \"state\": \"\", \"confidence\": \"verified\", \"company_name\": \"Walmart Inc.  (WMT)  (CIK 0000104169)\", \"reason\": null}, {\"project_name\": \"Verrus, LLC\", \"county\": \"\", \"state\": \"\", \"confidence\": \"candidate\", \"company_name\": \"Verrus Flexible AI Data Centers United States\", \"reason\": null}], \"va\": {\"case_name\": \"VIRGINIA ELECTRIC AND POWER CO\", \"n_documents\": 125, \"most_recent\": \"Amazon Data Services, Inc. - Notice of Withdrawal of Clarice M. Gardner as Counsel.\", \"most_recent_date\": \"2026-07-07\"}, \"tx\": {\"source_url\": \"https://www.ercot.com/files/docs/2026/04/01/ERCOT_LargeLoad_Update_April2026_B-C_-Hearing.pdf\", \"fetched_at\": \"2026-07-21T23:54:16\", \"extraction\": \"automated\", \"total_queue_gw_approx\": 410.0, \"data_center_pct\": 87.0, \"parse_status\": \"ok\"}, \"generated_at\": \"2026-07-21\"}}"
+    },
+    {
+      "event": "done",
+      "data": "{\"type\": \"done\"}"
+    }
+  ]
+}
