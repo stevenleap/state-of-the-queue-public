@@ -9,25 +9,24 @@ happens. This is the thing that gets clicked in front of judges.
 
 WHAT "LIVE" MEANS HERE, PRECISELY (read this before assuming a step is
 faked): every step below calls the exact same functions already built
-and live-tested earlier in this project (fetch_latest_queue.py,
-cross_reference.py, dominion_scc_tracker.py, ercot_large_load_tracker.py)
--- imported directly, not shelled out to, not mocked.
+and live-tested earlier in this project (cross_reference.py,
+dominion_scc_tracker.py, ercot_large_load_tracker.py) -- imported
+directly, not shelled out to, not mocked.
 
-PJM IS NOT A LOAD-SIDE DATA SOURCE. Its public export is confirmed
-generation-only (real generator interconnection requests, not data
-centers -- see CLAUDE.md's MAJOR UPDATE). It is fetched live here purely
-as a labeled, secondary comparison stat ("new power supply competing for
-the same grid capacity"), never as a source of cross-reference
-candidates -- an earlier version of this file tried classifying a live
-PJM sample via DeepSeek looking for "Data Center" predictions to feed
-the cross-reference step, which (a) is structurally close to a 0% hit
-rate on generation data, so it wasted most of a run's time to
-demonstrate nothing, and (b) looked like a broken search on screen when
-it came back empty. The actual load-side data in this demo is Virginia
-(Dominion/SCC docket) and Texas (ERCOT) -- both real regulatory sources
-that are specifically about large loads / data centers, not PJM.
+PJM IS DELIBERATELY NOT PART OF THIS DEMO. An earlier version fetched
+PJM's public queue live as a labeled "context, not load" stat -- its
+export is confirmed generation-only (real generator interconnection
+requests, not data centers, see CLAUDE.md's MAJOR UPDATE), and an even
+earlier version tried classifying a live PJM sample via DeepSeek looking
+for "Data Center" predictions, which was structurally close to a 0% hit
+rate. Both were removed per explicit direction: repeatedly seeing PJM
+data next to a data-center-focused demo read as "still using the wrong
+data" even with correct labeling, so the simpler, clearer fix is not
+showing it at all. The load-side data in this demo is Virginia
+(Dominion/SCC docket) and Texas (ERCOT) only -- both real regulatory
+sources that are specifically about large loads / data centers.
 
-The real cross-reference candidates now come from Virginia's own SCC
+The real cross-reference candidates come from Virginia's own SCC
 docket, fetched live just above that step: real filer/party names pulled
 out of the case's most recent real filings (Case No. PUR-2026-00011 is
 specifically "For Approval of its Large-Load Connection Queue Process
@@ -62,7 +61,6 @@ from fastapi import FastAPI
 from fastapi.responses import HTMLResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 
-import fetch_latest_queue
 import cross_reference as cr
 import dominion_scc_tracker as dst
 import ercot_large_load_tracker as elt
@@ -90,9 +88,7 @@ def sse(event_type: str, **payload) -> dict:
 async def cross_ref_one_live(project_name, county="", state="", tow="", out=None):
     """Runs the real ALL_CHECKERS list + the real entity-clustering logic
     from cross_reference.py against one target, live, yielding an SSE
-    event per checker as it completes. Reused for both PJM-derived
-    candidates and the guaranteed real fallback target below -- same
-    real code path either way, just called on different names.
+    event per checker as it completes.
 
     `out`, if given a list, gets the final verdict dict appended -- an
     async generator can't cleanly hand back a return value to a `yield
@@ -149,8 +145,7 @@ async def cross_ref_one_live(project_name, county="", state="", tow="", out=None
 def _extract_va_candidates(docs_sorted, case_name, limit=MAX_CROSS_REF_CANDIDATES):
     """Pulls up to `limit` distinct real filer/party names out of Virginia's
     most recent SCC filings -- these are the real cross-reference targets
-    for the live demo now, replacing PJM's generation rows (see run_pipeline
-    docstring for why). Document_Name is real, live text shaped like
+    for the live demo. Document_Name is real, live text shaped like
     "Amazon Data Services, Inc. - Notice of ..."; the party name is
     everything before the first " - ". Filters out Dominion itself and
     procedural parties (Staff, the Commission, the AG's office) since
@@ -180,25 +175,7 @@ async def run_pipeline():
     """The actual live run. An async generator -- each yield is one real
     SSE event sent to the browser the moment that real step completes."""
 
-    report = {"pjm": {}, "cross_ref": [], "va": {}, "tx": {}}
-
-    # ---------------------------------------------------------- PJM fetch
-    # Context only, not a load-side claim: PJM's export is confirmed
-    # generation-only (see CLAUDE.md's MAJOR UPDATE), so it no longer
-    # feeds the cross-reference step below -- that used to mean gambling
-    # a live DeepSeek classification pass on ~0 odds of a real "Data
-    # Center" hit, which both wasted most of a run's time AND looked like
-    # a broken search on screen. Kept here only as what it actually is: a
-    # real, live comparison point for new generation SUPPLY, the
-    # secondary story this project's locked decisions already call for.
-    yield sse("step", label="Fetching PJM's live generation queue (context, not load data)", detail="services.pjm.com")
-    try:
-        df = await asyncio.to_thread(fetch_latest_queue.fetch_queue_df)
-        report["pjm"]["total_rows_live"] = len(df)
-        yield sse("result", label=f"{len(df):,} real generator interconnection requests fetched live from PJM",
-                   detail="supporting context: new power supply competing for the same grid capacity, not data-center load")
-    except RuntimeError as e:
-        yield sse("step_error", label=f"PJM fetch failed: {e}")
+    report = {"cross_ref": [], "va": {}, "tx": {}}
 
     # ------------------------------------------------------------- Virginia
     docs_sorted = []
@@ -221,8 +198,7 @@ async def run_pipeline():
     # Targets are real large-load filers pulled live from the VA docket
     # just checked above -- guaranteed data-center-relevant by what that
     # docket is (Case No. PUR-2026-00011 is specifically about large-load
-    # connection queue standards), so this step no longer depends on a
-    # PJM sample turning up a hit it structurally can't.
+    # connection queue standards).
     candidates = _extract_va_candidates(docs_sorted, case_name)
     for name in candidates:
         verdict_out = []

@@ -1,14 +1,6 @@
 {
-  "captured_at": "2026-07-22T03:54:16.915395+00:00",
+  "captured_at": "2026-07-22T04:24:13.696107+00:00",
   "events": [
-    {
-      "event": "step",
-      "data": "{\"type\": \"step\", \"label\": \"Fetching PJM's live generation queue (context, not load data)\", \"detail\": \"services.pjm.com\"}"
-    },
-    {
-      "event": "result",
-      "data": "{\"type\": \"result\", \"label\": \"9,263 real generator interconnection requests fetched live from PJM\", \"detail\": \"supporting context: new power supply competing for the same grid capacity, not data-center load\"}"
-    },
     {
       "event": "step",
       "data": "{\"type\": \"step\", \"label\": \"Checking Virginia SCC docket live\", \"detail\": \"Case No. PUR-2026-00011\"}"
@@ -27,11 +19,11 @@
     },
     {
       "event": "checker",
-      "data": "{\"type\": \"checker\", \"source\": \"ferc_elibrary\", \"hit\": true, \"entity\": \"Maryland Office of People's Counsel\", \"note\": \"\"}"
+      "data": "{\"type\": \"checker\", \"source\": \"ferc_elibrary\", \"hit\": true, \"entity\": \"PEOPLE'S COUNSEL OF MARYLAND\", \"note\": \"\"}"
     },
     {
       "event": "checker",
-      "data": "{\"type\": \"checker\", \"source\": \"web_news\", \"hit\": true, \"entity\": \"AWS Data Centers - Amazon Web Services ...\", \"note\": \"\"}"
+      "data": "{\"type\": \"checker\", \"source\": \"web_news\", \"hit\": true, \"entity\": \"Amazon Data Services, Inc. - BOARDMAN, OR | datacenter.fyi\", \"note\": \"\"}"
     },
     {
       "event": "checker",
@@ -39,11 +31,11 @@
     },
     {
       "event": "checker",
-      "data": "{\"type\": \"checker\", \"source\": \"utility_irp\", \"hit\": true, \"entity\": \"NPM - ORIGINATION: NV Energy seeks large-load approvals for AWS, Prologis, Novva, and Fleet data centers\", \"note\": \"\"}"
+      "data": "{\"type\": \"checker\", \"source\": \"utility_irp\", \"hit\": true, \"entity\": \"AWS Cloud - Amazon Sustainability\", \"note\": \"\"}"
     },
     {
       "event": "checker",
-      "data": "{\"type\": \"checker\", \"source\": \"contractor_announcements\", \"hit\": true, \"entity\": \"Manager of Construction, Data Center Construction\", \"note\": \"\"}"
+      "data": "{\"type\": \"checker\", \"source\": \"contractor_announcements\", \"hit\": true, \"entity\": \"Amazon.com. Spend less. Smile more.\", \"note\": \"\"}"
     },
     {
       "event": "checker",
@@ -63,7 +55,7 @@
     },
     {
       "event": "verdict",
-      "data": "{\"type\": \"verdict\", \"project_name\": \"Amazon Data Services, Inc.\", \"county\": \"\", \"state\": \"\", \"confidence\": \"conflicting\", \"company_name\": \"AMAZON COM INC  (AMZN)  (CIK 0001018724)\", \"reason\": \"ferc_elibrary found \\u201cMaryland Office of People's Counsel\\u201d; sec_edgar agree on \\u201cAMAZON COM INC  (AMZN)  (CIK 0001018724)\\u201d instead.\"}"
+      "data": "{\"type\": \"verdict\", \"project_name\": \"Amazon Data Services, Inc.\", \"county\": \"\", \"state\": \"\", \"confidence\": \"conflicting\", \"company_name\": \"AMAZON COM INC  (AMZN)  (CIK 0001018724)\", \"reason\": \"ferc_elibrary found \\u201cPEOPLE'S COUNSEL OF MARYLAND\\u201d; sec_edgar agree on \\u201cAMAZON COM INC  (AMZN)  (CIK 0001018724)\\u201d instead.\"}"
     },
     {
       "event": "step",
@@ -79,7 +71,7 @@
     },
     {
       "event": "checker",
-      "data": "{\"type\": \"checker\", \"source\": \"web_news\", \"hit\": true, \"entity\": \"Walmart Data Center Facilities, Permits & Public Records\", \"note\": \"\"}"
+      "data": "{\"type\": \"checker\", \"source\": \"web_news\", \"hit\": true, \"entity\": \"Area 71 - Wikipedia\", \"note\": \"\"}"
     },
     {
       "event": "checker",
@@ -91,7 +83,7 @@
     },
     {
       "event": "checker",
-      "data": "{\"type\": \"checker\", \"source\": \"contractor_announcements\", \"hit\": true, \"entity\": \"Walmart\", \"note\": \"\"}"
+      "data": "{\"type\": \"checker\", \"source\": \"contractor_announcements\", \"hit\": true, \"entity\": \"Data Center Construction Scheduler - Walmart\", \"note\": \"\"}"
     },
     {
       "event": "checker",
@@ -111,7 +103,7 @@
     },
     {
       "event": "verdict",
-      "data": "{\"type\": \"verdict\", \"project_name\": \"Walmart Inc.\", \"county\": \"\", \"state\": \"\", \"confidence\": \"verified\", \"company_name\": \"Walmart Inc.  (WMT)  (CIK 0000104169)\", \"reason\": null}"
+      "data": "{\"type\": \"verdict\", \"project_name\": \"Walmart Inc.\", \"county\": \"\", \"state\": \"\", \"confidence\": \"conflicting\", \"company_name\": \"Walmart Inc.  (WMT)  (CIK 0000104169)\", \"reason\": \"ferc_elibrary found \\u201cUnion Electric Company d/b/a Ameren Missouri\\u201d; sec_edgar agree on \\u201cWalmart Inc.  (WMT)  (CIK 0000104169)\\u201d instead.\"}"
     },
     {
       "event": "step",
@@ -127,11 +119,11 @@
     },
     {
       "event": "checker",
-      "data": "{\"type\": \"checker\", \"source\": \"web_news\", \"hit\": true, \"entity\": \"Verrus Flexible AI Data Centers United States\", \"note\": \"\"}"
+      "data": "{\"type\": \"checker\", \"source\": \"web_news\", \"hit\": true, \"entity\": \"Verrus, LLC: Lyon Township Data Center\", \"note\": \"\"}"
     },
     {
       "event": "checker",
-      "data": "{\"type\": \"checker\", \"source\": \"incentive_announcements\", \"hit\": true, \"entity\": \"Policy Snapshot: Data Center Incentives\", \"note\": \"\"}"
+      "data": "{\"type\": \"checker\", \"source\": \"incentive_announcements\", \"hit\": true, \"entity\": \"Verrus Data\", \"note\": \"\"}"
     },
     {
       "event": "checker",
@@ -139,7 +131,7 @@
     },
     {
       "event": "checker",
-      "data": "{\"type\": \"checker\", \"source\": \"contractor_announcements\", \"hit\": true, \"entity\": \"Verrus\", \"note\": \"\"}"
+      "data": "{\"type\": \"checker\", \"source\": \"contractor_announcements\", \"hit\": true, \"entity\": \"While controversy stirs... - Crain's Grand Rapids Business\", \"note\": \"\"}"
     },
     {
       "event": "checker",
@@ -159,7 +151,7 @@
     },
     {
       "event": "verdict",
-      "data": "{\"type\": \"verdict\", \"project_name\": \"Verrus, LLC\", \"county\": \"\", \"state\": \"\", \"confidence\": \"candidate\", \"company_name\": \"Verrus Flexible AI Data Centers United States\", \"reason\": null}"
+      "data": "{\"type\": \"verdict\", \"project_name\": \"Verrus, LLC\", \"county\": \"\", \"state\": \"\", \"confidence\": \"candidate\", \"company_name\": \"Verrus, LLC: Lyon Township Data Center\", \"reason\": null}"
     },
     {
       "event": "step",
@@ -171,7 +163,7 @@
     },
     {
       "event": "report",
-      "data": "{\"type\": \"report\", \"data\": {\"pjm\": {\"total_rows_live\": 9263}, \"cross_ref\": [{\"project_name\": \"Amazon Data Services, Inc.\", \"county\": \"\", \"state\": \"\", \"confidence\": \"conflicting\", \"company_name\": \"AMAZON COM INC  (AMZN)  (CIK 0001018724)\", \"reason\": \"ferc_elibrary found \\u201cMaryland Office of People's Counsel\\u201d; sec_edgar agree on \\u201cAMAZON COM INC  (AMZN)  (CIK 0001018724)\\u201d instead.\"}, {\"project_name\": \"Walmart Inc.\", \"county\": \"\", \"state\": \"\", \"confidence\": \"verified\", \"company_name\": \"Walmart Inc.  (WMT)  (CIK 0000104169)\", \"reason\": null}, {\"project_name\": \"Verrus, LLC\", \"county\": \"\", \"state\": \"\", \"confidence\": \"candidate\", \"company_name\": \"Verrus Flexible AI Data Centers United States\", \"reason\": null}], \"va\": {\"case_name\": \"VIRGINIA ELECTRIC AND POWER CO\", \"n_documents\": 125, \"most_recent\": \"Amazon Data Services, Inc. - Notice of Withdrawal of Clarice M. Gardner as Counsel.\", \"most_recent_date\": \"2026-07-07\"}, \"tx\": {\"source_url\": \"https://www.ercot.com/files/docs/2026/04/01/ERCOT_LargeLoad_Update_April2026_B-C_-Hearing.pdf\", \"fetched_at\": \"2026-07-21T23:54:16\", \"extraction\": \"automated\", \"total_queue_gw_approx\": 410.0, \"data_center_pct\": 87.0, \"parse_status\": \"ok\"}, \"generated_at\": \"2026-07-21\"}}"
+      "data": "{\"type\": \"report\", \"data\": {\"cross_ref\": [{\"project_name\": \"Amazon Data Services, Inc.\", \"county\": \"\", \"state\": \"\", \"confidence\": \"conflicting\", \"company_name\": \"AMAZON COM INC  (AMZN)  (CIK 0001018724)\", \"reason\": \"ferc_elibrary found \\u201cPEOPLE'S COUNSEL OF MARYLAND\\u201d; sec_edgar agree on \\u201cAMAZON COM INC  (AMZN)  (CIK 0001018724)\\u201d instead.\"}, {\"project_name\": \"Walmart Inc.\", \"county\": \"\", \"state\": \"\", \"confidence\": \"conflicting\", \"company_name\": \"Walmart Inc.  (WMT)  (CIK 0000104169)\", \"reason\": \"ferc_elibrary found \\u201cUnion Electric Company d/b/a Ameren Missouri\\u201d; sec_edgar agree on \\u201cWalmart Inc.  (WMT)  (CIK 0000104169)\\u201d instead.\"}, {\"project_name\": \"Verrus, LLC\", \"county\": \"\", \"state\": \"\", \"confidence\": \"candidate\", \"company_name\": \"Verrus, LLC: Lyon Township Data Center\", \"reason\": null}], \"va\": {\"case_name\": \"VIRGINIA ELECTRIC AND POWER CO\", \"n_documents\": 125, \"most_recent\": \"Amazon Data Services, Inc. - Notice of Withdrawal of Clarice M. Gardner as Counsel.\", \"most_recent_date\": \"2026-07-07\"}, \"tx\": {\"source_url\": \"https://www.ercot.com/files/docs/2026/04/01/ERCOT_LargeLoad_Update_April2026_B-C_-Hearing.pdf\", \"fetched_at\": \"2026-07-22T00:24:13\", \"extraction\": \"automated\", \"total_queue_gw_approx\": 410.0, \"data_center_pct\": 87.0, \"parse_status\": \"ok\"}, \"generated_at\": \"2026-07-22\"}}"
     },
     {
       "event": "done",

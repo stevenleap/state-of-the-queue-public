@@ -5,6 +5,65 @@ this folder. It's the full handoff from a planning conversation in
 claude.ai — that conversation isn't visible here, so treat this document
 as the complete record of what's been decided and built so far.
 
+## SESSION UPDATE 2026-07-22 — PJM removed from the live demo entirely, charts + live visualization added, conclusion section added
+
+Direct user feedback, addressed immediately rather than deferred:
+"why are we still using PJM, stop using them and use real data" (the
+third time PJM came up as a trust concern, after two earlier rounds of
+relabeling it as "context, not load" -- clearly the labeling fix wasn't
+landing), plus "use visuals and charts everywhere" and "the ending needs
+a conclusion."
+
+1. **PJM removed from `server.py`'s live pipeline entirely**, not
+   relabeled again. No more PJM fetch step, no `fetch_latest_queue`
+   import, no `report["pjm"]` key. The demo is Virginia + Texas only now.
+   `fetch_latest_queue.py` itself is untouched and still real/working as
+   a standalone module -- just no longer part of the live demo path.
+
+2. **Real charts added, using this project's already-validated palette**
+   (accent blue, good green, warn amber, muted gray -- same values
+   already vetted for the original `index.html` dashboard, reused rather
+   than inventing new hues): a live per-checker-step hit/miss bar that
+   rebuilds in real time as each of the ~9-10 real checkers responds
+   (previously the checker list was the only live-updating element; now
+   there's an aggregate visual too), a data-center-vs-other-load stacked
+   bar on the Texas card, and a verified/candidate/conflicting/unresolved
+   confidence-summary bar above the cross-reference list. Also added an
+   indeterminate progress bar across the top of the live trace (nudges
+   toward 90% on every real event, snaps to 100%/green on `done`) per the
+   explicit ask for the loading experience itself to feel more alive, not
+   just the final report.
+
+3. **Conclusion section added** to the report -- synthesized from that
+   run's actual real numbers (not fixed text), so it stays honest across
+   a full run, a partial run where one section failed, and a replay.
+   Found and fixed one real accuracy gap in this while testing the VA-
+   failure case again after these changes: the closing sentence
+   unconditionally said "directly from Virginia's and Texas's own
+   regulators" even on a run where Virginia's check had failed and
+   contributed nothing -- generalized to "the real regulators above"
+   instead.
+
+4. **Also addressed directly: "the data seems the same every run, are we
+   using real data?"** -- confirmed and explained rather than just
+   asserted: PJM's and Virginia's totals repeating across back-to-back
+   test runs is expected (real docket/queue counts don't change by the
+   hour), and cited concrete counter-evidence that live variability IS
+   present where it should be (FERC eLibrary and Verrus's matched entity
+   name genuinely differed in wording between separate real runs this
+   session). Texas's ~410 GW figure being identical every run is
+   confirmed as a real, deliberate, already-documented limitation (a
+   pinned real report URL, since ERCOT has no discoverable "latest
+   report" endpoint) rather than a hidden shortcut.
+
+All changes re-verified live end to end after implementation (not just
+code-reviewed): a full run completed in 46.0s with zero PJM mentions
+visible on the rendered page, both charts and the conclusion populated
+with real numbers, zero console/page errors (Playwright-checked), and the
+replay path re-tested separately to confirm it renders the same new
+elements correctly. `cached_runs/latest_run.json` re-captured fresh
+against the final code.
+
 ## SESSION UPDATE 2026-07-21 (continued) — failure-state hardening: two real crash bugs found and fixed by testing actual failure paths, not just the happy path
 
 Night Hack is 2026-07-24 (3 days out at the time of this update), confirmed

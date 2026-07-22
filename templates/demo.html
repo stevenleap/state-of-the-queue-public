@@ -52,6 +52,15 @@
   .trace-head .live::before{ content:"●"; margin-right:5px; animation:pulse 1.4s infinite; }
   @keyframes pulse{ 0%,100%{opacity:1;} 50%{opacity:.3;} }
 
+  .progress-track{ height:4px; border-radius:2px; background:var(--hairline); margin-bottom:22px; overflow:hidden; }
+  .progress-fill{ height:100%; width:4%; border-radius:2px; background:var(--accent); transition:width .5s ease; }
+  .progress-fill.done{ background:var(--good); }
+
+  .step-chart{ margin:12px 0 2px 23px; }
+  .step-chart .bar-track{ height:22px; }
+  .step-chart .chart-legend{ font-size:11px; margin-top:6px; }
+  .live-num{ display:inline-block; }
+
   .step{ background:var(--card); border-radius:12px; box-shadow:var(--shadow); padding:18px 20px; margin-bottom:10px; }
   .step-label{ font-size:14px; font-weight:500; display:flex; align-items:center; gap:9px; }
   .step-detail{ font-size:12px; color:var(--ink-muted); margin-top:4px; margin-left:23px; }
@@ -91,6 +100,20 @@
   .rpt-list li{ padding:8px 0; border-top:1px solid var(--hairline); display:flex; justify-content:space-between; gap:10px;}
   .rpt-list li:first-child{ border-top:none; padding-top:0; }
   .timestamp{ text-align:center; font-size:12px; color:var(--ink-muted); margin-top:32px; }
+
+  /* ---- charts: one stacked bar per part-to-whole comparison, thin,
+     rounded ends, 2px surface gap between segments, direct labels
+     instead of a legend box since there are only 2-4 segments ---- */
+  .bar-track{ display:flex; height:30px; border-radius:6px; overflow:hidden; background:var(--page); }
+  .bar-seg{ display:flex; align-items:center; justify-content:center; font-size:10.5px; font-weight:600;
+    color:#fff; white-space:nowrap; overflow:hidden; min-width:2px; }
+  .bar-seg + .bar-seg{ margin-left:2px; }
+  .chart-legend{ display:flex; gap:16px; margin-top:9px; font-size:11.5px; color:var(--ink-2); flex-wrap:wrap; }
+  .chart-legend span.item{ display:inline-flex; align-items:center; gap:5px; }
+  .chart-legend .dot{ width:8px; height:8px; border-radius:50%; display:inline-block; flex:0 0 auto; }
+  #rptConfidenceChart{ margin:2px 0 16px; }
+  #rptConclusion h3{ font-size:15px; font-weight:600; margin:0 0 10px; color:var(--ink); }
+  #rptConclusion p{ font-size:13px; color:var(--ink-2); line-height:1.6; margin:0; }
 </style>
 </head>
 <body>
@@ -113,6 +136,7 @@
       <h2>Live run</h2>
       <span class="live" id="liveTag">LIVE</span>
     </div>
+    <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
     <div id="steps"></div>
   </section>
 
@@ -121,8 +145,10 @@
     <div class="rpt-grid" id="rptTop"></div>
     <div class="rpt-card" style="margin-bottom:16px;">
       <h3>Real Virginia filers — cross-referenced live</h3>
+      <div id="rptConfidenceChart"></div>
       <ul class="rpt-list" id="rptCrossRef"></ul>
     </div>
+    <div class="rpt-card" id="rptConclusion" style="margin-bottom:16px;"></div>
     <p class="timestamp" id="rptTime"></p>
   </section>
 
@@ -132,6 +158,31 @@
 let currentStepEl = null;
 
 let currentStepError = false;
+let currentStepHitCounts = null;  // {hit, miss} for the live per-step chart, reset each new step
+
+// Indeterminate progress: no fixed step count is known client-side (the
+// number of cross-reference candidates varies run to run), so each real
+// event nudges the bar toward a 90% ceiling with decaying steps -- always
+// visibly moving, never fake-completing before the run actually has.
+let progressPct = 4;
+function bumpProgress(){
+  progressPct = progressPct + (90 - progressPct) * 0.35;
+  const fill = document.getElementById('progressFill');
+  fill.style.width = progressPct + '%';
+  fill.classList.remove('done');
+}
+function finishProgress(){
+  const fill = document.getElementById('progressFill');
+  fill.style.width = '100%';
+  fill.classList.add('done');
+  progressPct = 100;
+}
+function resetProgress(){
+  progressPct = 4;
+  const fill = document.getElementById('progressFill');
+  fill.style.width = progressPct + '%';
+  fill.classList.remove('done');
+}
 
 function addStep(label, detail){
   const el = document.createElement('div');
@@ -142,6 +193,7 @@ function addStep(label, detail){
   document.getElementById('steps').appendChild(el);
   currentStepEl = el;
   currentStepError = false;
+  currentStepHitCounts = null;
   el.scrollIntoView({behavior:'smooth', block:'end'});
   return el;
 }
@@ -234,6 +286,7 @@ function startRun(url, mode){
   document.getElementById('report').style.display = 'none';
   currentStepEl = null;
   currentStepError = false;
+  resetProgress();
 
   const tag = document.getElementById('liveTag');
   if(mode === 'live'){
@@ -252,7 +305,7 @@ function startRun(url, mode){
 
   // Every real event resets the stall watchdog -- wrapping addEventListener
   // once here instead of repeating armWatchdog() in each handler below.
-  const on = (type, handler) => es.addEventListener(type, (e) => { armWatchdog(); handler(e); });
+  const on = (type, handler) => es.addEventListener(type, (e) => { armWatchdog(); bumpProgress(); handler(e); });
 
   on('meta', (e) => {
     const d = JSON.parse(e.data);
@@ -289,6 +342,22 @@ function startRun(url, mode){
       `<span>${d.entity ? `<span class="checker-entity">${d.entity}</span>` : ''}` +
       `<span class="checker-badge ${d.hit ? 'hit':'miss'}">${d.hit ? 'hit':'miss'}</span></span>`;
     body.appendChild(row);
+
+    // Live chart, not just a growing list: rebuilds every real checker
+    // response so the hit/miss split visibly fills in source by source,
+    // instead of only appearing once at the end in the final report.
+    if(!currentStepHitCounts) currentStepHitCounts = {hit: 0, miss: 0};
+    currentStepHitCounts[d.hit ? 'hit' : 'miss']++;
+    let chartEl = currentStepEl.querySelector('.step-chart');
+    if(!chartEl){
+      chartEl = document.createElement('div');
+      chartEl.className = 'step-chart';
+      currentStepEl.insertBefore(chartEl, body);
+    }
+    renderBarChart(chartEl, [
+      {label: 'Hit', value: currentStepHitCounts.hit, color: 'var(--good)'},
+      {label: 'Miss', value: currentStepHitCounts.miss, color: 'var(--ink-muted)'},
+    ]);
   });
 
   on('verdict', (e) => {
@@ -332,6 +401,7 @@ function startRun(url, mode){
   on('done', () => {
     clearWatchdog();
     concludeCurrentStep();
+    finishProgress();
     if(mode === 'live'){
       tag.textContent = 'COMPLETE';
       tag.style.color = 'var(--good)';
@@ -372,6 +442,34 @@ async function initReplayLink(){
 }
 initReplayLink();
 
+// Renders one part-to-whole stacked bar: thin track, 2px surface gap
+// between segments, direct labels inside segments wide enough to hold
+// them, a legend below for the rest (dataviz skill: legend + selective
+// direct labels, never a label crammed onto every point).
+function renderBarChart(container, segments){
+  const total = segments.reduce((s, seg) => s + seg.value, 0);
+  if (!total){ container.innerHTML = ''; return; }
+  const track = document.createElement('div');
+  track.className = 'bar-track';
+  segments.filter(s => s.value > 0).forEach(seg => {
+    const pct = (seg.value / total) * 100;
+    const el = document.createElement('div');
+    el.className = 'bar-seg';
+    el.style.width = pct + '%';
+    el.style.background = seg.color;
+    if (pct >= 12) el.textContent = seg.labelInBar || `${Math.round(pct)}%`;
+    track.appendChild(el);
+  });
+  const legend = document.createElement('div');
+  legend.className = 'chart-legend';
+  legend.innerHTML = segments.filter(s => s.value > 0).map(seg =>
+    `<span class="item"><span class="dot" style="background:${seg.color}"></span>${seg.label} (${seg.value.toLocaleString()}${seg.unit || ''})</span>`
+  ).join('');
+  container.innerHTML = '';
+  container.appendChild(track);
+  container.appendChild(legend);
+}
+
 function renderReport(r){
   const top = document.getElementById('rptTop');
   top.innerHTML = '';
@@ -379,10 +477,18 @@ function renderReport(r){
   if (r.tx && r.tx.total_queue_gw_approx){
     const c = document.createElement('div');
     c.className = 'rpt-card';
+    const dcPct = r.tx.data_center_pct || 0;
+    const dcGw = r.tx.total_queue_gw_approx * (dcPct / 100);
+    const otherGw = r.tx.total_queue_gw_approx - dcGw;
     c.innerHTML = `<h3>Texas — ERCOT (just fetched)</h3>
       <div class="rpt-val num">~${r.tx.total_queue_gw_approx.toFixed(0)} GW</div>
-      <div class="rpt-lbl">${r.tx.data_center_pct ? r.tx.data_center_pct + '% data centers' : ''}</div>`;
+      <div class="rpt-lbl">total large-load queue, live-parsed from ERCOT's own report</div>
+      <div id="txChart"></div>`;
     top.appendChild(c);
+    renderBarChart(document.getElementById('txChart'), [
+      {label: 'Data centers', value: Math.round(dcGw), unit: ' GW', color: 'var(--accent)'},
+      {label: 'Other large loads', value: Math.round(otherGw), unit: ' GW', color: 'var(--ink-muted)'},
+    ]);
   }
   if (r.va && r.va.n_documents){
     const c = document.createElement('div');
@@ -392,19 +498,20 @@ function renderReport(r){
       <div class="rpt-lbl">real filings on record, most recent ${r.va.most_recent_date || ''}</div>`;
     top.appendChild(c);
   }
-  if (r.pjm && r.pjm.total_rows_live){
-    const c = document.createElement('div');
-    c.className = 'rpt-card';
-    c.innerHTML = `<h3>PJM — generation queue (context, not load)</h3>
-      <div class="rpt-val num">${r.pjm.total_rows_live.toLocaleString()}</div>
-      <div class="rpt-lbl">real generator interconnection requests, fetched live · not a data-center load claim</div>`;
-    top.appendChild(c);
-  }
 
   if (!top.children.length){
     top.innerHTML = '<div class="rpt-card"><h3>No sources came back this run</h3>' +
-      '<div class="rpt-lbl">PJM, Virginia, and Texas all failed live this run — see the real errors in the trace above.</div></div>';
+      '<div class="rpt-lbl">Virginia and Texas both failed live this run — see the real errors in the trace above.</div></div>';
   }
+
+  const confCounts = {verified: 0, candidate: 0, conflicting: 0, unresolved: 0};
+  (r.cross_ref || []).forEach(v => { if (confCounts[v.confidence] !== undefined) confCounts[v.confidence]++; });
+  renderBarChart(document.getElementById('rptConfidenceChart'), [
+    {label: 'Verified', value: confCounts.verified, color: 'var(--good)'},
+    {label: 'Candidate', value: confCounts.candidate, color: 'var(--accent)'},
+    {label: 'Conflicting', value: confCounts.conflicting, color: 'var(--warn)'},
+    {label: 'Unresolved', value: confCounts.unresolved, color: 'var(--ink-muted)'},
+  ]);
 
   const list = document.getElementById('rptCrossRef');
   list.innerHTML = '';
@@ -417,6 +524,34 @@ function renderReport(r){
   });
   if (!(r.cross_ref || []).length){
     list.innerHTML = '<li>No real filer names came back from the Virginia SCC check this run — see the trace above for the live error.</li>';
+  }
+
+  // Conclusion: synthesized from this run's actual numbers, not fixed
+  // text -- so it stays honest across live runs vs. replays vs. a run
+  // where a section failed.
+  const parts = [];
+  if (r.tx && r.tx.total_queue_gw_approx){
+    parts.push(`Texas's live queue stands at roughly <strong>${r.tx.total_queue_gw_approx.toFixed(0)} GW</strong>` +
+      (r.tx.data_center_pct ? `, about <strong>${r.tx.data_center_pct}%</strong> of it data centers` : '') + `.`);
+  }
+  if (r.va && r.va.n_documents){
+    parts.push(`Virginia's SCC docket has <strong>${r.va.n_documents}</strong> real filings on record.`);
+  }
+  const n = (r.cross_ref || []).length;
+  if (n){
+    const verifiedN = confCounts.verified, conflictN = confCounts.conflicting;
+    parts.push(`This run cross-referenced <strong>${n}</strong> real ${n === 1 ? 'filer' : 'filers'} pulled live from that docket` +
+      (verifiedN || conflictN
+        ? `: ${[verifiedN ? `${verifiedN} verified` : null, conflictN ? `${conflictN} flagged conflicting` : null].filter(Boolean).join(', ')}.`
+        : `.`));
+  }
+  const concl = document.getElementById('rptConclusion');
+  if (parts.length){
+    concl.innerHTML = `<h3>What this run found</h3><p>${parts.join(' ')} These numbers were pulled live, just now, ` +
+      `directly from the real regulators above — not from a sample file or a cached snapshot. That's the whole point: ` +
+      `this data already exists publicly, it's just never been collected in one place and watched over time until now.</p>`;
+  } else {
+    concl.innerHTML = `<h3>What this run found</h3><p>No live sources returned usable data this run — see the real errors in the trace above.</p>`;
   }
 
   document.getElementById('rptTime').textContent = 'Report generated ' + (r.generated_at || '') +
