@@ -54,6 +54,7 @@ Run locally:
     uvicorn server:app --reload --port 8000
 """
 import io
+import os
 import json
 import asyncio
 import re
@@ -63,6 +64,7 @@ from pathlib import Path
 from fastapi import FastAPI
 from fastapi.responses import HTMLResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
+from pydantic import BaseModel
 
 import cross_reference as cr
 import dominion_scc_tracker as dst
@@ -237,15 +239,30 @@ async def cross_ref_one_live(project_name, county="", state="", tow="", out=None
                 # unresolved" is honest either way; "didn't match" would
                 # overclaim a negative result for ones never tested.
                 reason += f" ({remainder} more remain unresolved.)"
+
+        # Softened badge wording, per explicit direction: a real 3+-way
+        # disagreement doesn't have to read as an alarm ("CONFLICTING") to
+        # stay honest -- the plurality answer IS still the most-found real
+        # signal. The badge now leads with that answer and its fraction
+        # ("Amazon — 4/6 sources"); the minority stays fully named in
+        # `reason` above, not hidden, just not the headline word anymore.
+        # Internal `confidence` value is unchanged (still "conflicting"),
+        # so badge color/styling still visually distinguishes this from a
+        # clean VERIFIED result.
+        if confidence == "conflicting":
+            badge_label = f"{company_name} — {primary_count}/{total_named} sources"
+        else:
+            badge_label = f"{confidence.upper()}: {company_name}" if company_name else confidence.upper()
     else:
         confidence = "unresolved"
         company_name = None
         reason = None
         has_disagreement = False
+        badge_label = "UNRESOLVED"
 
     verdict = {"project_name": project_name, "county": county, "state": state,
                "confidence": confidence, "company_name": company_name, "reason": reason,
-               "has_disagreement": has_disagreement}
+               "has_disagreement": has_disagreement, "badge_label": badge_label}
     if out is not None:
         out.append(verdict)
     yield sse("verdict", **verdict)
@@ -503,6 +520,72 @@ async def api_replay():
 
 def sse_line(event_type: str, **payload) -> str:
     return f"event: {event_type}\ndata: {json.dumps({'type': event_type, **payload})}\n\n"
+
+
+class ChatRequest(BaseModel):
+    role: str = ""
+    message: str
+    history: list = []
+    report: dict = {}
+
+
+@app.post("/api/chat")
+async def api_chat(req: ChatRequest):
+    """Lets a viewer state their role (investor, policymaker, journalist,
+    etc.) and ask questions about THIS run's real data -- the model is
+    given the actual report fields as context and explicitly instructed
+    not to invent anything beyond them. Runs on OPENAI_KEY/gpt-5.4-mini,
+    same provider as the rest of this project's LLM calls as of
+    2026-07-24."""
+    api_key = os.environ.get("OPENAI_KEY")
+    if not api_key:
+        return {"error": "OPENAI_KEY not set on the server."}
+
+    lines = []
+    va = req.report.get("va") or {}
+    if va.get("n_documents"):
+        lines.append(f"Virginia SCC docket ({va.get('case_name', '')}): {va['n_documents']} real filings on "
+                      f"record, most recent: \"{va.get('most_recent')}\" ({va.get('most_recent_date')}).")
+    tx = req.report.get("tx") or {}
+    if tx.get("total_queue_gw_approx"):
+        lines.append(f"Texas ERCOT large-load queue: ~{tx['total_queue_gw_approx']:.0f} GW total, "
+                      f"~{tx.get('data_center_pct', '?')}% of it data centers. Source: {tx.get('source_url')}.")
+    for v in req.report.get("cross_ref", []) or []:
+        lines.append(f"Cross-referenced real filer \"{v.get('project_name')}\": {v.get('confidence')} "
+                      f"-- {v.get('company_name')}. {v.get('reason') or ''}".strip())
+    context = "\n".join(lines) or "No report data is available yet -- tell the user to run the live pipeline first."
+
+    role_line = (f'The user identifies their role as: "{req.role.strip()}." Tailor tone, depth, and which '
+                 f"details you lead with to that role (e.g. an investor cares about risk/timelines, a "
+                 f"policymaker cares about systemic bottlenecks, a journalist wants a plain-language, "
+                 f"citable summary)." if req.role.strip() else "The user hasn't stated a role -- answer plainly.")
+
+    system_prompt = (
+        "You are a research assistant for 'State of the Queue', a tool tracking real AI data center "
+        "grid interconnection data pulled live from Virginia's SCC docket and Texas's ERCOT queue. "
+        f"{role_line} NEVER invent numbers, company names, or claims that aren't in the real data below "
+        "-- if the data doesn't answer the question, say so plainly rather than guessing. Keep answers "
+        "concise.\n\nREAL DATA FROM THE MOST RECENT RUN:\n" + context
+    )
+
+    messages = [{"role": "system", "content": system_prompt}]
+    for h in (req.history or [])[-10:]:
+        if h.get("role") in ("user", "assistant") and h.get("content"):
+            messages.append({"role": h["role"], "content": str(h["content"])[:2000]})
+    messages.append({"role": "user", "content": req.message[:2000]})
+
+    try:
+        from openai import OpenAI
+        client = OpenAI(api_key=api_key)
+        resp = await asyncio.to_thread(
+            client.chat.completions.create,
+            model="gpt-5.4-mini", messages=messages, max_completion_tokens=700,
+        )
+        answer = resp.choices[0].message.content or "(no response)"
+    except Exception as e:
+        return {"error": f"Chat request failed: {e}"}
+
+    return {"answer": answer}
 
 
 @app.get("/", response_class=HTMLResponse)

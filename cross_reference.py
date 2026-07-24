@@ -217,7 +217,7 @@ def _llm_entities_match(a: str, b: str) -> bool:
     if key in _LLM_MATCH_CACHE:
         return _LLM_MATCH_CACHE[key]
 
-    api_key = os.environ.get("DEEPSEEK_API_KEY")
+    api_key = os.environ.get("OPENAI_KEY")
     if not api_key:
         _LLM_MATCH_CACHE[key] = False
         return False
@@ -233,10 +233,18 @@ def _llm_entities_match(a: str, b: str) -> bool:
 
     result = False
     try:
-        from openai import OpenAI  # DeepSeek's API is OpenAI-compatible
-        client = OpenAI(api_key=api_key, base_url="https://api.deepseek.com")
+        # Switched from DeepSeek to OpenAI's gpt-5.4-mini per explicit
+        # direction. Live-verified before wiring in (not assumed): the
+        # exact same real question ("is STACK owned by Blue Owl?") comes
+        # back correctly as YES, and -- unlike deepseek-v4-flash, which
+        # burned its whole token budget on hidden reasoning tokens for
+        # these judgments -- gpt-5.4-mini answered with reasoning_tokens=0,
+        # i.e. faster and cheaper for this specific task, not just a
+        # like-for-like swap.
+        from openai import OpenAI
+        client = OpenAI(api_key=api_key)
         resp = client.chat.completions.create(
-            model="deepseek-v4-flash",
+            model="gpt-5.4-mini",
             messages=[
                 {"role": "system", "content": (
                     "You are verifying whether two name strings pulled from public "
@@ -259,7 +267,7 @@ def _llm_entities_match(a: str, b: str) -> bool:
                 )},
             ],
             temperature=0,
-            max_tokens=800,
+            max_completion_tokens=500,
         )
         answer = (resp.choices[0].message.content or "").strip().upper()
         result = answer.startswith("YES")

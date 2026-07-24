@@ -111,7 +111,7 @@
   .verdict-badge{ display:inline-block; font-size:11px; font-weight:600; padding:4px 11px; border-radius:20px; margin:8px 0 0 23px; text-transform:uppercase; letter-spacing:.03em; }
   .verdict-badge.verified{ background:#e7f6e7; color:var(--good); }
   .verdict-badge.candidate{ background:var(--accent-wash); color:var(--accent); }
-  .verdict-badge.conflicting{ background:#fdeee0; color:var(--warn); }
+  .verdict-badge.conflicting{ background:#e7f6e7; color:var(--good); }
   .verdict-badge.unresolved{ background:var(--page); color:var(--ink-muted); }
 
   /* ---- report ---- */
@@ -127,7 +127,6 @@
   .rpt-list li{ padding:8px 0; border-top:1px solid var(--hairline); }
   .rpt-list li .rpt-list-row{ display:flex; justify-content:space-between; gap:10px; }
   .rpt-list li .rpt-list-reason{ font-size:11.5px; color:var(--ink-muted); margin-top:4px; }
-  .rpt-list li .rpt-list-reason.has-disagreement{ color:var(--warn); }
   .rpt-list li:first-child{ border-top:none; padding-top:0; }
   .timestamp{ text-align:center; font-size:12px; color:var(--ink-muted); margin-top:32px; }
 
@@ -185,6 +184,20 @@
     </div>
     <div class="rpt-card" id="rptConclusion" style="margin-bottom:16px;"></div>
     <p class="timestamp" id="rptTime"></p>
+
+    <div class="rpt-card" id="chatCard" style="margin-top:16px;">
+      <h3>Ask about this run</h3>
+      <div class="rpt-lbl" style="margin-bottom:12px;">Tell it your role and ask a question — it answers from the real data above only, nothing invented.</div>
+      <input id="chatRole" type="text" placeholder="Your role (optional) — e.g. investor, policymaker, journalist"
+             style="width:100%;box-sizing:border-box;padding:9px 12px;border:1px solid var(--hairline);border-radius:8px;font-size:13px;font-family:inherit;margin-bottom:10px;">
+      <div id="chatLog" style="display:flex;flex-direction:column;gap:10px;margin-bottom:12px;"></div>
+      <div style="display:flex;gap:8px;">
+        <input id="chatInput" type="text" placeholder="Ask a question about this run's data..."
+               style="flex:1;padding:9px 12px;border:1px solid var(--hairline);border-radius:8px;font-size:13px;font-family:inherit;">
+        <button id="chatSend" onclick="sendChat()"
+                style="padding:9px 18px;border:none;border-radius:8px;background:var(--accent);color:#fff;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;">Ask</button>
+      </div>
+    </div>
   </section>
 
 </div>
@@ -392,7 +405,7 @@ function handleVerdictEvent(d){
   if(!currentStepEl) return;
   const badge = document.createElement('div');
   badge.className = 'verdict-badge ' + d.confidence;
-  badge.textContent = d.confidence + (d.company_name ? ': ' + d.company_name : '');
+  badge.textContent = d.badge_label || (d.confidence + (d.company_name ? ': ' + d.company_name : ''));
   currentStepEl.appendChild(badge);
   // Every outcome gets its plurality read shown, not just conflicting
   // ones -- a clean VERIFIED result says "6 of 6 agree" just as plainly
@@ -684,7 +697,14 @@ function renderBarChart(container, segments){
   container.appendChild(legend);
 }
 
+let chatHistory = [];
+
 function renderReport(r){
+  lastReport = r;
+  chatHistory = [];
+  const chatLog = document.getElementById('chatLog');
+  if (chatLog) chatLog.innerHTML = '';
+
   const top = document.getElementById('rptTop');
   top.innerHTML = '';
 
@@ -732,8 +752,9 @@ function renderReport(r){
   (r.cross_ref || []).forEach(v => {
     const li = document.createElement('li');
     const loc = [v.county, v.state].filter(Boolean).join(', ');
+    const label = v.badge_label || v.confidence;
     li.innerHTML = `<div class="rpt-list-row"><span>${v.project_name || v.queue_id}${loc ? ` <span style="color:var(--ink-muted)">(${loc})</span>` : ''}</span>` +
-      `<span class="verdict-badge ${v.confidence}" style="margin:0;">${v.confidence}</span></div>` +
+      `<span class="verdict-badge ${v.confidence}" style="margin:0;">${label}</span></div>` +
       (v.reason ? `<div class="rpt-list-reason${v.has_disagreement ? ' has-disagreement' : ''}">${v.reason}</div>` : '');
     list.appendChild(li);
   });
@@ -781,6 +802,57 @@ function renderReport(r){
   document.getElementById('report').style.display = 'block';
   document.getElementById('report').scrollIntoView({behavior:'smooth'});
 }
+
+function appendChatBubble(role, text){
+  const log = document.getElementById('chatLog');
+  const bubble = document.createElement('div');
+  const isUser = role === 'user';
+  bubble.style.cssText = 'max-width:85%;padding:10px 13px;border-radius:10px;font-size:13px;line-height:1.5;white-space:pre-wrap;' +
+    (isUser ? 'align-self:flex-end;background:var(--accent);color:#fff;' : 'align-self:flex-start;background:var(--page);color:var(--ink);');
+  bubble.textContent = text;
+  log.appendChild(bubble);
+  log.scrollIntoView({behavior:'smooth', block:'end'});
+  return bubble;
+}
+
+async function sendChat(){
+  const input = document.getElementById('chatInput');
+  const message = input.value.trim();
+  if(!message) return;
+  if(!lastReport){
+    appendChatBubble('assistant', 'Run the live pipeline first — there\'s no report data yet to ask about.');
+    return;
+  }
+  const role = document.getElementById('chatRole').value.trim();
+  const sendBtn = document.getElementById('chatSend');
+
+  appendChatBubble('user', message);
+  input.value = '';
+  sendBtn.disabled = true;
+  const thinking = appendChatBubble('assistant', '...');
+
+  try {
+    const resp = await fetch('/api/chat', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({role, message, history: chatHistory, report: lastReport}),
+    });
+    const data = await resp.json();
+    const answer = data.answer || data.error || 'Something went wrong — try again.';
+    thinking.textContent = answer;
+    chatHistory.push({role: 'user', content: message});
+    chatHistory.push({role: 'assistant', content: answer});
+  } catch (e) {
+    thinking.textContent = 'Connection error — try again.';
+  } finally {
+    sendBtn.disabled = false;
+  }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  const chatInput = document.getElementById('chatInput');
+  if(chatInput) chatInput.addEventListener('keydown', (e) => { if(e.key === 'Enter') sendChat(); });
+});
 </script>
 </body>
 </html>

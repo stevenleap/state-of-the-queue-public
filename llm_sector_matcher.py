@@ -49,21 +49,43 @@ For every project, return your best classification, a confidence score from 0 to
 Respond ONLY with a JSON array, one object per input project, in the same order, with exactly these keys: queue_id, predicted_sector (one of "Data Center", "Crypto Mining", "Industrial/Manufacturing", "Other"), confidence (0-1 float), reasoning (one sentence string), signals (array of short strings). No prose outside the JSON array, no markdown code fences."""
 
 
+def call_openai(batch_json: str) -> str:
+    """Default provider as of 2026-07-24, per explicit direction to
+    consolidate on OPENAI_KEY for text and vision across this project
+    instead of DeepSeek/Gemini. gpt-5.4-mini confirmed live (real key,
+    real call) as a cheap, current, capable model -- see
+    cross_reference.py's _llm_entities_match and ercot_large_load_
+    tracker.py's vision_extract_total_mw for the same swap."""
+    from openai import OpenAI
+    api_key = os.environ.get("OPENAI_KEY")
+    if not api_key:
+        sys.exit("Set OPENAI_KEY in your environment first.")
+    client = OpenAI(api_key=api_key)
+    resp = client.chat.completions.create(
+        model="gpt-5.4-mini",
+        messages=[
+            {"role": "system", "content": SYSTEM_PROMPT},
+            {"role": "user", "content": batch_json},
+        ],
+        temperature=0,
+        max_completion_tokens=4000,  # batches of 15 projects' worth of JSON output
+    )
+    return resp.choices[0].message.content
+
+
 def call_deepseek(batch_json: str) -> str:
+    """Kept as an explicit --provider deepseek option, no longer the
+    default (see call_openai above)."""
     from openai import OpenAI  # DeepSeek's API is OpenAI-compatible
     api_key = os.environ.get("DEEPSEEK_API_KEY")
     if not api_key:
         sys.exit("Set DEEPSEEK_API_KEY in your environment first.")
     client = OpenAI(api_key=api_key, base_url="https://api.deepseek.com")
     resp = client.chat.completions.create(
-        # CHANGED 2026-07-19: "deepseek-chat" deprecates 2026/07/24 (confirmed
-        # from DeepSeek's own docs, api-docs.deepseek.com) -- switched to
-        # deepseek-v4-flash ahead of that date rather than waiting for it to
-        # break. Live-tested with a real DEEPSEEK_API_KEY: a real call to
-        # this model returns resp.model == "deepseek-v4-flash", confirmed
-        # working, not just documented. deepseek-v4-pro is the
-        # higher-quality/higher-cost tier if classification accuracy ever
-        # matters more than cost here.
+        # "deepseek-chat" deprecated 2026/07/24 -- switched to
+        # deepseek-v4-flash ahead of that date. Live-tested with a real
+        # DEEPSEEK_API_KEY: a real call to this model returns
+        # resp.model == "deepseek-v4-flash", confirmed working.
         model="deepseek-v4-flash",
         messages=[
             {"role": "system", "content": SYSTEM_PROMPT},
@@ -89,7 +111,7 @@ def call_anthropic(batch_json: str) -> str:
     return "".join(b.text for b in resp.content if b.type == "text")
 
 
-PROVIDERS = {"deepseek": call_deepseek, "anthropic": call_anthropic}
+PROVIDERS = {"openai": call_openai, "deepseek": call_deepseek, "anthropic": call_anthropic}
 
 
 def find_col(df, *candidates):
@@ -105,7 +127,7 @@ def find_col(df, *candidates):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("input_csv")
-    ap.add_argument("--provider", default="deepseek", choices=list(PROVIDERS.keys()))
+    ap.add_argument("--provider", default="openai", choices=list(PROVIDERS.keys()))
     ap.add_argument("--limit", type=int, default=None, help="classify only first N rows -- cheap test run")
     args = ap.parse_args()
 

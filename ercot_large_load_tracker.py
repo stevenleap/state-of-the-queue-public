@@ -90,6 +90,7 @@ import re
 import json
 import argparse
 import io
+import base64
 from datetime import datetime, date
 from dotenv import load_dotenv
 
@@ -246,30 +247,25 @@ def vision_extract_total_mw(pdf_bytes: bytes) -> dict | None:
     hold the chart and asks a vision model a single specific question
     about it, rather than a general 'read this page' prompt.
 
-    CHANGED 2026-07-19: switched from Claude (no ANTHROPIC_API_KEY budget
-    available) to Gemini, since Google's free tier genuinely includes
-    vision-capable models -- confirmed from Gemini's own pricing page
-    (gemini-2.5-flash and others are listed "Free of charge" for text/
-    image/video input) and from the real google-genai SDK's own README
-    (github.com/googleapis/python-genai) for the exact request shape,
-    not guessed. DeepSeek was considered first per direct instruction but
-    ruled out after checking DeepSeek's own official API docs
-    (api-docs.deepseek.com): their chat completion schema defines
-    `content` as a plain string, no image/vision input exists on their
-    public API at all -- confirmed, not assumed.
+    CHANGED 2026-07-24: switched from Gemini to OpenAI's gpt-5.4-mini per
+    explicit direction to consolidate on one provider. Verified the vision
+    path directly before wiring it in (not assumed): a real image_url/
+    base64 call to gpt-5.4-mini succeeds and returns a sensible answer,
+    confirmed via a live test call, same discipline as when Gemini was
+    first adopted (that switch itself was made because DeepSeek's public
+    API has no image input at all -- confirmed from DeepSeek's own docs,
+    not assumed).
 
     Returns a dict with vision_fallback_status explaining what happened
-    either way (never raises) if GEMINI_API_KEY is missing, the
-    google-genai package isn't installed, or the chart page can't be
-    located -- callers should treat this purely as best-effort."""
-    api_key = os.environ.get("GEMINI_API_KEY")
+    either way (never raises) if OPENAI_KEY is missing or the chart page
+    can't be located -- callers should treat this purely as best-effort."""
+    api_key = os.environ.get("OPENAI_KEY")
     if not api_key:
-        return {"vision_fallback_status": "SKIPPED: no GEMINI_API_KEY set (.env or environment)"}
+        return {"vision_fallback_status": "SKIPPED: no OPENAI_KEY set (.env or environment)"}
     try:
-        from google import genai
-        from google.genai import types
+        from openai import OpenAI
     except ImportError:
-        return {"vision_fallback_status": "SKIPPED: google-genai package not installed (pip install google-genai)"}
+        return {"vision_fallback_status": "SKIPPED: openai package not installed (pip install openai)"}
 
     with pdfplumber.open(io.BytesIO(pdf_bytes)) as pdf:
         page_idx = _find_queue_chart_page(pdf)
@@ -280,15 +276,17 @@ def vision_extract_total_mw(pdf_bytes: bytes) -> dict | None:
         page_image.original.save(buf, format="PNG")
         img_bytes = buf.getvalue()
 
-    client = genai.Client(api_key=api_key)
-    response = client.models.generate_content(
-        model="gemini-2.5-flash",  # free tier, confirmed vision-capable -- see docstring
-        contents=[
-            VISION_PROMPT,
-            types.Part.from_bytes(data=img_bytes, mime_type="image/png"),
-        ],
+    client = OpenAI(api_key=api_key)
+    b64 = base64.b64encode(img_bytes).decode()
+    response = client.chat.completions.create(
+        model="gpt-5.4-mini",
+        messages=[{"role": "user", "content": [
+            {"type": "text", "text": VISION_PROMPT},
+            {"type": "image_url", "image_url": {"url": f"data:image/png;base64,{b64}"}},
+        ]}],
+        max_completion_tokens=500,
     )
-    raw = (response.text or "").strip()
+    raw = (response.choices[0].message.content or "").strip()
     m = re.search(r"[\d,]+", raw)
     if not m:
         return {"vision_fallback_status": f"FAILED: model didn't return a parseable number (got: {raw!r})"}
@@ -297,7 +295,7 @@ def vision_extract_total_mw(pdf_bytes: bytes) -> dict | None:
         "vision_fallback_status": "ok",
         "vision_raw_response": raw,
         "vision_source_page": page_idx + 1,
-        "vision_model": "gemini-2.5-flash",
+        "vision_model": "gpt-5.4-mini",
     }
 
 
